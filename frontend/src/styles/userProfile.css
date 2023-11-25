@@ -1,0 +1,24 @@
+.profile-container {
+    display: flex;
+}
+
+.profile-box {
+    width: 260px;
+    height: auto;
+    padding: 16px;
+    border: 1px solid #ccc;
+    margin-top: 20px;
+    margin-left: 20px;
+}
+
+.follower-following {
+    display: flex;
+    align-items: center;
+}
+
+.followers,
+.following {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}

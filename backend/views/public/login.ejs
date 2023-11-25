@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Artefino</title>
+    <%- include("./includes/template_links") %>
+</head>
+
+<body class="animsition">
+    <!-- Header -->
+    <%- include("./includes/template_header") %>
+        <div class="text-center center-div" id="login">
+            <div class="container w-25 py-5">
+                <div class="title pb-5">
+                    <h2 class="font-weight-bold">Login</h2>
+                    <!-- <span><=locals.msg ? msg : "Log in for the existing user" %></span>
+                < if(locals.logout){ %>
+                    <div class="alter alert-success text-center">
+                        <= logout %>
+                    </div>
+                < } %> -->
+                </div>
+
+                <% if(typeof message !=='undefined' ){ %>
+                    <h6 class="text-danger">
+                        <%= message %>
+                    </h6>
+                    <% } %>
+
+                        <form action="" method="post" id="loginForm">
+                            <div class="form-group">
+                                <input type="string" class="form-control mb-4" placeholder="Email" id="emailId" name="email">
+                            </div>
+                            <div class="form-group">
+                                <input type="password" class="form-control mb-5" placeholder="Password" name="password">
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mb-4">
+                                <a class="text-primary fw-bold" href="/forgotPassword">Forgot Password ?</a>
+                            </div>
+                            <button type="submit" class="btn btn-success rounded-pill mb-3">Login</button>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <p class="mb-0">New to Artefino?</p>
+                                <a class="text-primary ms-2" href="register">Create an account</a>
+                            </div>
+                        </form>
+            </div>
+        </div>
+        <%- include("./includes/template_footer") %>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+                crossorigin="anonymous"></script>
+</body>
+
+</html>
