@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button, Modal, Table, Form as BootstrapForm } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { useAddCategoryMutation, useUpdateCategoryByAdminMutation, useUnListCategoryByAdminMutation, useReListCategoryByAdminMutation } from "../../slices/adminApiSlice";
+import PropTypes from 'prop-types';
 
 const CategoriesDataTable = ({ categories }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,7 +32,7 @@ const CategoriesDataTable = ({ categories }) => {
       )
     : [];
 
-  const [addCategory, { isLoading }] = useAddCategoryMutation();
+  const [addCategory] = useAddCategoryMutation();
     const [updateCategoryByAdmin, { isLoading: isUpdating }] = useUpdateCategoryByAdminMutation();
     const [UnListCategoryByAdmin, { isLoading: isUnListing }] = useUnListCategoryByAdminMutation();
     const [ReListCategoryByAdmin, { isLoading: isReListing }] = useReListCategoryByAdminMutation();
@@ -66,7 +67,7 @@ const CategoriesDataTable = ({ categories }) => {
 
   const handleUnList = async () => {
     try {
-      const responseFromApiCall = await UnListCategoryByAdmin({ categoryId: categoryIdToUnList });
+      await UnListCategoryByAdmin({ categoryId: categoryIdToUnList });
       toast.success("Category Blocked Successfully.");
       setCategoryIdToUnList(null); // Clear the category ID to block
       setShowConfirmation(false); // Close the confirmation dialog
@@ -80,7 +81,7 @@ const CategoriesDataTable = ({ categories }) => {
 
   const handleReList = async () => {
       try {
-        const responseFromApiCall = await ReListCategoryByAdmin({ categoryId: categoryIdToReList });
+        await ReListCategoryByAdmin({ categoryId: categoryIdToReList });
         toast.success("Category Blocked Successfully.");
         setCategoryIdToReList(null); // Clear the category ID to block
         setShowConfirmation(false); // Close the confirmation dialog
@@ -106,7 +107,6 @@ const CategoriesDataTable = ({ categories }) => {
         name: categoryNameToUpdate,
         description: categoryDescriptionToUpdate,
       });
-console.log("responseFromApiCall", responseFromApiCall)
       if (responseFromApiCall.data) {
         toast.success("Category Updated Successfully.");
         window.location.reload();
@@ -323,6 +323,17 @@ console.log("responseFromApiCall", responseFromApiCall)
       </Modal>
     </>
   );
+};
+
+CategoriesDataTable.propTypes = {
+  categories: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      description: PropTypes.string.isRequired,
+      isListed: PropTypes.bool.isRequired,
+    })
+  ).isRequired,
 };
 
 export default CategoriesDataTable;

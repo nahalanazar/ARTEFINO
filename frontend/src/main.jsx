@@ -23,6 +23,7 @@ import PasswordOtpVerify from './screens/userScreens/PasswordOtpVerify.jsx'
 import ResetPassword from './screens/userScreens/ResetPasswordScreen.jsx'
 import UserSellScreen from './screens/userScreens/SellScreen.jsx'
 import PostDetailScreen from './screens/userScreens/PostDetailScreen.jsx'
+import ChatScreen from './screens/userScreens/ChatScreen.jsx'
 
 //? ==================================== Admin Screens Import ====================================
 import AdminHomeScreen from './screens/adminScreens/HomeScreen.jsx'
@@ -54,6 +55,7 @@ const router = createBrowserRouter(
         <Route path='/profile/:id?' element={<UserProfileScreen />} />
         <Route path='/sell' element={<UserSellScreen />} />
         <Route path={`/postDetails/:postId`} element={<PostDetailScreen />} />
+        <Route path='/chat' element={<ChatScreen />} />
       </Route>
 
       { /* ===================================== Admin Routes ===================================== */ }

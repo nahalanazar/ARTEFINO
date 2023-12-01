@@ -20,7 +20,9 @@ import {
     getFollowedUsers,
     followArtist,
     unFollowArtist,
-    showArtists
+    showArtists,
+    allUsers,
+    checkBlock
 } from '../controllers/userController.js'
 
 import {
@@ -33,10 +35,21 @@ import {
     postDetails,
     getUserPosts
 } from '../controllers/productController.js'
-import { multerUploadUserProfile, multerUploadProductImages } from '../config/multerConfig.js';
 
+import {
+    multerUploadUserProfile,
+    multerUploadProductImages
+} from '../config/multerConfig.js';
+
+import {
+    accessChat,
+    fetchChats,
+    sendMessage,
+    allMessages
+} from '../controllers/chatController.js'
 
 // router.all('*', checkUser)
+// router.get('/', authenticateUser, allUsers)
 router.post('/login', authUser)
 router.post('/register', registerUser)
 router.post('/otpVerify', authenticateUser, verifyOtp)
@@ -56,5 +69,11 @@ router.get('/followedUsers', authenticateUser, getFollowedUsers)
 router.put('/followArtist/:artistId', authenticateUser, followArtist)
 router.put('/unFollowArtist/:artistId', authenticateUser, unFollowArtist)
 router.get('/getArtists', authenticateUser, showArtists);
+router.post('/accessChat', authenticateUser, accessChat)
+router.get('/fetchChats', authenticateUser, fetchChats)
+router.post('/sendMessage', authenticateUser, sendMessage)
+router.get('/allMessages/:chatId', authenticateUser, allMessages)
+router.put('/checkBlock', checkBlock)
+
 
 export default router;

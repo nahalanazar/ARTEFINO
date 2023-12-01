@@ -4,26 +4,30 @@ import { useEffect, useState } from 'react';
 import { useGetArtistsMutation, useFollowArtistMutation } from '../../slices/userApiSlice';
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from 'react-redux';
 
 const ArtistsList = () => {
+  const { userInfo } = useSelector((state) => state.userAuth);
   const [getArtists] = useGetArtistsMutation();
   const [artists, setArtists] = useState([]);
   const VITE_PROFILE_IMAGE_DIR_PATH = import.meta.env.VITE_PROFILE_IMAGE_DIR_PATH;
   const [followArtist] = useFollowArtistMutation();
   const navigate = useNavigate()
+
   useEffect(() => {
     const fetchArtists = async () => {
       try {
         const response = await getArtists();
-        console.log("response.data: ", response.data);
         setArtists(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
       }
     };
-
-    fetchArtists();
-  }, [getArtists]);
+    if (userInfo) {
+      fetchArtists();
+    }
+    
+  }, [getArtists, userInfo]);
 
   const handleFollow = async (userIdToFollow) => {
     try {
@@ -51,10 +55,14 @@ const ArtistsList = () => {
     }
   };
 
+  if (!userInfo) {
+    return <div>Login To Get Artists Suggestion</div>;
+  }
+
   return (
     <>
       <h6>Suggested Artists</h6>
-      {artists.map((artist) => (
+      {artists?.map((artist) => (
         <Card key={artist._id} style={{ width: '17rem', marginBottom: '20px' }}>
           <Card.Body style={{ display: 'flex', alignItems: 'center' }}>
             <img
@@ -66,11 +74,12 @@ const ArtistsList = () => {
                 borderRadius: '50%',
                 marginRight: '10px',
                 objectFit: 'cover',
+                cursor: 'pointer'
               }}
               onClick={() => navigate(`/profile/${artist._id}`)}
             />
             <span
-              style={{ fontSize: '17px', flexGrow: 1 }}
+              style={{ fontSize: '17px', flexGrow: 1, cursor: 'pointer' }}
               onClick={() => navigate(`/profile/${artist._id}`)}
             >
               {artist.name}
@@ -79,7 +88,7 @@ const ArtistsList = () => {
               variant="primary"
               onClick={() => handleFollow(artist._id)}
               disabled={artist.isFollowed} // Disable the button if already followed
-            >
+            > 
               {artist.isFollowed ? 'Following' : 'Follow'}
             </Button>
           </Card.Body>

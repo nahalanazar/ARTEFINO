@@ -40,12 +40,6 @@ const userSchema = mongoose.Schema({
             ref: 'User'
         }
     ],
-    chatRooms: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'ChatRoom'
-        }
-    ],
     is_blocked: {
         type: Boolean,
         default: false

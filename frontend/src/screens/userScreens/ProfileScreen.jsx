@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { useFollowedUsersMutation, useFollowArtistMutation, useUnFollowArtistMutation } from '../../slices/userApiSlice';
 import { toast } from "react-toastify";
+import ChatButton from "../../components/userComponents/ChatButton";
 
 
 const ProfileScreen = () => {
@@ -79,6 +80,7 @@ const handleUnFollow = async (userIdToUnFollow) => {
 
 
 
+
   return (
     <div>
       <CategoriesTab />
@@ -147,22 +149,7 @@ const handleUnFollow = async (userIdToUnFollow) => {
               >
                 {isFollowed ? 'UnFollow' : 'Follow'}
               </button>
-              <button
-                className="followButton"
-                style={{
-                  color: 'white',  
-                  backgroundColor: '#007BFF',  
-                  fontSize: 16,
-                  fontFamily: 'Roboto',
-                  fontWeight: '700',
-                  padding: '8px 16px',  
-                  border: 'none',  
-                  borderRadius: '4px',  
-                  cursor: 'pointer',
-                }}
-              >
-                Message
-              </button>
+              <ChatButton userId={id} />
             </div>
           )}
         </div>

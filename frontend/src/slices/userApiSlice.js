@@ -130,7 +130,40 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 url: `${USERS_URL}/getArtists`,
                 method: 'GET'
             })
-        })
+        }),
+        accessChat: builder.mutation({
+            query: (userId) => ({
+                url: `${USERS_URL}/accessChat`,
+                method: 'POST',
+                body: {userId}
+            })
+        }),
+        fetchChat: builder.mutation({
+            query: () => ({
+                url: `${USERS_URL}/fetchChats`,
+                method: 'GET'
+            })
+        }), 
+        sendMessage: builder.mutation({
+            query: (data) => ({
+                url: `${USERS_URL}/sendMessage`,
+                method: 'POST',
+                body: data
+            })
+        }),
+        fetchMessages: builder.mutation({
+            query: (chatId) => ({
+                url: `${USERS_URL}/allMessages/${chatId}`,
+                method: 'GET'
+            })
+        }),
+        checkBlock: builder.mutation({
+            query: (data) => ({
+                url: `${USERS_URL}/checkBlock`,
+                method: 'PUT',
+                body: data
+            })
+        }),
     })
 })
 
@@ -153,5 +186,10 @@ export const {
     useFollowedUsersMutation,
     useFollowArtistMutation,
     useUnFollowArtistMutation,
-    useGetArtistsMutation
+    useGetArtistsMutation,
+    useAccessChatMutation,
+    useFetchChatMutation,
+    useSendMessageMutation,
+    useFetchMessagesMutation,
+    useCheckBlockMutation
 } = userApiSlice

@@ -8,7 +8,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useGetPostByIdMutation } from "../../slices/userApiSlice";
 import Map from '../../components/userComponents/Map'
 import { useSelector } from 'react-redux';
-
+import ChatButton from "../../components/userComponents/ChatButton";
+import {toast} from 'react-toastify'
 const PostDetailScreen = () => {
     const { userInfo } = useSelector((state) => state.userAuth);
     const VITE_PROFILE_IMAGE_DIR_PATH = import.meta.env.VITE_PROFILE_IMAGE_DIR_PATH;
@@ -23,9 +24,13 @@ const PostDetailScreen = () => {
         const fetchPostDetails = async () => {
             try {
                 const response = await getPostById(postId);
+                
                 setPost(response.data);
+                console.log("res:", response);
+                
             } catch (error) {
                 console.error("Error fetching post details:", error);
+                toast.error(error.data.message);
             }
         };
 
@@ -45,47 +50,52 @@ const PostDetailScreen = () => {
         setSelectedImage(newIndex);
     };
 
-    const isCurrentUserPost = post.stores && post.stores._id === userInfo.id;
+    const isCurrentUserPost = post?.stores && post?.stores._id === userInfo.id;
 
-    const renderActionButton = () => {
-        if (isCurrentUserPost) {
-            return (
-                <>
-                    <button className="edit-removeButton" onClick={() => editPost()}>Edit Post</button>
-                    <button className="edit-removeButton removeButton" onClick={() => removePost()}>Remove</button>
-                </>
-            );
-        } else {
-            return (
-                <button className="chatButton" onClick={() => chatWithArtist()}>Chat with Artist</button>
-            );
-        }
+    
+const renderProfileLink = () => {
+    const commonStyles = {
+        profileImage: {
+            src: `${VITE_PROFILE_IMAGE_DIR_PATH}${post?.stores.profileImageName}`,
+            alt: 'Profile',
+        },
+        artistName: post?.stores.name,
     };
 
-    const renderProfileLink = () => {
-        if (isCurrentUserPost) {
-            return (
-                <div className="artist-info" onClick={() => navigate('/profile')}>
-                    <img
-                        src={`${VITE_PROFILE_IMAGE_DIR_PATH}${post.stores.profileImageName}`}
-                        alt="Profile"
-                    />
-                    <h3>{post.stores.name}</h3>
-                </div>
-            );
-        } else {
-            return (
-                <div className="artist-info" onClick={() => navigate(`/profile/${post.stores._id}`)}>
-                    <img
-                        src={`${VITE_PROFILE_IMAGE_DIR_PATH}${post.stores.profileImageName}`}
-                        alt="Profile"
-                    />
-                    <h3>{post.stores.name}</h3>
-                </div>
-            );
-        }
-    };
+    if (isCurrentUserPost) {
+        return (
+            <div className="artist-info" onClick={() => navigate('/profile')}>
+                <img {...commonStyles.profileImage} />
+                <h3>{commonStyles.artistName}</h3>
+            </div>
+        );
+    } else {
+        return (
+            <div className="artist-info">
+                <img {...commonStyles.profileImage}  onClick={() => navigate(`/profile/${post?.stores._id}`)}/>
+                <h3 style={{ marginRight: "60px" }} onClick={() => navigate(`/profile/${post?.stores._id}`)}>{commonStyles.artistName}</h3>
+                <ChatButton userId={post?.stores._id} />
+            </div>
+        );
+    }
+};
 
+const renderActionButton = () => {
+    if (isCurrentUserPost) {
+        return (
+            <>
+                <button className="edit-removeButton" onClick={() => editPost()}>
+                    Edit Post
+                </button>
+                <button className="edit-removeButton removeButton" onClick={() => removePost()}>
+                    Remove
+                </button>
+            </>
+        );
+    } else {
+        return <></>; // No action button for other artists
+    }
+};
 
 
     return (
@@ -120,7 +130,7 @@ const PostDetailScreen = () => {
                         </div>
                     </Col>
                 )}
-                {post && post.stores && (
+                {post && post?.stores && (
                     <Col sm={4}>
                         <div className="details-section pt-5">
                             <div className="product-details-box mb-3">

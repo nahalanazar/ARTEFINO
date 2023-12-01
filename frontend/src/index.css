@@ -5,3 +5,15 @@
 .category-bg{
     background-color: rgb(191, 196, 201);
 }
+
+::-webkit-scrollbar{
+    width: 0px;
+}
+
+::-webkit-scrollbar-thumb{
+    background: rgba(136, 136, 136, 0.281);
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background: #555;
+}

@@ -5,13 +5,19 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useLogoutMutation } from '../../slices/userApiSlice.js';
 import { logout } from '../../slices/userAuthSlice.js';
+import { ChatState } from '../context/ChatProvider.jsx';
+import { ChakraProvider } from "@chakra-ui/react"
 
 const Header = () => {
+  const {notification, setNotification} = ChatState()
   const { userInfo } = useSelector((state) => state.userAuth);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [logoutApiCall] = useLogoutMutation();
+
+
+  const VITE_LOGO_IMAGE_DIR_PATH = import.meta.env.VITE_LOGO_IMAGE_DIR_PATH
 
   const logoutHandler = async () => {
     try {
@@ -30,7 +36,7 @@ const Header = () => {
           <LinkContainer to='/'>
             <Navbar.Brand>
               <Image
-                src="http://localhost:5000/logo/artefino-logo.png"
+                src= {VITE_LOGO_IMAGE_DIR_PATH}
                 alt="ArteFino"
                 style={{
                   width: '60px',
@@ -41,7 +47,8 @@ const Header = () => {
               />
             </Navbar.Brand>
           </LinkContainer>
-          <Form inline="true">
+          {userInfo && (
+            <Form inline="true">
             <InputGroup>
               <InputGroup.Text id="basic-addon1"><FaSearch /></InputGroup.Text>
               <Form.Control
@@ -52,6 +59,7 @@ const Header = () => {
               />
             </InputGroup>
           </Form>
+          )}
           <Navbar.Toggle aria-controls='basic-navbar-nav' />
           <Navbar.Collapse id='basic-navbar-nav'>
             <Nav className='ms-auto'>
@@ -66,9 +74,11 @@ const Header = () => {
               )}
               {userInfo && (
                 <Nav.Item>
-                  <Nav.Link>
+                  <LinkContainer to='/chat'>
+                    <Nav.Link>
                     <FaComments />
                   </Nav.Link>
+                  </LinkContainer>
                 </Nav.Item>
               )}
               {userInfo ? (

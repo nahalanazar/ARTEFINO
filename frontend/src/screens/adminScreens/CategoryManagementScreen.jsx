@@ -3,6 +3,7 @@ import { useEffect,useState } from "react"
 import { toast } from "react-toastify";
 import { useGetCategoriesDataMutation } from "../../slices/adminApiSlice";
 import Loader from "../../components/Loader";
+import { Container } from "react-bootstrap";
 
 
 const CategoryScreen = () => {
@@ -28,8 +29,10 @@ const CategoryScreen = () => {
 
   return (
     <div>
-      <h1>Categories List</h1>
-      { isLoading ? <Loader/> : <CategoriesDataTable categories={categoriesData} /> }
+      <Container>
+        <h1>Categories List</h1>
+        { isLoading ? <Loader/> : <CategoriesDataTable categories={categoriesData} /> }
+      </Container>
     </div>
   );
 };

@@ -43,7 +43,6 @@
 .artist-info {
     display: flex;
     align-items: center;
-    padding-bottom: 20px;
 }
 
 .artist-info img {

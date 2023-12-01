@@ -1,11 +1,11 @@
 import { Outlet, useLocation } from "react-router-dom";
-import {Container } from "react-bootstrap";
+// import {Container } from "react-bootstrap";
 import UserHeader from "./components/userComponents/Header";
 import AdminHeader from "./components/AdminComponents/Header";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './index.css'
-
+import ChatProvider from "./components/context/ChatProvider.jsx";
 
 
 const App = () => {
@@ -14,13 +14,13 @@ const App = () => {
 
   return (
     <>
-
-      {isAdminPage ? <AdminHeader /> : <UserHeader />}
+      <ChatProvider>
+        {isAdminPage ? <AdminHeader /> : <UserHeader />}
+        
+        <ToastContainer />  
       
-      <ToastContainer />  
-    
-      <Outlet />
-   
+        <Outlet />
+      </ChatProvider>
     </>
   );
 

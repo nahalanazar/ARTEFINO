@@ -3,6 +3,7 @@ import { useEffect,useState } from "react"
 import { toast } from "react-toastify";
 import { useGetUsersDataMutation } from "../../slices/adminApiSlice";
 import Loader from "../../components/Loader";
+import { Container } from "react-bootstrap";
 
 const AdminUserManagementScreen = () => {
 
@@ -26,10 +27,10 @@ const AdminUserManagementScreen = () => {
   }, [usersDataFromAPI]);
 
   return (
-    <div>
+    <Container>
       <h1>Users List</h1>
-      { isLoading ? <Loader/> : <UsersDataTable users={usersData} /> }
-    </div>
+     { isLoading ? <Loader/> : <UsersDataTable users={usersData} /> }
+    </Container>
   );
 };
 

@@ -269,6 +269,7 @@ const googleRegisterUser = asyncHandler(async (req, res) => {
             throw new Error('Please provide all required fields');
     }
 
+
     const existingUser = await User.findOne({email:email})
 
     if (existingUser) {
@@ -281,6 +282,10 @@ const googleRegisterUser = asyncHandler(async (req, res) => {
         if (existingUser.profileImageName) {
             registeredUserData.profileImageName = existingUser.profileImageName
         }
+        if (existingUser.is_blocked) {
+        res.status(401)
+        throw new Error('Your account is blocked')
+    }
     res.status(201).json(registeredUserData)
     } else {
         const user = await User.create({
@@ -308,9 +313,10 @@ const googleRegisterUser = asyncHandler(async (req, res) => {
 // access Public
 const forgotPassword = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email: req.body.email, verified: true })
+    console.log
     if (!user) {
         res.status(401);
-        throw new Error('User not found, User authentication failed');
+        throw new Error('User not found, User authentication failed, Please SignUp again');
     } else {
         generateUserToken(res, user._id)
         sendOtpVerification(user, res)
@@ -451,11 +457,35 @@ const showArtists = asyncHandler(async (req, res) => {
   // Find artists who are not in the current user's following list
   const artists = await User.find({
     _id: { $ne: userId, $nin: followingList }
-  });
+  }).limit(5);
 
   res.status(200).json(artists);
 });
 
+// desc   Show all artists except the current user in search
+// route  GET /api/users?search=name/email
+// access Private
+const allUsers = asyncHandler(async (req, res) => {
+    console.log("hi");
+    const keyword = req.query.search
+        ? {
+            $or: [
+                { name: { $regex: req.query.search, $options: 'i' } },
+                { email: { $regex: req.query.search, $options: 'i'} }
+            ]
+        } : {}
+    
+    const users = await User.find(keyword).find({ _id: { $ne: req.user._id } })
+    res.send(users)
+})
+
+const checkBlock = asyncHandler(async (req, res) => {
+    const users = await User.findById(req.body.id)
+    if (users) {
+    res.status(200).json(users)
+}
+    
+})
 
 export {
     authUser,
@@ -471,5 +501,7 @@ export {
     getFollowedUsers,
     followArtist,
     unFollowArtist,
-    showArtists
+    showArtists,
+    allUsers,
+    checkBlock
 } 

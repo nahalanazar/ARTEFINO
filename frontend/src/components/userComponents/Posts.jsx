@@ -43,7 +43,7 @@ const Posts = () => {
     
     return (
         <div>
-        {posts.map((post) => (
+        {posts?.map((post) => (
             <Card key={post._id} style={{ marginBottom: '20px' }}>
             <Card.Header>
                 <img
