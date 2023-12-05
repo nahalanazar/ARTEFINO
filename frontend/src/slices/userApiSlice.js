@@ -164,6 +164,18 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 body: data
             })
         }),
+        fetchNotifications: builder.mutation({
+            query: () => ({
+                url: `${USERS_URL}/allNotifications`,
+                method: 'GET'
+            })
+        }),
+        deleteNotification: builder.mutation({
+            query: (notificationId) => ({
+                url: `${USERS_URL}/deleteNotification/${notificationId}`,
+                method: 'PUT'
+            })
+        }),
     })
 })
 
@@ -191,5 +203,7 @@ export const {
     useFetchChatMutation,
     useSendMessageMutation,
     useFetchMessagesMutation,
-    useCheckBlockMutation
+    useCheckBlockMutation,
+    useFetchNotificationsMutation,
+    useDeleteNotificationMutation
 } = userApiSlice

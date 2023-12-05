@@ -37,6 +37,11 @@ import {
 } from '../controllers/productController.js'
 
 import {
+    fetchNotifications,
+    deleteNotification
+} from '../controllers/notificationController.js'
+
+import {
     multerUploadUserProfile,
     multerUploadProductImages
 } from '../config/multerConfig.js';
@@ -74,6 +79,9 @@ router.get('/fetchChats', authenticateUser, fetchChats)
 router.post('/sendMessage', authenticateUser, sendMessage)
 router.get('/allMessages/:chatId', authenticateUser, allMessages)
 router.put('/checkBlock', checkBlock)
+router.get('/allNotifications', authenticateUser, fetchNotifications)
+router.put('/deleteNotification/:notificationId', authenticateUser, deleteNotification)
+
 
 
 export default router;

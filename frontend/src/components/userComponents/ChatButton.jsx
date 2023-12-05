@@ -46,19 +46,19 @@ const ChatButton = ({ userId }) => {
     return (
       <>
         <button
-        className="followButton"
-        style={{
-            color: 'white',  
-            backgroundColor: '#007BFF',  
-            fontSize: 16,
-            fontFamily: 'Roboto',
-            fontWeight: '700',
-            padding: '8px 16px',  
-            border: 'none',  
-            borderRadius: '4px',  
-            cursor: 'pointer',
-        }}
-        onClick={() => accessChat(userId)}
+          className="followButton"
+          style={{
+              color: 'white',  
+              backgroundColor: '#007BFF',  
+              fontSize: 16,
+              fontFamily: 'Roboto',
+              fontWeight: '700',
+              padding: '8px 16px',  
+              border: 'none',  
+              borderRadius: '4px',  
+              cursor: 'pointer',
+          }}
+          onClick={() => accessChat(userId)}
         > 
             Message
         </button>

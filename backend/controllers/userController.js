@@ -412,13 +412,13 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 // route  GET /api/users/followedUsers
 // access Private
 const getFollowedUsers = asyncHandler(async (req, res) => {
-    const id = req.user._id //thasni
+    const id = req.user._id
     const user = await User.findById(id)
 
     if (!user) {
       res.status(404).json({ error: 'User not found' });
     }
-    const followers = await User.find({ _id: { $in: user.following } }) //this id is nahala's id , ie , follower
+    const followers = await User.find({ _id: { $in: user.following } }) 
     res.status(200).json({followers});
 });
 

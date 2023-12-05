@@ -2,6 +2,10 @@ import asyncHandler from 'express-async-handler'
 import ChatRoom from '../models/chatModel.js'
 import User from '../models/userModel.js'
 import Message from '../models/messageModel.js'
+import { createNotification } from './notificationController.js'
+import Notification from '../models/notificationModel.js'
+
+
 // desc   Access particular chatRoom or create a new chatRoom
 // route  POST /api/users/accessChat
 // access Private
@@ -93,10 +97,23 @@ const sendMessage = asyncHandler(async (req, res) => {
         await ChatRoom.findByIdAndUpdate(req.body.chatId, {
             latestMessage: message
         })
+
+        // Notify users about the new message
+        // const senderId = req.user._id;
+        // const receiverId = message.chat.users.find((user) => user._id.toString() !== senderId.toString())._id;
+
+        // const existingNotification = await Notification.findOne({
+        //     sender: senderId,
+        //     receiver: receiverId
+        // });
+
+        // if (!existingNotification) {
+        //     await createNotification(senderId, receiverId, chatId, `New message from ${req.user.name}`);
+        // }
+
         res.status(200).json(message)
     } catch (error) {
-        res.status(400)
-        throw new Error(error.message)
+        res.status(400).json({ error: error.message });
     }
 })
 

@@ -50,6 +50,8 @@ app.use(errorHandler)
 //NOTE ===================== Starting Server =====================
 const server = app.listen(port, () => console.log(`server started on port ${port}`))
 
+import { storeNotification } from './controllers/notificationController.js';
+
 import("socket.io").then((socketIO) => {
     const io = new socketIO.Server(server, {
         pingTimeout: 60000,  // amount of time it will wait while being inactive. So after one minute of inactivity(not send any message), it will close the connection to save the bandwidth
@@ -61,8 +63,10 @@ import("socket.io").then((socketIO) => {
     // Your socket.io configuration and event handling can go here
     io.on("connection", (socket) => {
         console.log("connected to socket.io")
+        let userInfo;
 
-        socket.on("setup", (userInfo) => {
+        socket.on("setup", (user) => {
+            userInfo = user
             socket.join(userInfo.id)
             socket.emit("connected")
         })
@@ -77,24 +81,56 @@ import("socket.io").then((socketIO) => {
         socket.on("stop typing", (room) => socket.in(room).emit("stop typing"))
 
         // socket.in means inside that room, emit/send message
-        socket.on("new Message", (newMessageReceived) => {
-            let chat = newMessageReceived.chat
+
+        // socket.on("new Message", (newMessageReceived) => {
+        //     let chat = newMessageReceived.chat
             
-            if (!chat.users) return console.log("chat.users not defined")
+        //     if (!chat.users) return console.log("chat.users not defined")
             
-            chat.users.forEach((user) => {
-                if (user._id == newMessageReceived.sender._id) return
+        //     chat.users.forEach((user) => {
+        //         if (user._id == newMessageReceived.sender._id) return
                 
-                socket.in(user._id).emit("message received", newMessageReceived)
-            })
-        })
+        //         socket.in(user._id).emit("message received", newMessageReceived)
+        //     })
+        // })
+
+        socket.on("new Message", async (newMessageReceived) => {
+            let chat = newMessageReceived.chat;
+            
+            if (!chat.users) return console.log("chat.users not defined");
+
+            // Iterate through users in the chat
+            for (const user of chat.users) {
+                if (user._id == newMessageReceived.sender._id) continue;
+
+                // Check if the user is online (connected to the socket)
+                const isUserOnline = io.sockets.adapter.rooms.has(user._id);
+
+                // If the user is not online, emit real-time message and store notification
+                if (!isUserOnline) {
+                    console.log("not online");
+                    socket.in(user._id).emit("message received", newMessageReceived);
+
+                    // Store notification in the database
+                    await storeNotification(user._id, newMessageReceived);
+                } else {
+                    // The user is online, only emit real-time message
+                    socket.in(user._id).emit("message received", newMessageReceived);
+                }
+            }
+        });
+
 
         socket.off("setup", () => {
-            console.log("User Disconnected")
-            socket.leave(userInfo.id)
+            console.log("User Disconnected");
+            if (userInfo) {
+                socket.leave(userInfo.id);
+                userInfo = null;  // Reset userInfo on disconnection
+            }
         })
 
     })
 }).catch((error) => {
     console.error("Error importing socket.io:", error);
 });
+
