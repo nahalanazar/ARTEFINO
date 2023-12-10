@@ -24,6 +24,7 @@ import ResetPassword from './screens/userScreens/ResetPasswordScreen.jsx'
 import UserSellScreen from './screens/userScreens/SellScreen.jsx'
 import PostDetailScreen from './screens/userScreens/PostDetailScreen.jsx'
 import ChatScreen from './screens/userScreens/ChatScreen.jsx'
+import UpdatePostScreen from './screens/userScreens/UpdatePostScreen.jsx'
 
 //? ==================================== Admin Screens Import ====================================
 import AdminHomeScreen from './screens/adminScreens/HomeScreen.jsx'
@@ -39,7 +40,7 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path='/' element={ <App/> } >
 
-      { /* ===================================== User Routes ===================================== */ }
+      { /* ===================================== User Routes ===================================== */}
       <Route index={true} path='/' element={<UserHomeScreen className="w-100" /> } />
       <Route path='/login' element={ <UserLoginScreen /> } />
       <Route path='/register' element={ <UserRegisterScreen /> } />
@@ -51,11 +52,11 @@ const router = createBrowserRouter(
       {/* USER PRIVATE ROUTES */}
       <Route path='' element={ <UserPrivateRoutes /> } >    
         <Route path='/updateProfile' element={<UserUpdateProfileScreen />} />
-        {/* <Route path='/profile' element={<UserProfileScreen />} /> */}
         <Route path='/profile/:id?' element={<UserProfileScreen />} />
         <Route path='/sell' element={<UserSellScreen />} />
         <Route path={`/postDetails/:postId`} element={<PostDetailScreen />} />
         <Route path='/chat' element={<ChatScreen />} />
+        <Route path={`/updatePost/:postId`} element={<UpdatePostScreen />} />
       </Route>
 
       { /* ===================================== Admin Routes ===================================== */ }

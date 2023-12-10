@@ -78,9 +78,6 @@ const handleUnFollow = async (userIdToUnFollow) => {
   }
 };
 
-
-
-
   return (
     <div>
       <CategoriesTab />

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Form, Button } from 'react-bootstrap'
 import FormContainer from '../../components/FormContainer'
 import Loader from '../../components/Loader'
@@ -8,10 +8,31 @@ import { useNavigate } from 'react-router-dom'
 
 const PasswordOtpVerify = () => {
     const [otp, setOtp] = useState('')
+    const [showResendButton, setShowResendButton] = useState(false);
+    const [countdown, setCountdown] = useState(60);
+
     const [verifyOtp, { isLoading }] = useOtpVerifyMutation()
     const [resendOtpMutation, { isLoading: resendOtpLoading }] = useResendOtpMutation();
     const navigate = useNavigate()
-    const [showResendButton, setShowResendButton] = useState(false);
+
+    useEffect(() => {
+        let timer;
+
+        if (countdown > 0) {
+            timer = setInterval(() => {
+                setCountdown((prevCountdown) => prevCountdown - 1);
+            }, 1000);
+        }
+
+        return () => clearInterval(timer);
+    }, [countdown]);
+
+    useEffect(() => {
+        // Show the resend button after one minute
+        if (countdown === 0) {
+            setShowResendButton(true);
+        }
+    }, [countdown]);
 
     const submitHandler = async (e) => {
         e.preventDefault();
@@ -19,9 +40,10 @@ const PasswordOtpVerify = () => {
             const res = await verifyOtp({ otp }).unwrap()
             navigate('/resetPassword')
         } catch (err) {
+            setOtp('')
             if (err?.data?.message) {
-                toast.error('OTP expired. Click "Resend OTP" to get a new one.');
-                setShowResendButton(true)
+                toast.error(err?.data?.message);
+                // setShowResendButton(true)
             } else {
                 toast.error(err?.data?.message || err.error)
             }
@@ -34,6 +56,7 @@ const PasswordOtpVerify = () => {
             await resendOtpMutation().unwrap();
             toast.success('New OTP sent successfully!');
             setShowResendButton(false); // Hide the button after successfully resending OTP
+            setCountdown(60);
         } catch (error) {
             toast.error(error?.data?.message || error.error);
         }
@@ -43,7 +66,11 @@ const PasswordOtpVerify = () => {
   return (
     <FormContainer>
         <h1>OTP verification</h1>
-        <p>OTP will expire in One minute</p>
+        {countdown > 0 ? (
+                <p>OTP will expire in {countdown} seconds</p>
+            ) : (
+                <p>Time to enter OTP has expired. Click <b>Resend OTP</b> to get a new one.</p>
+            )}
         <Form onSubmit={submitHandler}>
             <Form.Group className='my-2' controlId='otp'>
                 <Form.Label>Enter OTP</Form.Label>

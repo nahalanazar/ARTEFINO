@@ -20,6 +20,7 @@ import {
     getFollowedUsers,
     followArtist,
     unFollowArtist,
+    removeArtist,
     showArtists,
     allUsers,
     checkBlock
@@ -33,7 +34,9 @@ import {
     createProduct,
     showPosts,
     postDetails,
-    getUserPosts
+    getUserPosts,
+    removePost,
+    updatePost
 } from '../controllers/productController.js'
 
 import {
@@ -70,9 +73,12 @@ router.get('/getCategories', getAllCategories);
 router.post('/addProduct', authenticateUser, multerUploadProductImages, createProduct);
 router.get('/showPosts', showPosts);
 router.get('/postDetails/:postId', authenticateUser, postDetails)
+router.delete('/removePost/:postId', authenticateUser, removePost)
+router.put('/updatePost/:postId', authenticateUser, multerUploadProductImages, updatePost);
 router.get('/followedUsers', authenticateUser, getFollowedUsers)
 router.put('/followArtist/:artistId', authenticateUser, followArtist)
 router.put('/unFollowArtist/:artistId', authenticateUser, unFollowArtist)
+router.put('/removeArtist/:artistId', authenticateUser, removeArtist)
 router.get('/getArtists', authenticateUser, showArtists);
 router.post('/accessChat', authenticateUser, accessChat)
 router.get('/fetchChats', authenticateUser, fetchChats)

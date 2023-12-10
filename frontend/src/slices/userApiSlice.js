@@ -102,12 +102,26 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 method: 'GET'
             })
         }),
+        removePost: builder.mutation({          
+            query: (data) => ({
+                url: `${USERS_URL}/removePost/${data}`,
+                method: 'DELETE',
+                body: data
+            })
+
+        }),
+        updatePost: builder.mutation({
+            query: ({ postId, formData }) => ({
+                url: `${USERS_URL}/updatePost/${postId}`,
+                method: 'PUT',
+                body: formData
+            })
+        }),
         followedUsers: builder.mutation({          
             query: () => ({
                 url: `${USERS_URL}/followedUsers`,
                 method: 'GET'
             })
-
         }),
         followArtist: builder.mutation({          
             query: (data) => ({
@@ -120,6 +134,14 @@ export const userApiSlice = apiSlice.injectEndpoints({
         unFollowArtist: builder.mutation({          
             query: (data) => ({
                 url: `${USERS_URL}/unFollowArtist/${data}`,
+                method: 'PUT',
+                body: data
+            })
+
+        }),
+        removeArtist: builder.mutation({          
+            query: (data) => ({
+                url: `${USERS_URL}/removeArtist/${data}`,
                 method: 'PUT',
                 body: data
             })
@@ -195,9 +217,12 @@ export const {
     useAddProductMutation,
     useShowPostsMutation,
     useGetPostByIdMutation,
+    useRemovePostMutation,
+    useUpdatePostMutation,
     useFollowedUsersMutation,
     useFollowArtistMutation,
     useUnFollowArtistMutation,
+    useRemoveArtistMutation,
     useGetArtistsMutation,
     useAccessChatMutation,
     useFetchChatMutation,

@@ -49,7 +49,9 @@ const authUser = asyncHandler(async (req, res) => {
         let registeredUserData = {
             name: user.name,
             email: user.email,
-            id: user._id
+            id: user._id,
+            followers: user.followers,
+            following: user.following
         }
         if (user.profileImageName) {
             registeredUserData.profileImageName = user.profileImageName
@@ -130,7 +132,9 @@ const registerUser = asyncHandler(async (req, res) => {
         let registeredUserData = {
             name: user.name,
             email: user.email,
-            id: user._id
+            id: user._id,
+            followers: user.followers,
+            following: user.following
         }
         res.status(200).json({"message":registeredUserData})
     } else {
@@ -138,8 +142,6 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new Error('Invalid user data, User registration failed')
     }
 })
-
-// const { EMAIL } = process.env
 
 
 let transporter = nodemailer.createTransport({
@@ -232,7 +234,9 @@ const verifyOtp = asyncHandler(async (req, res) => {
                     let registeredUserData = {
                         name: req.user.name,
                         email: req.user.email,
-                        id: req.user._id
+                        id: req.user._id,
+                        followers: req.user.followers,
+                        following: req.user.following
                     }
                     res.status(201).json(registeredUserData)
                 }
@@ -277,7 +281,9 @@ const googleRegisterUser = asyncHandler(async (req, res) => {
         let registeredUserData = {
             name: existingUser.name,
             email: existingUser.email,
-            id: existingUser._id
+            id: existingUser._id,
+            followers: existingUser.followers,
+            following: existingUser.following
         }
         if (existingUser.profileImageName) {
             registeredUserData.profileImageName = existingUser.profileImageName
@@ -298,7 +304,9 @@ const googleRegisterUser = asyncHandler(async (req, res) => {
             let registeredUserData = {
                 name: user.name,
                 email: user.email,
-                id: user._id
+                id: user._id,
+                followers: user.followers,
+                following: user.following
             }
             res.status(201).json(registeredUserData)
         } else {
@@ -361,6 +369,8 @@ const logoutUser = asyncHandler(async (req, res) => {
 const getUserProfile = asyncHandler(async (req, res) => {
     const id = req.params.userId
     const user = await User.findById(id)
+        .populate('followers', 'name profileImageName')
+        .populate('following', 'name profileImageName')
 
     if (!user) {
       res.status(404).json({ error: 'User not found' });
@@ -444,6 +454,17 @@ const unFollowArtist = asyncHandler(async (req, res) => {
     res.status(200).json({ status: 'success', message: 'UnFollowed artist successfully' });
 })
 
+// desc    Remove an artist from Followers list
+// route   PUT /api/users/removeArtist/:artistId
+// access  Private
+const removeArtist = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const artistId = req.params.artistId;
+    await User.findByIdAndUpdate(userId, { $pull: { followers: artistId } });
+    await User.findByIdAndUpdate(artistId, { $pull: { following: userId } });
+    res.status(200).json({ status: 'success', message: 'Removed artist successfully' });
+})
+
 // desc   Show some artists in home
 // route  GET /api/users/getArtists
 // access Private
@@ -466,7 +487,6 @@ const showArtists = asyncHandler(async (req, res) => {
 // route  GET /api/users?search=name/email
 // access Private
 const allUsers = asyncHandler(async (req, res) => {
-    console.log("hi");
     const keyword = req.query.search
         ? {
             $or: [
@@ -501,6 +521,7 @@ export {
     getFollowedUsers,
     followArtist,
     unFollowArtist,
+    removeArtist,
     showArtists,
     allUsers,
     checkBlock

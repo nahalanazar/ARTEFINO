@@ -89,7 +89,7 @@ const LoginScreen = () => {
             </Form.Group> 
             <Row className='py-3'>
                 <Col>
-                    <Link to='/forgotPassword'>Forgot Password</Link>
+                    <Link to='/forgotPassword'  className="btn btn-link">Forgot Password</Link>
                 </Col> 
             </Row>
 

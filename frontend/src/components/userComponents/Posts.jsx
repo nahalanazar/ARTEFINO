@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Card from 'react-bootstrap/Card';
 import { FaThumbsUp, FaComment } from 'react-icons/fa';
+import moment from 'moment';
 import { useShowPostsMutation } from '../../slices/userApiSlice';
 import { useNavigate } from 'react-router-dom';
 
@@ -40,6 +41,27 @@ const Posts = () => {
     const handlePostClick = (postId) => {
         navigate(`/postDetails/${postId}`);
     };
+
+    // Function to format the time difference
+    const formatTimeDifference = (timestamp) => {
+    const now = moment();
+    const postTime = moment(timestamp);
+
+    const diffInMinutes = now.diff(postTime, 'minutes');
+    const diffInHours = now.diff(postTime, 'hours');
+    const diffInDays = now.diff(postTime, 'days');
+
+    if (diffInMinutes < 60) {
+        return `Updated ${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
+    } else if (diffInHours < 24) {
+        return `Updated ${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
+    } else if (diffInDays < 7) {
+        return `Updated ${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
+    } else {
+        return `Updated on ${postTime.format('MMMM DD, YYYY')}`;
+    }
+};
+
     
     return (
         <div>
@@ -101,7 +123,8 @@ const Posts = () => {
                 <Card.Text>{post.description}</Card.Text>
             </Card.Body>
             <Card.Footer>
-                <small className="text-muted">Uploaded on {new Date(post.dateListed).toLocaleDateString()}</small>
+                <small className="text-muted">{formatTimeDifference(post.dateListed)}</small>
+                {/* <small className="text-muted">Uploaded on {new Date(post.dateListed).toLocaleDateString()}</small> */}
                 <br />
                 <small className="text-muted">Category: {post.category.name}</small>
             </Card.Footer>

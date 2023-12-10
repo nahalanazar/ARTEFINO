@@ -5,7 +5,7 @@ import { Form, Button, Row, Col } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import Loader from '../../components/Loader';
 import { useAddProductMutation, useGetCategoriesMutation } from '../../slices/userApiSlice';
-// import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+
 
 const SellScreen = () => {
   const [categories, setCategories] = useState([]);
@@ -16,7 +16,6 @@ const SellScreen = () => {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [addProduct, { isLoading }] = useAddProductMutation();
   const [getCategories] = useGetCategoriesMutation();
-  // const [location, setLocation] = useState({ lat: 0, lon: 0 });
   const [accessLatitude, setAccessLatitude] = useState('');
   const [accessLongitude, setAccessLongitude] = useState('');
   const [address, setAddress] = useState('');
@@ -72,9 +71,6 @@ const SellScreen = () => {
     console.log("selectedCategory: ", selectedCategory);
   };
 
-  // const handleMapClick = (e) => {
-  //   setLocation({ lat: e.latlng.lat, lon: e.latlng.lng });
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -108,11 +104,10 @@ const SellScreen = () => {
       formData.append('latitude', accessLatitude);
       formData.append('longitude', accessLongitude);
       formData.append('address', address)
-
       const response = await addProduct(formData).unwrap();
       console.log("response: ", response);
       toast.success('Product added successfully');
-      navigate('/')
+      navigate(`/postDetails/${response.postId}`)
     } catch (error) {
       console.error('Error adding product:', error);
       toast.error(error.data.error.message);
@@ -137,7 +132,6 @@ const SellScreen = () => {
   function errors(err) {
     console.warn(`ERROR(${err.code}): ${err.message}`);
   }
-
  
 
   return (
@@ -170,7 +164,6 @@ const SellScreen = () => {
             as="select"
             value={categoryId}
             onChange={handleCategoryChange}
-            // onChange={(e) => setCategoryId(e.target.value)}
           >
             {/* Populate categories dynamically */}
             <option value="">Select category</option>
@@ -197,26 +190,6 @@ const SellScreen = () => {
             ))}
           </Row>
         </Form.Group>
-
-        {/* <Form.Group controlId="location">
-          <Form.Label>Location</Form.Label>
-          <MapContainer
-            center={[location.lat, location.lon]}
-            zoom={13}
-            style={{ height: '300px', width: '100%' }}
-            onClick={handleMapClick}
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
-            {location.lat !== 0 && location.lon !== 0 && (
-              <Marker position={[location.lat, location.lon]}>
-                <Popup>Your selected location</Popup>
-              </Marker>
-            )}
-          </MapContainer>
-        </Form.Group> */}
 
         <Form.Group controlId="latitude">
           <Form.Label>Latitude</Form.Label>
