@@ -36,7 +36,9 @@ import {
     postDetails,
     getUserPosts,
     removePost,
-    updatePost
+    updatePost,
+    likePost,
+    unlikePost
 } from '../controllers/productController.js'
 
 import {
@@ -68,18 +70,20 @@ router.post('/resetPassword', authenticateUser, resetPassword)
 router.post('/logout', logoutUser)
 router.get('/profile/:userId', authenticateUser, getUserProfile)
 router.get('/userPosts/:userId', authenticateUser, getUserPosts)
-router.put('/profile', authenticateUser, multerUploadUserProfile.single('profileImage'), updateUserProfile);
-router.get('/getCategories', getAllCategories);
-router.post('/addProduct', authenticateUser, multerUploadProductImages, createProduct);
-router.get('/showPosts', showPosts);
+router.put('/profile', authenticateUser, multerUploadUserProfile.single('profileImage'), updateUserProfile)
+router.get('/getCategories', getAllCategories)
+router.post('/addProduct', authenticateUser, multerUploadProductImages, createProduct)
+router.get('/showPosts', showPosts)
 router.get('/postDetails/:postId', authenticateUser, postDetails)
 router.delete('/removePost/:postId', authenticateUser, removePost)
-router.put('/updatePost/:postId', authenticateUser, multerUploadProductImages, updatePost);
+router.put('/updatePost/:postId', authenticateUser, multerUploadProductImages, updatePost)
+router.post('/likePost/:postId', authenticateUser, likePost)
+router.delete('/unlikePost/:postId', authenticateUser, unlikePost)
 router.get('/followedUsers', authenticateUser, getFollowedUsers)
 router.put('/followArtist/:artistId', authenticateUser, followArtist)
 router.put('/unFollowArtist/:artistId', authenticateUser, unFollowArtist)
 router.put('/removeArtist/:artistId', authenticateUser, removeArtist)
-router.get('/getArtists', authenticateUser, showArtists);
+router.get('/getArtists', authenticateUser, showArtists)
 router.post('/accessChat', authenticateUser, accessChat)
 router.get('/fetchChats', authenticateUser, fetchChats)
 router.post('/sendMessage', authenticateUser, sendMessage)

@@ -117,6 +117,20 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 body: formData
             })
         }),
+        likePost: builder.mutation({          
+            query: (postId) => ({
+                url: `${USERS_URL}/likePost/${postId}`,
+                method: 'POST'
+            })
+
+        }),
+        unlikePost: builder.mutation({          
+            query: (postId) => ({
+                url: `${USERS_URL}/unlikePost/${postId}`,
+                method: 'DELETE'
+            })
+
+        }),
         followedUsers: builder.mutation({          
             query: () => ({
                 url: `${USERS_URL}/followedUsers`,
@@ -219,6 +233,8 @@ export const {
     useGetPostByIdMutation,
     useRemovePostMutation,
     useUpdatePostMutation,
+    useLikePostMutation,
+    useUnlikePostMutation,
     useFollowedUsersMutation,
     useFollowArtistMutation,
     useUnFollowArtistMutation,

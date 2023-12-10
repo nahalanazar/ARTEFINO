@@ -81,7 +81,7 @@ const getUserPosts = asyncHandler(async (req, res) => {
     res.status(200).json({userPosts});
 });
 
-// desc    Remove an Post
+// desc    Remove a Post
 // route   DELETE /api/users/removePost/:postId
 // access  Private
 const removePost = asyncHandler(async (req, res) => {
@@ -111,8 +111,8 @@ const removePost = asyncHandler(async (req, res) => {
     res.status(200).json({ status: 'success', message: 'Removed Post successfully' });
 })
 
-// desc   update profile page
-// route  PUT /api/users/profile
+// desc   update post
+// route  PUT /api/users/updatePost/:postId
 // access Private
 const updatePost = asyncHandler(async (req, res) => {
     const post = await Product.findById(req.params.postId);
@@ -144,11 +144,56 @@ const updatePost = asyncHandler(async (req, res) => {
 
 });
 
+// desc   add like to the Post
+// route  POST /api/users/likePost/:postId
+// access Private
+const likePost = asyncHandler(async (req, res) => {
+    const postId = req.params.postId;
+    const userId = req.user._id;
+    const post = await Product.findById(postId)
+
+    if (!post) {
+        return res.status(404).json({ message: 'Post not found' });
+    }
+
+    post.likes.push(userId)
+    await post.save()
+
+    res.status(200).json({ message: 'Like added successfully', likes: post.likes })
+})
+
+// desc   remove like to the Post
+// route  DELETE /api/users/unlikePost/:postId
+// access Private
+const unlikePost = asyncHandler(async (req, res) => {
+    const postId = req.params.postId;
+    const userId = req.user._id;
+    const post = await Product.findById(postId)
+
+    if (!post) {
+        return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Check if the user has already liked the post
+    const indexOfUser = post.likes.indexOf(userId);
+    if (indexOfUser === -1) {
+        return res.status(400).json({ message: 'User has not liked the post' });
+    }
+
+    // Remove the user from the likes array
+    post.likes.splice(indexOfUser, 1);
+    await post.save();
+
+    res.status(200).json({ message: 'Like removed successfully', likes: post.likes });
+})
+
 export {
     createProduct,
     showPosts,
     postDetails,
     getUserPosts,
     removePost,
-    updatePost
+    updatePost,
+    likePost,
+    unlikePost
 }
