@@ -20,7 +20,19 @@ const ChatButton = ({ userId }) => {
     const accessChat = async (userId) => {
       try {
           setLoadingChat(true)
-          const { data } = await getChat(userId)
+          const response = await getChat(userId)
+        if (response.error.data.message) {
+            return toast({
+              title: "Error fetching the Chat",
+              description: response.error.data.message || "An error occurred",
+              status: "error",
+              duration: 5000,
+              isClosable: true,
+              position: "top-right"
+            })
+          }
+          console.log("response from access chat: ", response);
+          const {data} = response
           if (!chats.find((c) => c._id === data._id)) {
             setChats([data, ...chats])
             setSelectedChat(data)
@@ -32,7 +44,7 @@ const ChatButton = ({ userId }) => {
       } catch (error) {
           toast({
               title: "Error fetching the Chat",
-              description: error.message,
+              description: error.response?.data?.message || "An error occurred",
               status: "error",
               duration: 5000,
               isClosable: true,

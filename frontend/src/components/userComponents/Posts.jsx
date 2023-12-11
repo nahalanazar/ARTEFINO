@@ -14,7 +14,6 @@ const Posts = () => {
     const [getPosts] = useShowPostsMutation();
     const [likePost] = useLikePostMutation();
     const [unlikePostApi] = useUnlikePostMutation();
-    const [isLiked, setIsLiked] = useState(false);
 
     const navigate = useNavigate();
 
@@ -23,8 +22,8 @@ const Posts = () => {
             try {
                 const response = await getPosts();
                 const postsData = response.data;
-                console.log("postsData: ", postsData)
                 setPosts(postsData);
+
                 // Check if the current user has liked each post
                 const likedPosts = postsData.map((post) => ({
                     ...post,
@@ -38,7 +37,7 @@ const Posts = () => {
         };
 
         fetchPosts();
-    }, [getPosts, userInfo, isLiked]);
+    }, [getPosts, userInfo]);
 
     const handleLikeClick = async (event, postId) => {
         event.stopPropagation(); // Prevent the event from propagating to the parent (Card) click handler
@@ -46,46 +45,27 @@ const Posts = () => {
             navigate('/login')
         }
         try {
-            if (isLiked) {
-                await unlikePost(postId)
-            } else {
-                const response = await likePost(postId).unwrap();
-                console.log("response on like: ", response);
-                // Update the likes count in the post
-                const updatedPosts = posts.map((post) => {
-                    if (post._id === postId) {
-                        return { ...post, likes: response.likes };
-                    }
-                    return post;
-                });
+            const response = posts.find((post) => post._id === postId).isLiked
+                ? await unlikePostApi(postId).unwrap()
+                : await likePost(postId).unwrap();
+            console.log("response on like: ", response);
 
-                setPosts(updatedPosts);
-                setIsLiked(true);
-            }
+            // Update the likes count in the post
+            const updatedPosts = posts.map((post) =>
+                post._id === postId
+                    ? { ...post, likes: response.likes, isLiked: !post.isLiked }
+                    : post
+            );
+
+            setPosts(updatedPosts);
+
         } catch (error) {
             console.log("Error adding like:", error);
         }
     };
 
-    const unlikePost = async (postId) => {
-    try {
-        const response = await unlikePostApi(postId).unwrap(); // Replace with your API call for unlike
-        console.log("response on unlike: ", response);
 
-        // Update the likes count in the post
-        const updatedPosts = posts.map((post) => {
-            if (post._id === postId) {
-                return { ...post, likes: response.likes };
-            }
-            return post;
-        });
-
-        setPosts(updatedPosts);
-        setIsLiked(false); // Set isLiked to false, as the user has unliked the post
-    } catch (error) {
-        console.log("Error removing like:", error);
-    }
-};
+    
 
 
     const handleCommentClick = (event) => {
@@ -125,19 +105,24 @@ const Posts = () => {
         {posts?.map((post) => (
             <Card key={post._id} style={{ marginBottom: '20px' }}>
             <Card.Header>
-                <img
-                    src={`${VITE_PROFILE_IMAGE_DIR_PATH}${post.stores.profileImageName}`}
-                    alt="Profile"
-                    style={{
-                        width: '30px',
-                        height: '30px',
-                        borderRadius: '50%',
-                        marginRight: '10px',
-                        objectFit: 'cover',
-                    }}
-                />
-                {post.stores.name}
+                {post.stores && post.stores.profileImageName && post.stores.name && (
+                    <>
+                        <img
+                            src={`${VITE_PROFILE_IMAGE_DIR_PATH}${post.stores.profileImageName}`}
+                            alt="Profile"
+                            style={{
+                                width: '30px',
+                                height: '30px',
+                                borderRadius: '50%',
+                                marginRight: '10px',
+                                objectFit: 'cover',
+                            }}
+                        />
+                        {post.stores.name}
+                    </>
+                )}
             </Card.Header>
+
             <Card.Img
                 variant="top"
                 src={`${VITE_PRODUCT_IMAGE_DIR_PATH}${post.images[0]}`}
@@ -179,10 +164,10 @@ const Posts = () => {
                 {post.likes && <>{post.likes.length > 0 && `${post.likes.length} ${post.likes.length === 1 ? 'like' : 'likes'}`}</>}
             </Card.Body>
             <Card.Footer>
-                <small className="text-muted">{formatTimeDifference(post.dateListed)}</small>
-                {/* <small className="text-muted">Uploaded on {new Date(post.dateListed).toLocaleDateString()}</small> */}
-                <br />
-                <small className="text-muted">Category: {post.category.name}</small>
+            <small className="text-muted">{formatTimeDifference(post.dateListed)}</small>
+            {/* <small className="text-muted">Uploaded on {new Date(post.dateListed).toLocaleDateString()}</small> */}
+            <br />
+            <small className="text-muted">Category: {post.category.name}</small>
             </Card.Footer>
             </Card>
         ))}

@@ -3,7 +3,7 @@ import { Box, Text, Button } from "@chakra-ui/react";
 function ConfirmationDialog({ onConfirm, onCancel }) {
   return (
     <>
-        <Box
+      <Box
         position="fixed"
         top="0"
         left="0"

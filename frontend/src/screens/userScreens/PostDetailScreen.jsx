@@ -1,5 +1,5 @@
 import { Button, ChakraProvider } from "@chakra-ui/react";
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import '../../styles/productDetails.css';
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import Container from 'react-bootstrap/Container';
@@ -10,9 +10,8 @@ import { useGetPostByIdMutation, useRemovePostMutation } from "../../slices/user
 import Map from '../../components/userComponents/Map'
 import { useSelector } from 'react-redux';
 import ChatButton from "../../components/userComponents/ChatButton";
-import {toast} from 'react-toastify'
+import { toast } from 'react-toastify'
 import ConfirmationDialog from "../../components/userComponents/RemovePostConfirm";
-
 
 const PostDetailScreen = () => {
     const VITE_PROFILE_IMAGE_DIR_PATH = import.meta.env.VITE_PROFILE_IMAGE_DIR_PATH;
@@ -26,7 +25,7 @@ const PostDetailScreen = () => {
     const navigate = useNavigate()
 
     const [getPostById] = useGetPostByIdMutation();
-    const [removePost] = useRemovePostMutation();    
+    const [removePost] = useRemovePostMutation();
 
     useEffect(() => {
         const fetchPostDetails = async () => {
@@ -57,6 +56,7 @@ const PostDetailScreen = () => {
 
     const isCurrentUserPost = post?.stores && post?.stores._id === userInfo.id;
 
+    
     const renderProfileLink = () => {
         const commonStyles = {
             profileImage: {
@@ -84,17 +84,18 @@ const PostDetailScreen = () => {
         }
     };
 
+    
     const renderActionButton = () => {
         if (isCurrentUserPost) {
             return (
-                <>
+                <div className="button-container">
                     <button className="edit-removeButton" onClick={() => handleUpdatePost(post._id)}>
                         Edit Post
                     </button>
                     <Button className="edit-removeButton removeButton" colorScheme="red" onClick={() => handleRemovePost(post._id)}>
                         Remove
                     </Button>
-                </>
+                </div>
             );
         } else {
             return <></>; // No action button for other artists
@@ -137,13 +138,12 @@ const PostDetailScreen = () => {
         navigate(`/updatePost/${postId}`);
     };
 
-
     return (
         <ChakraProvider>
             <Container>
                 <Row>
                     {post && post.images && (
-                        <Col sm={8}>
+                        <Col md={8}>
                             <div className="image-section pt-5">
                                 <div className="large-image-container">
                                     <img
@@ -156,7 +156,7 @@ const PostDetailScreen = () => {
                                         <FaArrowRight onClick={() => handleArrowClick('next')} />
                                     </div>
                                 </div>
-                                <div className="small-images">
+                                <div className="small-images d-flex">
                                     {post.images &&
                                         post.images.map((image, index) => (
                                             <img
@@ -164,7 +164,7 @@ const PostDetailScreen = () => {
                                                 src={`${VITE_PRODUCT_IMAGE_DIR_PATH}${image}`}
                                                 alt={`Small ${index}`}
                                                 onClick={() => handleImageClick(index)}
-                                                className={index === selectedImage ? 'selected' : ''}
+                                                className={index === selectedImage ? 'selected' : ''} // Adding margins between images on large screens
                                             />
                                         ))
                                     }
@@ -173,7 +173,7 @@ const PostDetailScreen = () => {
                         </Col>
                     )}
                     {post && post?.stores && (
-                        <Col sm={4}>
+                        <Col md={4}>
                             <div className="details-section pt-5">
                                 <div className="product-details-box mb-3">
                                     <h2>{post.title}</h2>
@@ -208,14 +208,14 @@ const PostDetailScreen = () => {
                     )}
                 </Row>
                 {confirmation && (
-                <ConfirmationDialog
-                onConfirm={handleConfirmation}
-                onCancel={handleCancelConfirmation}
-                />
-            )}
+                    <ConfirmationDialog
+                        onConfirm={handleConfirmation}
+                        onCancel={handleCancelConfirmation}
+                    />
+                )}
             </Container>
         </ChakraProvider>
     );
 };
 
-export default PostDetailScreen
+export default PostDetailScreen;
