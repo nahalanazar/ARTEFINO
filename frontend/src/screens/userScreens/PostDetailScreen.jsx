@@ -50,7 +50,7 @@ const PostDetailScreen = () => {
             direction === 'next'
                 ? (selectedImage + 1) % (post?.images?.length || 1)
                 : (selectedImage - 1 + (post?.images?.length || 1)) % (post?.images?.length || 1);
-
+        
         setSelectedImage(newIndex);
     };
 

@@ -9,7 +9,9 @@ import { ChatState } from '../context/ChatProvider.jsx';
 import { ChakraProvider } from "@chakra-ui/react"
 import NotificationBadge from 'react-notification-badge'
 import { Effect } from "react-notification-badge"
-
+// import SearchDrawer from './SearchDrawer.jsx';
+import {lazy, Suspense} from 'react'
+const SearchDrawer = lazy(() => import('./SearchDrawer.jsx'))
 const Header = () => {
   const {notification, setNotification} = ChatState()
   const { userInfo } = useSelector((state) => state.userAuth);
@@ -17,7 +19,6 @@ const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [logoutApiCall] = useLogoutMutation();
-
 
   const VITE_LOGO_IMAGE_DIR_PATH = import.meta.env.VITE_LOGO_IMAGE_DIR_PATH
 
@@ -51,17 +52,14 @@ const Header = () => {
               </Navbar.Brand>
             </LinkContainer>
             {userInfo && (
-              <Form inline="true">
-              <InputGroup>
-                <InputGroup.Text id="basic-addon1"><FaSearch /></InputGroup.Text>
-                <Form.Control
-                  style={{ width: "300px" }}
-                  placeholder="Search..."
-                  aria-label="Search"
-                  aria-describedby="basic-addon1"
-                />
-              </InputGroup>
-            </Form>
+              <Suspense fallback={<div>Loading...</div>}>
+                <Form inline="true">
+                  <InputGroup>
+                    <InputGroup.Text id="basic-addon1"><FaSearch /></InputGroup.Text>
+                      <SearchDrawer />
+                  </InputGroup>
+                </Form>
+              </Suspense>
             )}
             <Navbar.Toggle aria-controls='basic-navbar-nav' />
             <Navbar.Collapse id='basic-navbar-nav'>

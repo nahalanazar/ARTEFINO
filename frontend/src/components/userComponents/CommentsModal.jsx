@@ -61,9 +61,7 @@ console.log("newComment after reset:", newComment);
     }
   };
 
-const isPostButtonDisabled = !newComment.trim();
-console.log("newComment:", newComment);
-console.log("isPostButtonDisabled:", isPostButtonDisabled);
+  const isPostButtonDisabled = !newComment.trim();
 
   return (
     <>
