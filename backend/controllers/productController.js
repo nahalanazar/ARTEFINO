@@ -53,7 +53,7 @@ const createProduct = asyncHandler(async (req, res) => {
 // route  GET /api/users/showPosts
 // access Private
 const showPosts = asyncHandler(async (req, res) => {
-    const posts = await Product.find().populate('category stores').exec()
+    const posts = await Product.find().populate('category stores comments.user').exec()
     res.status(200).json(posts)
 })
 
@@ -187,6 +187,40 @@ const unlikePost = asyncHandler(async (req, res) => {
     res.status(200).json({ message: 'Like removed successfully', likes: post.likes });
 })
 
+// desc   add comment to the Post
+// route  POST /api/users/commentPost/:postId
+// access Private
+const commentPost = asyncHandler(async (req, res) => {
+    const postId = req.params.postId;
+    const userId = req.user._id;
+    const text = req.body.text;
+    const post = await Product.findById(postId)
+
+    if (!post) {
+        return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Find the user and populate the necessary fields
+    const user = await User.findById(userId).select('name profileImageName');
+
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+
+    const newComment = {
+        user: user, // Assign the populated user
+        text,
+        date: new Date()
+    }
+
+    post.comments.push(newComment);
+    await post.save();
+
+    res.status(200).json({ message: 'Comment added successfully', comment: newComment });
+});
+
+
+
 export {
     createProduct,
     showPosts,
@@ -195,5 +229,6 @@ export {
     removePost,
     updatePost,
     likePost,
-    unlikePost
+    unlikePost,
+    commentPost
 }

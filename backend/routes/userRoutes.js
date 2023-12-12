@@ -38,7 +38,8 @@ import {
     removePost,
     updatePost,
     likePost,
-    unlikePost
+    unlikePost,
+    commentPost
 } from '../controllers/productController.js'
 
 import {
@@ -79,6 +80,7 @@ router.delete('/removePost/:postId', authenticateUser, removePost)
 router.put('/updatePost/:postId', authenticateUser, multerUploadProductImages, updatePost)
 router.post('/likePost/:postId', authenticateUser, likePost)
 router.delete('/unlikePost/:postId', authenticateUser, unlikePost)
+router.post('/commentPost/:postId', authenticateUser, commentPost)
 router.get('/followedUsers', authenticateUser, getFollowedUsers)
 router.put('/followArtist/:artistId', authenticateUser, followArtist)
 router.put('/unFollowArtist/:artistId', authenticateUser, unFollowArtist)

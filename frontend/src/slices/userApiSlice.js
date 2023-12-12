@@ -122,14 +122,22 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 url: `${USERS_URL}/likePost/${postId}`,
                 method: 'POST'
             })
-
         }),
         unlikePost: builder.mutation({          
             query: (postId) => ({
                 url: `${USERS_URL}/unlikePost/${postId}`,
                 method: 'DELETE'
             })
-
+        }),
+        commentPost: builder.mutation({          
+            query: ({ postId, text }) => ({
+                url: `${USERS_URL}/commentPost/${postId}`,
+                method: 'POST',
+                body: JSON.stringify({ text }), // Stringify the body
+                headers: {
+                'Content-Type': 'application/json', // Set the content type
+                },
+            }),
         }),
         followedUsers: builder.mutation({          
             query: () => ({
@@ -235,6 +243,7 @@ export const {
     useUpdatePostMutation,
     useLikePostMutation,
     useUnlikePostMutation,
+    useCommentPostMutation,
     useFollowedUsersMutation,
     useFollowArtistMutation,
     useUnFollowArtistMutation,
