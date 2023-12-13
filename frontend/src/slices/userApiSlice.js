@@ -139,6 +139,14 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 },
             }),
         }),
+        commentDelete: builder.mutation({          
+            query: ({ postId, commentId }) => ({
+                url: `${USERS_URL}/commentDelete/${postId}`,
+                method: 'DELETE',
+                body: { commentId }, // Send commentId directly in the body
+                
+            })
+        }),
         followedUsers: builder.mutation({          
             query: () => ({
                 url: `${USERS_URL}/followedUsers`,
@@ -244,6 +252,7 @@ export const {
     useLikePostMutation,
     useUnlikePostMutation,
     useCommentPostMutation,
+    useCommentDeleteMutation,
     useFollowedUsersMutation,
     useFollowArtistMutation,
     useUnFollowArtistMutation,

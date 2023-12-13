@@ -115,14 +115,16 @@ const Posts = () => {
                 : post
         );
         setPosts(updatedPosts);
+        if (addedComment) {
         toast({
             title: "Comment Added",
             description: "Your comment has been added successfully.",
             status: "success",
             duration: 3000,
             isClosable: true,
-            position:"top-right"
+            position: "top-right"
         });
+    }
     };
 
     
@@ -198,7 +200,7 @@ const Posts = () => {
                     </Card.Footer>
                 </Card>
             ))}
-                <CommentsModal post={commentModalPost} isOpen={isCommentsModalOpen} onClose={onCloseCommentsModal} onCommentPost={handleCommentPost} formatTimeDifference={formatTimeDifference} />
+                <CommentsModal post={commentModalPost} isOpen={isCommentsModalOpen} onClose={onCloseCommentsModal} onCommentPost={handleCommentPost} formatTimeDifference={formatTimeDifference} setPosts={setPosts} posts={posts} />
         </div>
         </ChakraProvider>
     )

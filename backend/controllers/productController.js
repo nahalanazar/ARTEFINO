@@ -215,8 +215,32 @@ const commentPost = asyncHandler(async (req, res) => {
 
     post.comments.push(newComment);
     await post.save();
+    // Fetch the newly added comment from the post object
+    const addedComment = post.comments[post.comments.length - 1];
 
-    res.status(200).json({ message: 'Comment added successfully', comment: newComment });
+    console.log("result:", addedComment._id);
+console.log("comment added");
+    res.status(200).json({ message: 'Comment added successfully', comment: addedComment });
+});
+
+// desc   add comment to the Post
+// route  DELETE /api/users/commentDelete/:postId
+// access Private
+const commentDelete = asyncHandler(async (req, res) => {
+    const postId = req.params.postId;
+    const commentId = req.body.commentId;
+    console.log("postId,commentId ", postId, commentId);
+    const result = await Product.updateOne(
+      { _id: postId },
+      { $pull: { comments: { _id: commentId } } }
+    );
+    if (result.modifiedCount > 0) {
+        console.log('Comment deleted successfully');
+        res.status(200).json({ message: 'Comment deleted successfully' });
+    } else {
+        console.log('Comment not found or deletion unsuccessful');
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
 
@@ -230,5 +254,6 @@ export {
     updatePost,
     likePost,
     unlikePost,
-    commentPost
+    commentPost,
+    commentDelete
 }
