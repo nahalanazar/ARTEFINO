@@ -13,7 +13,7 @@ import ScrollableChat from './ScrollableChat';
 import io from 'socket.io-client'
 import Lottie from 'react-lottie'
 import animationData from '../../animations/typing.json'
-
+import moment from 'moment'
 const ENDPOINT = "http://localhost:5000";
 let socket, selectedChatCompare;
 
@@ -43,12 +43,40 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         }
     }
     useEffect(() => {
-        socket = io(ENDPOINT)
+        // Create a new socket connection when userId changes
+        socket = io(ENDPOINT, { query: { userId }});
+        
         socket.emit("setup", userInfo)
+        socket.on("userStatus", ({ userId, online, lastSeen }) => {
+            console.log(`${userId} is ${online ? 'online' : 'offline'}`);
+            console.log("selected  chat: ", selectedChat);
+            if (selectedChat && selectedChat.users.some(user => user._id === userId )) {
+                setSelectedChat(prevChat => ({
+                    ...prevChat,
+                    online: online,
+                    lastSeen: online ? null : lastSeen,
+                    userId: userId
+                }));
+            }
+        });
         socket.on("connected", () => setSocketConnected(true))
         socket.on("typing", () => setIsTyping(true))
         socket.on("stop typing", () => setIsTyping(false))
-    }, [])
+
+
+        // Cleanup the previous socket connection when the component unmounts
+        return () => {
+            if (socket) {
+                socket.disconnect();
+                socket.off("connected");
+                socket.off("typing");
+                socket.off("stop typing");
+                socket.off("userStatus");
+                socket.off("message received");
+            }
+        };
+    }, []);
+
 
     const sendMessage = async (event) => {
         if (event.key === "Enter" && newMessage) {
@@ -94,51 +122,45 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
 
     useEffect(() => {
-        fetchMessages()
+        fetchMessages();
         selectedChatCompare = selectedChat;
-    }, [selectedChat])
-
-
-    // useEffect(() => {
-    //     socket.on("message received", (newMessageReceived) => {
-    //         if (!selectedChatCompare || selectedChatCompare._id !== newMessageReceived.chat._id) {
-    //             if (!notification.includes(newMessageReceived)) {
-    //                 setNotification([newMessageReceived, ...notification])
-    //                 setFetchAgain(!fetchAgain)
-    //             }
-    //         } else {
-    //             setMessages([...messages, newMessageReceived])
-    //         }
-    //     })
-    // })
+    }, [selectedChat]);
 
 
     useEffect(() => {
         socket.on("message received", (newMessageReceived) => {
             if (!selectedChatCompare || selectedChatCompare._id !== newMessageReceived.chat._id) {
-            const existingNotification = notification.find((n) => n.chat._id === newMessageReceived.chat._id);
+                const existingNotification = notification.find((n) => n.chat._id === newMessageReceived.chat._id);
 
-            if (!existingNotification) {
-                // Notify users about the new message
-                // const senderId = newMessageReceived.sender._id;
-                // const receiverId = userId; // Assume the current user is the receiver
-                // createNotification(senderId, receiverId, `New message from ${getSender(userId, newMessageReceived.chat.users)}`);
-                
-                setNotification([newMessageReceived, ...notification]);
-                setFetchAgain(!fetchAgain)
-            } else {
-                // Update the existing notification
-                setNotification([
-                ...notification.filter((n) => n.chat._id !== newMessageReceived.chat._id),
-                newMessageReceived,
-                ]);
-                setFetchAgain(!fetchAgain);
-            }
+                if (!existingNotification) {
+                    // Notify users about the new message
+                    // const senderId = newMessageReceived.sender._id;
+                    // const receiverId = userId; // Assume the current user is the receiver
+                    // createNotification(senderId, receiverId, `New message from ${getSender(userId, newMessageReceived.chat.users)}`);
+                    
+                    setNotification([newMessageReceived, ...notification]);
+                    setFetchAgain(!fetchAgain)
+                } else {
+                    // Update the existing notification
+                    setNotification([
+                    ...notification.filter((n) => n.chat._id !== newMessageReceived.chat._id),
+                    newMessageReceived,
+                    ]);
+                    setFetchAgain(!fetchAgain);
+                }
             } else {
                 setMessages([...messages, newMessageReceived]);
             }
         });
-    });
+        return () => {
+            // Cleanup event listeners when the component unmounts
+            socket.off("connected");
+            socket.off("typing");
+            socket.off("stop typing");
+            socket.off("userStatus");
+        };
+
+    },[notification, selectedChat]);
 
     useEffect(() => {
         const fetchNotificationsData = async () => {
@@ -184,7 +206,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             <>
                 <Text
                     fontSize={{ base: "28px", md: "30px" }}
-                    pb={3}
                     px={2}
                     w="100%"
                     fontFamily="work sans"
@@ -197,7 +218,16 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                         icon={<ArrowBackIcon />}
                         onClick={()=>setSelectedChat("")}
                     />
-                    {getSender(userId, selectedChat.users)}
+                    <Box>
+                        <p style={{ margin: "0" }}>{getSender(userId, selectedChat.users)}</p>
+                        {selectedChat.online ? (
+                              <p style={{ fontSize: "14px", margin: "0" }}>{`${selectedChat.userId} online`}</p>
+                        ) : (
+                            <p style={{ fontSize: "14px", margin: "0" }}>
+                                Last seen: {moment(selectedChat.lastSeen).format('MMMM D, YYYY h:mm A')}
+                            </p>
+                          )}
+                    </Box>
                 </Text>
                 <Box
                     display="flex"
@@ -209,7 +239,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                     h="100%"
                     borderRadius="lg"
                     overflow="hidden"
-                >
+                > 
                       {loading ? (
                           <Spinner
                               size="xl"

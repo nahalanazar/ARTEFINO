@@ -11,6 +11,7 @@ import ChatProvider from "./components/context/ChatProvider.jsx";
 const App = () => {
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith("/admin");
+// console.error = () => {};
 
   return (
     <>

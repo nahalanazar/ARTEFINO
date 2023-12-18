@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, Navigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Form, Button, Row, Col } from 'react-bootstrap'
 import FormContainer from '../../components/FormContainer'
 import { toast } from 'react-toastify';
 import Loader from "../../components/Loader";
 import { useGetPostByIdMutation, useUpdatePostMutation, useGetCategoriesMutation } from '../../slices/userApiSlice';
+import ConfirmationDialog from "../../components/userComponents/RemovePostConfirm";
+import { ChakraProvider } from "@chakra-ui/react";
+
 const UpdatePostScreen = () => {
     const { postId } = useParams();
     const [categories, setCategories] = useState([]);
@@ -17,6 +20,8 @@ const UpdatePostScreen = () => {
     const [address, setAddress] = useState('');
     const [imagePreviews, setImagePreviews] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [imageToRemoveIndex, setImageToRemoveIndex] = useState(null);
+    const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
 
     const navigate = useNavigate()
 
@@ -66,91 +71,115 @@ const UpdatePostScreen = () => {
         setCategoryId(selectedCategoryId);
     };
 
+    // const handleRemoveImage = (index) => {
+    //     setImages((existingImages) => {
+    //         const updatedImages = [...existingImages];
+    //         updatedImages.splice(index, 1);
+    //         return updatedImages;
+    //     });
+
+    //     setImagePreviews((existingPreviews) => {
+    //         const updatedPreviews = [...existingPreviews];
+    //         updatedPreviews.splice(index, 1);
+    //         return updatedPreviews;
+    //     });
+    // };
+
     const handleRemoveImage = (index) => {
+        setImageToRemoveIndex(index);
+        setShowConfirmationDialog(true);
+    };
+
+    const confirmRemoveImage = () => {
         setImages((existingImages) => {
             const updatedImages = [...existingImages];
-            updatedImages.splice(index, 1);
+            updatedImages.splice(imageToRemoveIndex, 1);
             return updatedImages;
         });
 
         setImagePreviews((existingPreviews) => {
             const updatedPreviews = [...existingPreviews];
-            updatedPreviews.splice(index, 1);
+            updatedPreviews.splice(imageToRemoveIndex, 1);
             return updatedPreviews;
         });
+
+        setImageToRemoveIndex(null);
+        setShowConfirmationDialog(false);
+    };
+
+    const cancelRemoveImage = () => {
+        setImageToRemoveIndex(null);
+        setShowConfirmationDialog(false);
     };
 
     const submitHandler = async (e) => {
-    e.preventDefault();
+        e.preventDefault();
 
-    if (!title.trim() || !description.trim() || !categoryId || images.length === 0) {
-        toast.error('Please fill out all required fields.');
-        return;
-    }
-
-    if (images.length > 3) {
-        toast.error('You can upload up to 3 images.');
-        return;
-    }
-
-    for (let i = 0; i < images.length; i++) {
-        const fileType = typeof images[i] === 'object' ? images[i].type.split('/')[0] : null;
-
-        // If it's not an object, assume it's a URL (string) and continue
-        if (fileType && fileType !== 'image') {
-            toast.error('Please upload only images (JPEG, PNG, etc.).');
+        if (!title.trim() || !description.trim() || !categoryId || images.length === 0) {
+            toast.error('Please fill out all required fields.');
             return;
         }
-    }
 
+        if (images.length > 3) {
+            toast.error('You can upload up to 3 images.');
+            return;
+        }
 
-    // Create form data and update the post
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('category', categoryId);
+        for (let i = 0; i < images.length; i++) {
+            const fileType = typeof images[i] === 'object' ? images[i].type.split('/')[0] : null;
 
-    if(images.length > 0){
-        images.forEach((image, index) => {
-            if (index < imagePreviews.length) {
-                // Existing image details
-                if (typeof image === 'string') {
-                    // URL string (existing image)
-                    formData.append('existingImages', image);
+            // If it's not an object, assume it's a URL (string) and continue
+            if (fileType && fileType !== 'image') {
+                toast.error('Please upload only images (JPEG, PNG, etc.).');
+                return;
+            }
+        }
+
+        // Create form data and update the post
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('category', categoryId);
+
+        if(images.length > 0){
+            images.forEach((image, index) => {
+                if (index < imagePreviews.length) {
+                    // Existing image details
+                    if (typeof image === 'string') {
+                        // URL string (existing image)
+                        formData.append('existingImages', image);
+                    } else {
+                        // File object (newly added image)
+                        formData.append('images', image);
+                    }
                 } else {
-                    // File object (newly added image)
+                    // Newly added images
                     formData.append('images', image);
                 }
-            } else {
-                // Newly added images
-                formData.append('images', image);
-            }
-        });
-    }
-    
-    formData.append('latitude', accessLatitude);
-    formData.append('longitude', accessLongitude);
-    formData.append('address', address);
-
-    try {
-        console.log("formData: ", formData);
-        const response = await updatePost({ postId, formData } ).unwrap();
-        console.log("response from update post: ", response);
-        if (response.error) {
-            toast.error(response.error.data.message)
-        } else {          
-            toast.success('Product Updated successfully');
+            });
         }
-        navigate(`/postDetails/${response.postId}`)
-    } catch (error) {
-        console.error('Error updating post:', error);
-    }
-};
+        
+        formData.append('latitude', accessLatitude);
+        formData.append('longitude', accessLongitude);
+        formData.append('address', address);
 
-
+        try {
+            const response = await updatePost({ postId, formData } ).unwrap();
+            console.log("response from update post: ", response);
+            if (response.error) {
+                toast.error(response.error.data.message)
+            } else {          
+                toast.success('Post Updated successfully');
+            }
+            navigate(`/postDetails/${response.postId}`)
+        } catch (error) {
+            console.error('Error updating post:', error);
+        }
+    };
 
   return (
-    <div>
+    <ChakraProvider>
+        <div>
       <FormContainer>
         <h1>Update Post</h1>
           
@@ -212,6 +241,12 @@ const UpdatePostScreen = () => {
                         </Col>
                     ))}
                 </Row>
+                {showConfirmationDialog && (
+                    <ConfirmationDialog
+                        onConfirm={confirmRemoveImage}
+                        onCancel={cancelRemoveImage}
+                    />
+                )}
                 <Form.Control className="mt-5" type="file" multiple name="images" onChange={handleImageChange} />
             </Form.Group>
               
@@ -253,6 +288,7 @@ const UpdatePostScreen = () => {
         </Form>  
     </FormContainer>
     </div>
+    </ChakraProvider>
   )
 }
 

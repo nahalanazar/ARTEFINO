@@ -51,6 +51,7 @@ app.use(errorHandler)
 const server = app.listen(port, () => console.log(`server started on port ${port}`))
 
 import { storeNotification } from './controllers/notificationController.js';
+import User from './models/userModel.js';
 
 import("socket.io").then((socketIO) => {
     const io = new socketIO.Server(server, {
@@ -65,10 +66,14 @@ import("socket.io").then((socketIO) => {
         console.log("connected to socket.io")
         let userInfo;
 
-        socket.on("setup", (user) => {
-            userInfo = user
+        socket.on("setup", async (user) => {
+            console.log("User set up:", user);
+            userInfo = { ...user, online: true } // Include online status
             socket.join(userInfo.id)
             socket.emit("connected")
+            // Emit online status to all clients
+            // socket.emit("userStatus", { userId: userInfo.id, online: true, lastSeen: new Date()  });
+            io.to(user.id).emit("userStatus", { userId: user.id, online: true, lastSeen: new Date() });
         })
 
         // Joining a chat by taking chat room id from frontend
@@ -79,20 +84,6 @@ import("socket.io").then((socketIO) => {
 
         socket.on("typing", (room) => socket.in(room).emit("typing"))
         socket.on("stop typing", (room) => socket.in(room).emit("stop typing"))
-
-        // socket.in means inside that room, emit/send message
-
-        // socket.on("new Message", (newMessageReceived) => {
-        //     let chat = newMessageReceived.chat
-            
-        //     if (!chat.users) return console.log("chat.users not defined")
-            
-        //     chat.users.forEach((user) => {
-        //         if (user._id == newMessageReceived.sender._id) return
-                
-        //         socket.in(user._id).emit("message received", newMessageReceived)
-        //     })
-        // })
 
         socket.on("new Message", async (newMessageReceived) => {
             let chat = newMessageReceived.chat;
@@ -125,9 +116,22 @@ import("socket.io").then((socketIO) => {
             console.log("User Disconnected");
             if (userInfo) {
                 socket.leave(userInfo.id);
+                io.emit('userStatus', { userId: userInfo.id, online: false, lastSeen: new Date() });
                 userInfo = null;  // Reset userInfo on disconnection
             }
         })
+
+        socket.on("disconnect", async () => {
+            console.log("User disconnected");
+            if (userInfo) {
+                await User.updateOne({ _id: userInfo.id }, { online: false, lastSeen: new Date() });
+                io.to(userInfo.id).emit('userStatus', { userId: userInfo.id, online: false, lastSeen: new Date() });
+                socket.leave(userInfo.id);
+                userInfo = null;  // Reset userInfo on disconnection
+            }
+        });
+
+
 
     })
 }).catch((error) => {

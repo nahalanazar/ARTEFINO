@@ -22,6 +22,7 @@ const PostDetailScreen = () => {
     const [confirmation, setConfirmation] = useState(false);
     const [post, setPost] = useState({});
     const [postToRemove, setPostToRemove] = useState(null);
+    const imageUrl = post?.stores?.profileImageName ? VITE_PROFILE_IMAGE_DIR_PATH + post.stores.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg';
     const navigate = useNavigate()
 
     const [getPostById] = useGetPostByIdMutation();
@@ -31,6 +32,7 @@ const PostDetailScreen = () => {
         const fetchPostDetails = async () => {
             try {
                 const response = await getPostById(postId);
+                console.log("response:", response);
                 setPost(response.data);                
             } catch (error) {
                 console.error("Error fetching post details:", error);
@@ -60,7 +62,7 @@ const PostDetailScreen = () => {
     const renderProfileLink = () => {
         const commonStyles = {
             profileImage: {
-                src: `${VITE_PROFILE_IMAGE_DIR_PATH}${post?.stores.profileImageName}`,
+                src: imageUrl,
                 alt: 'Profile',
             },
             artistName: post?.stores.name,

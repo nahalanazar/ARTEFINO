@@ -23,7 +23,7 @@ function ConfirmationDialog({ onConfirm, onCancel }) {
         boxShadow="0 0 10px rgba(0, 0, 0, 0.2)"
         zIndex="2000"
       >
-        <Text>Are you sure you want to remove this Post?</Text>
+        <Text>Are you sure you want to remove this?</Text>
         <Button colorScheme="red" onClick={onConfirm}>Yes, remove</Button>
         <Button onClick={onCancel}>Cancel</Button>
       </Box>

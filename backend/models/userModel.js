@@ -47,7 +47,11 @@ const userSchema = mongoose.Schema({
     verified: {
         type: Boolean,
         default: false
-    }
+    },
+    lastSeen: {
+        type: Date,
+        default: null,
+    },
 }, {
     timestamps: true
 });

@@ -24,7 +24,6 @@ const Posts = () => {
 
     const toast = useToast();
 
-
     useEffect(() => {
         const fetchPosts = async () => {
             try {
@@ -133,11 +132,11 @@ const Posts = () => {
             <div>
             {posts?.map((post) => (
                 <Card key={post._id} style={{ marginBottom: '20px' }}>
-                    <Card.Header>
-                        {post.stores && post.stores.profileImageName && post.stores.name && (
+                    <Card.Header style={{ display: 'flex', alignItems: 'center' }}>
+                        {post.stores && post.stores.name && (
                             <>
                                 <img
-                                    src={`${VITE_PROFILE_IMAGE_DIR_PATH}${post.stores.profileImageName}`}
+                                    src={post?.stores?.profileImageName ? VITE_PROFILE_IMAGE_DIR_PATH + post.stores.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg'}
                                     alt="Profile"
                                     style={{
                                         width: '30px',
