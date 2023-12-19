@@ -1,8 +1,10 @@
 import asyncHandler from 'express-async-handler'
 import adminModel from '../models/adminModel.js'
+import Report from '../models/reportModel.js';
 import generateAdminToken from '../utils/jwtConfig/adminJwtConfig/generateAdminToken.js'
 import destroyAdminToken from '../utils/jwtConfig/adminJwtConfig/destroyAdminToken.js'
 import { fetchAllUsers, deleteUser, blockUser, unblockUser } from '../utils/helpers/adminHelper.js';
+import Product from '../models/productModel.js';
 
 // desc    Auth admin/set token
 // route   POST /api/admin/auth
@@ -204,7 +206,50 @@ const unblockUserData = asyncHandler( async (req, res) => {
     }
 });
 
+// desc   Show reported posts for admin
+// route  GET /api/admin/reportedPosts
+// access PRIVATE 
+const showReportedPosts = asyncHandler(async (req, res) => {
+  
+    const reports = await Report.find({})
+        .populate({
+            path: 'reportedPost',
+            populate: {
+                path: 'stores',
+                model: 'User', 
+            },
+        })
+        .populate('reporter')
+        .exec();
+    
+    const reportedPosts = reports.map(report => ({
+        image: report.reportedPost.images[0], 
+        title: report.reportedPost.title,
+        postedUserName: report.reportedPost.stores.name, 
+        reportedUserName: report.reporter.name,
+        reportedDate: report.timestamp,
+        reportedReason: report.reason,
+        reportId: report._id,
+        isReviewed: report.isReviewed
+    }));
+    res.status(200).json(reportedPosts);
+   
+});
 
+// desc    Remove Reported Post
+// route   PUT /api/admin/removeReportedPost
+// access  PRIVATE
+const removeReportedPost = asyncHandler(async (req, res) => {
+    const reportId = req.body.reportId;
+    const report = await Report.findById(reportId);
+    report.isReviewed = true;
+    await report.save();
+    // Update the post status as removed
+    const post = await Product.findById(report.reportedPost);
+    post.isRemoved = true;
+    await post.save();
+    res.status(200).json({status: 'success', message: 'Report marked as reviewed'});
+});
 
 
 export {
@@ -216,5 +261,7 @@ export {
     getAllUsers,
     deleteUserData,
     blockUserData,
-    unblockUserData
+    unblockUserData,
+    showReportedPosts,
+    removeReportedPost
 }

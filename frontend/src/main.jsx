@@ -34,7 +34,7 @@ import AdminPrivateRoutes from './screens/adminScreens/PrivateRoutes.jsx';
 import AdminProfileScreen from './screens/adminScreens/ProfileScreen.jsx';
 import UsersManagementScreen from './screens/adminScreens/UserManagementScreen.jsx';
 import CategoriesManagementScreen from './screens/adminScreens/CategoryManagementScreen.jsx';
-
+import ReportedPostsScreen from './screens/adminScreens/ReportedPostsScreen.jsx'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -68,7 +68,8 @@ const router = createBrowserRouter(
       <Route path='' element={ <AdminPrivateRoutes /> } >
         <Route path='/admin/profile' element={ <AdminProfileScreen /> } />
         <Route path='/admin/manage-users' element={<UsersManagementScreen />} />
-        <Route path='/admin/manage-categories' element={ <CategoriesManagementScreen /> } />
+        <Route path='/admin/manage-categories' element={<CategoriesManagementScreen />} />
+        <Route path='/admin/reported-posts' element={ <ReportedPostsScreen /> } />        
       </Route>
     </Route>
 

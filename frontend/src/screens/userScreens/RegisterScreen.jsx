@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 // import { Form, Button, Row, Col } from 'react-bootstrap'
 // import FormContainer from '../../components/FormContainer'
 import { toast } from 'react-toastify'
-// import Loader from '../../components/Loader'
+import Loader from '../../components/Loader'
 import { useRegisterMutation, useGoogleRegisterMutation } from '../../slices/userApiSlice'
 import { setCredentials } from '../../slices/userAuthSlice'
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
@@ -31,7 +31,7 @@ const RegisterScreen = () => {
     const dispatch = useDispatch()
 
     const { userInfo } = useSelector((state) => state.userAuth)
-    const [register] = useRegisterMutation()
+    const [register, { isLoading }] = useRegisterMutation()
     const [googleRegister] = useGoogleRegisterMutation()
 
     useEffect(() => {
@@ -147,8 +147,9 @@ const RegisterScreen = () => {
                                 <input type='password' placeholder='Confirm Password' className='border border-grey-400 py-1 px-2 w-full' value={confirmPassword} onChange={(e) => { setConfirmPassword(e.target.value); setConfirmPasswordError(validateConfirmPassword(password, e.target.value)) }} />
                                 {confirmPasswordError && <p className='text-red-500'>{confirmPasswordError}</p>}
                             </div>
+                            {isLoading && <Loader />}
                             <div className='mt-5'>
-                                <button className='w-full py-3 text-center text-white' type='submit' style={{ backgroundColor: '#ffbe55' }}>Register</button>
+                                <button className='w-full py-3 text-center text-white' type='submit' style={{ backgroundColor: '#ffbe55' }}>Send OTP</button>
                             </div>
                             <div className='mt-4 mb-3'>
                                 <span>Already have an account? <Link to='/login'  className='font-semibold text-blue-500'>Login</Link></span>

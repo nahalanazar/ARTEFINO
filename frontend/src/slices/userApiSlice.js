@@ -108,13 +108,22 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 method: 'DELETE',
                 body: data
             })
-
         }),
         updatePost: builder.mutation({
             query: ({ postId, formData }) => ({
                 url: `${USERS_URL}/updatePost/${postId}`,
                 method: 'PUT',
                 body: formData
+            })
+        }),
+        reportPost: builder.mutation({
+            query: ({ postId, data }) => ({
+                url: `${USERS_URL}/reportPost`,
+                method: 'POST',
+                body: {
+                    postId: postId,
+                    data: data
+                }
             })
         }),
         likePost: builder.mutation({          
@@ -249,6 +258,7 @@ export const {
     useGetPostByIdMutation,
     useRemovePostMutation,
     useUpdatePostMutation,
+    useReportPostMutation,
     useLikePostMutation,
     useUnlikePostMutation,
     useCommentPostMutation,

@@ -23,22 +23,20 @@ const ProfileScreen = () => {
   const [unFollowArtist] = useUnFollowArtistMutation()
 
   useEffect(() => {
-  const fetchFollowedUsers = async () => {
-    try {
-      const response = await fetchingFollowedUsers();
-      const followerIds = response.data.followers.map((follower) => follower._id);
-      setFollowedUsers(followerIds);
-      setIsFollowed(followerIds.includes(id));
-    } catch (error) {
-      toast.error(error?.data?.message || error?.error);
-      console.error('Error fetching followed users:', error);
-    }
-  };
+    const fetchFollowedUsers = async () => {
+      try {
+        const response = await fetchingFollowedUsers();
+        const followerIds = response.data.followers.map((follower) => follower._id);
+        setFollowedUsers(followerIds);
+        setIsFollowed(followerIds.includes(id));
+      } catch (error) {
+        toast.error(error?.data?.message || error?.error);
+        console.error('Error fetching followed users:', error);
+      }
+    };
 
-  fetchFollowedUsers();
-}, [id, fetchingFollowedUsers]);
-
-
+    fetchFollowedUsers();
+  }, [id, fetchingFollowedUsers]);
 
 const handleFollow = async (userIdToFollow) => {
   try {

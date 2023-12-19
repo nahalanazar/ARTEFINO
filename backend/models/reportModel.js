@@ -6,7 +6,7 @@ const reportSchema = mongoose.Schema({
         ref: 'User',
         required: true,
     },
-    reportedProduct: {
+    reportedPost: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
         required: true,

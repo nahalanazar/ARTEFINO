@@ -5,6 +5,7 @@ import mongoose from 'mongoose'
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url'; // Import fileURLToPath
+import Report from '../models/reportModel.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,7 +54,7 @@ const createProduct = asyncHandler(async (req, res) => {
 // route  GET /api/users/showPosts
 // access Private
 const showPosts = asyncHandler(async (req, res) => {
-    const posts = await Product.find().populate('category stores comments.user').exec()
+    const posts = await Product.find({ isRemoved: false }).populate('category stores comments.user').exec()
     res.status(200).json(posts)
 })
 
@@ -62,7 +63,10 @@ const showPosts = asyncHandler(async (req, res) => {
 // access Private
 const postDetails = asyncHandler(async (req, res) => {
     const postId = req.params.postId
-    const post = await Product.findById(postId).populate('category stores').exec()
+    const post = await Product.findById(postId).populate('category stores reports').exec()
+    if (!post) {
+        return res.status(404).json({ message: 'Post not found' });
+    }
     res.status(200).json(post)
 })
 
@@ -218,8 +222,6 @@ const commentPost = asyncHandler(async (req, res) => {
     // Fetch the newly added comment from the post object
     const addedComment = post.comments[post.comments.length - 1];
 
-    console.log("result:", addedComment._id);
-console.log("comment added");
     res.status(200).json({ message: 'Comment added successfully', comment: addedComment });
 });
 
@@ -243,6 +245,34 @@ const commentDelete = asyncHandler(async (req, res) => {
     }
 });
 
+// desc   Report Post
+// route  POST /api/users/reportPost/:postId
+// access Private
+const reportPost = asyncHandler(async (req, res) => {
+    const { postId, data } = req.body;
+    const { reason, description } = data || {};
+
+    const reporter = req.user._id;
+    const post = await Product.findById(postId)
+
+    if (!post) {
+        return res.status(404).json({ message: 'Post not found' });
+    }
+
+    const newReport = new Report({
+      reporter,
+      reportedPost: postId,
+      reason,
+      description
+    });
+
+    await newReport.save();
+
+    post.reports.push(newReport);
+    await post.save();
+
+    res.status(201).json({ message: 'Report submitted successfully' })
+})
 
 
 export {
@@ -255,5 +285,6 @@ export {
     likePost,
     unlikePost,
     commentPost,
-    commentDelete
+    commentDelete,
+    reportPost
 }

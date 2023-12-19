@@ -104,6 +104,7 @@ const LoginScreen = () => {
                             <div className='mt-3'>
                                 <span><Link to='/forgotPassword'  className="btn btn-link">Forgot Password</Link></span>
                             </div>
+                            {isLoading && <Loader />}
                             <div className='mt-3'>
                                 <button className='w-full py-3 text-center text-white' type='submit' style={{ backgroundColor: '#ffbe55' }}>Login</button>
                             </div>

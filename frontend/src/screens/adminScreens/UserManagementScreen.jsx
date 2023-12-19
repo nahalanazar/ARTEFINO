@@ -25,8 +25,8 @@ const AdminUserManagementScreen = () => {
 
   return (
     <Container>
-      <h1>Users List</h1>
-     { isLoading ? <Loader/> : <UsersDataTable users={usersData} /> }
+      <h1 className="p-2">Users List</h1>
+     { isLoading ? <Loader/> : <UsersDataTable users={usersData} setUsersData={setUsersData} /> }
     </Container>
   );
 };

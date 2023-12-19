@@ -13,6 +13,8 @@ import {
     deleteUserData,
     blockUserData,
     unblockUserData,
+    showReportedPosts,
+    removeReportedPost
 } from '../controllers/adminController.js'
 
 import {
@@ -36,6 +38,7 @@ router.post('/addCategory', authenticateAdmin, addCategoryData);
 router.put('/updateCategory', authenticateAdmin, updateCategoryData);
 router.put('/unListCategory', authenticateAdmin, unListCategoryData);
 router.put('/reListCategory', authenticateAdmin, reListCategoryData);
-
+router.get('/reportedPosts', authenticateAdmin, showReportedPosts);
+router.put('/removeReportedPost', authenticateAdmin, removeReportedPost);
 
 export default router

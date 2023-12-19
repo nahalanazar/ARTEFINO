@@ -11,8 +11,7 @@ const CategoryScreen = () => {
   const [categoriesData, setCategoriesData] = useState([]);
   const [categoriesDataFromAPI, { isLoading } ] = useGetCategoriesDataMutation();
 
-  useEffect(() => {
-    
+  useEffect(() => { 
     try {
       const fetchData = async () => {
         const responseFromApiCall = await categoriesDataFromAPI();
@@ -30,8 +29,8 @@ const CategoryScreen = () => {
   return (
     <div>
       <Container>
-        <h1>Categories List</h1>
-        { isLoading ? <Loader/> : <CategoriesDataTable categories={categoriesData} /> }
+        <h1 className="p-2">Categories List</h1>
+        { isLoading ? <Loader/> : <CategoriesDataTable categories={categoriesData} setCategoriesData={setCategoriesData} /> }
       </Container>
     </div>
   );

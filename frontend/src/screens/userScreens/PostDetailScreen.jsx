@@ -6,34 +6,43 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { useParams, useNavigate } from "react-router-dom";
-import { useGetPostByIdMutation, useRemovePostMutation } from "../../slices/userApiSlice";
+import { useGetPostByIdMutation, useRemovePostMutation, useReportPostMutation } from "../../slices/userApiSlice";
 import Map from '../../components/userComponents/Map'
 import { useSelector } from 'react-redux';
 import ChatButton from "../../components/userComponents/ChatButton";
 import { toast } from 'react-toastify'
 import ConfirmationDialog from "../../components/userComponents/RemovePostConfirm";
+import ReportModal from "../../components/userComponents/ReportModal";
 
 const PostDetailScreen = () => {
     const VITE_PROFILE_IMAGE_DIR_PATH = import.meta.env.VITE_PROFILE_IMAGE_DIR_PATH;
     const VITE_PRODUCT_IMAGE_DIR_PATH = import.meta.env.VITE_PRODUCT_IMAGE_DIR_PATH;
+
     const { userInfo } = useSelector((state) => state.userAuth);
     const { postId } = useParams();
     const [selectedImage, setSelectedImage] = useState(0);
     const [confirmation, setConfirmation] = useState(false);
     const [post, setPost] = useState({});
     const [postToRemove, setPostToRemove] = useState(null);
+    const [postToReport, setPostToReport] = useState(null);
+    const [showReportModal, setShowReportModal] = useState(false);
+    const [isReported, setIsReported] = useState(false);
+
     const imageUrl = post?.stores?.profileImageName ? VITE_PROFILE_IMAGE_DIR_PATH + post.stores.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg';
     const navigate = useNavigate()
 
     const [getPostById] = useGetPostByIdMutation();
     const [removePost] = useRemovePostMutation();
+    const [reportPost] = useReportPostMutation();
 
     useEffect(() => {
         const fetchPostDetails = async () => {
             try {
                 const response = await getPostById(postId);
-                console.log("response:", response);
-                setPost(response.data);                
+                console.log("response post details:", response);
+                setPost(response.data);
+                const userReported = response.data.reports.some(report => report.reporter === userInfo.id);
+                setIsReported(userReported);
             } catch (error) {
                 console.error("Error fetching post details:", error);
                 toast.error(error.data.message);
@@ -58,7 +67,6 @@ const PostDetailScreen = () => {
 
     const isCurrentUserPost = post?.stores && post?.stores._id === userInfo.id;
 
-    
     const renderProfileLink = () => {
         const commonStyles = {
             profileImage: {
@@ -80,13 +88,11 @@ const PostDetailScreen = () => {
                 <div className="artist-info">
                     <img {...commonStyles.profileImage}  onClick={() => navigate(`/profile/${post?.stores._id}`)}/>
                     <h3 style={{ marginRight: "60px" }} onClick={() => navigate(`/profile/${post?.stores._id}`)}>{commonStyles.artistName}</h3>
-                    <ChatButton userId={post?.stores._id} />
                 </div>
             );
         }
     };
 
-    
     const renderActionButton = () => {
         if (isCurrentUserPost) {
             return (
@@ -100,7 +106,56 @@ const PostDetailScreen = () => {
                 </div>
             );
         } else {
-            return <></>; // No action button for other artists
+            return (
+                <div className="button-container text-center">
+                    <ChatButton userId={post?.stores._id} />
+                    <button className="followButton removeButton"
+                        style={{
+                            color: 'white',  
+                            backgroundColor: 'red',  
+                            fontSize: 16,
+                            fontFamily: 'Roboto',
+                            fontWeight: '700',
+                            padding: '8px 16px',  
+                            border: 'none',  
+                            borderRadius: '4px',  
+                            cursor: 'pointer',
+                        }} onClick={() => (isReported ? null : handleReportModal(post._id))}
+                    >
+                        {isReported ? 'Reported' : 'Report'}
+                    </button>
+                </div>
+            );
+        }
+    };
+
+    const handleReportModal = async (postId) => {
+        setShowReportModal(true);
+        setPostToReport(postId);
+        console.log("setPostToReport", setPostToReport);
+    }
+
+    const handleReport = async (postId, reportDetails) => {
+        try {
+            if (!postId) {
+                console.error("postId is not available");
+                return;
+            }
+          
+            const response = await reportPost({ postId, data: reportDetails });
+console.log("response", response);
+            if (response.data.message === "Report submitted successfully") {
+                toast.success("Post reported successfully!");
+                setShowReportModal(false);
+                setIsReported(true)
+            } else {
+                console.error("Error reporting post:", response);
+                toast.error("Failed to report post");
+            }
+            setPostToReport(null);
+        } catch (error) {
+            console.error("Error reporting post:", error);
+            toast.error("Failed to report post");
         }
     };
 
@@ -216,6 +271,16 @@ const PostDetailScreen = () => {
                     />
                 )}
             </Container>
+            {showReportModal && (
+                <ReportModal
+                    showModal={showReportModal}
+                    handleClose={() => {
+                        setShowReportModal(false);
+                    }}
+                    handleReport={handleReport}
+                    postToReport={postToReport}
+                />
+            )}
         </ChakraProvider>
     );
 };

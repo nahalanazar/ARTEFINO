@@ -52,7 +52,17 @@ const productSchema = mongoose.Schema({
                 default: Date.now
             }
         }
-    ]
+    ],
+    reports: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Report'
+        }
+    ],
+    isRemoved: {
+        type: Boolean,
+        default: false,
+    },
     // isSold: {
     //     type: Boolean,
     //     default: false,

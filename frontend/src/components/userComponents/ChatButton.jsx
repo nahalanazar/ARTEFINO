@@ -61,10 +61,10 @@ const ChatButton = ({ userId }) => {
               cursor: 'pointer',
           }}
           onClick={() => accessChat(userId)}
-        > 
-            Message
+        >
+          {loadingChat ? <Spinner size="sm" borderWidth="6px" ml="auto" display="flex" />:  <>Message</> }       
         </button>
-        {loadingChat && <Spinner size="lg" borderWidth= "6px" ml="auto" display="flex" />}
+        
       </>
 
     )

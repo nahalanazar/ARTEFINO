@@ -40,7 +40,8 @@ import {
     likePost,
     unlikePost,
     commentPost,
-    commentDelete
+    commentDelete,
+    reportPost
 } from '../controllers/productController.js'
 
 import {
@@ -83,6 +84,7 @@ router.post('/likePost/:postId', authenticateUser, likePost)
 router.delete('/unlikePost/:postId', authenticateUser, unlikePost)
 router.post('/commentPost/:postId', authenticateUser, commentPost)
 router.delete('/commentDelete/:postId', authenticateUser, commentDelete)
+router.post('/reportPost', authenticateUser, reportPost);
 router.get('/followedUsers', authenticateUser, getFollowedUsers)
 router.put('/followArtist/:artistId', authenticateUser, followArtist)
 router.put('/unFollowArtist/:artistId', authenticateUser, unFollowArtist)
@@ -95,6 +97,7 @@ router.get('/allMessages/:chatId', authenticateUser, allMessages)
 router.put('/checkBlock', checkBlock)
 router.get('/allNotifications', authenticateUser, fetchNotifications)
 router.put('/deleteNotification/:notificationId', authenticateUser, deleteNotification)
+
 
 
 

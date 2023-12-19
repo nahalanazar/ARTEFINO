@@ -12,10 +12,9 @@ const fetchAllCategories = async () => {
 
 const addCategory = async (categoryData) => {
   try {
-    console.log("addcategory_______")
     const category = new Category(categoryData);
-    await category.save();
-    return { success: true, message: "Category added successfully." };
+    const result = await category.save();
+    return result;
 
   } catch (error) {
     console.error("Error adding category: ", error);
@@ -34,8 +33,8 @@ const updateCategory = async (categoryData) => {
     category.name = categoryData.name;
     category.description = categoryData.description;
 
-    await category.save();
-    return { success: true, message: "Category updated successfully." };
+    const result = await category.save();
+    return result
   } catch (error) {
     console.error("Error updating category:", error);
     throw error;

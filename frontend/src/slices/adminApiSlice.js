@@ -11,7 +11,9 @@ import {
     ADMIN_ADD_CATEGORY_URL,
     ADMIN_UPDATE_CATEGORY_URL,
     ADMIN_UNLIST_CATEGORY_URL,
-    ADMIN_RELIST_CATEGORY_URL
+    ADMIN_RELIST_CATEGORY_URL,
+    ADMIN_REPORTED_POSTS_URL,
+    ADMIN_REMOVE_REPORTED_POSTS_URL
 } from '../utils/constants.js';
 
 
@@ -124,7 +126,23 @@ export const adminApiSlice = apiSlice.injectEndpoints({
             })
 
         }),
+        getReportedPosts: builder.mutation({
+            
+            query: () => ({
+                url: ADMIN_REPORTED_POSTS_URL,
+                method: 'GET'
+            })
 
+        }),
+        removeReportedPost: builder.mutation({
+            
+            query: (data) => ({
+                url: ADMIN_REMOVE_REPORTED_POSTS_URL,
+                method: 'PUT',
+                body: data
+            })
+
+        }),
     })
 
 })
@@ -142,6 +160,7 @@ export const {
     useAddCategoryMutation,
     useUpdateCategoryByAdminMutation,
     useUnListCategoryByAdminMutation,
-    useReListCategoryByAdminMutation
-    
+    useReListCategoryByAdminMutation,
+    useGetReportedPostsMutation,
+    useRemoveReportedPostMutation
 } = adminApiSlice;
