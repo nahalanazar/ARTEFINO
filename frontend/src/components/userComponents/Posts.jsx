@@ -5,7 +5,7 @@ import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
-import { useShowPostsMutation, useLikePostMutation, useUnlikePostMutation } from '../../slices/userApiSlice';
+import { useShowPostsMutation, useShowLandingPostsMutation, useLikePostMutation, useUnlikePostMutation } from '../../slices/userApiSlice';
 import CommentsModal from './CommentsModal';
 
 const Posts = () => {
@@ -19,6 +19,7 @@ const Posts = () => {
     const navigate = useNavigate();
 
     const [getPosts] = useShowPostsMutation();
+    const [getLandingPosts] = useShowLandingPostsMutation();
     const [likePost] = useLikePostMutation();
     const [unlikePostApi] = useUnlikePostMutation();
 
@@ -44,8 +45,32 @@ const Posts = () => {
             }
         };
         
-        fetchPosts();
-    }, [getPosts, userInfo]);
+        const fetchLandingPosts = async () => {
+            try {
+                const response = await getLandingPosts()
+                console.log("reponse landing", response);
+                const postsData = response.data;
+                console.log("postsData", postsData);
+                setPosts(postsData);
+
+                // Check if the current user has liked each post
+                const likedPosts = postsData.map((post) => ({
+                    ...post,
+                    isLiked: userInfo ? post.likes.includes(userInfo.id) : false
+                }));
+
+                setPosts(likedPosts);
+            } catch (error) {
+                console.error('Error Getting posts:', error);
+            }
+        };
+
+        if (userInfo) {
+            fetchPosts();
+        } else {
+            fetchLandingPosts()
+        }
+    }, [getPosts, getLandingPosts, userInfo]);
     
     // Function to format the time difference
     const formatTimeDifference = (timestamp) => {

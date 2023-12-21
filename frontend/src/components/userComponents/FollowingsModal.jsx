@@ -35,6 +35,7 @@ function FollowingModal({ userDetails }) {
         const fetchFollowedUsers = async () => {
             try {
                 const response = await fetchingFollowedUsers();
+                console.log("ffollowing fetchFollowedUsers", response);
                 const followingIds = response.data.followers.map((follower) => follower._id);
 
                 // Move the followingIds processing here
@@ -67,7 +68,7 @@ function FollowingModal({ userDetails }) {
         try {
             const artistId = String(userIdToFollow);
             const response = await followArtist(artistId);
-
+            console.log("followingsMod:", response);
             if (response.data.status === 'success') {
                 console.log("response.data.status: ", response.data.status);
                 toast.success(`Started Following ${follower.name}`)

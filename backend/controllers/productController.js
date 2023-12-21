@@ -54,9 +54,36 @@ const createProduct = asyncHandler(async (req, res) => {
 // route  GET /api/users/showPosts
 // access Private
 const showPosts = asyncHandler(async (req, res) => {
-    const posts = await Product.find({ isRemoved: false }).populate('category stores comments.user').exec()
-    res.status(200).json(posts)
-})
+    const currentUser = req.user; 
+    const posts = await Product.find({
+        isRemoved: false,
+        $or: [
+            { 'stores': { $in: currentUser.following } }, 
+            { 'stores.isPrivate': false }, 
+            { 'stores': currentUser._id } 
+        ]
+    }).populate('category stores comments.user').exec();
+    res.status(200).json(posts);
+});
+
+// desc   Show all posts in home
+// route  GET /api/users/showPosts
+// access Public
+const showLandingPosts = asyncHandler(async (req, res) => {
+    try {
+        const posts = await Product.find({
+            isRemoved: false,
+        }).populate('category stores comments.user').exec();
+
+        const nonPrivatePosts = posts.filter(post => !post.stores.isPrivate);
+
+        res.status(200).json(nonPrivatePosts);
+    } catch (error) {
+        console.error("Error fetching posts:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 
 // desc   Show single posts details
 // route  GET /api/users/postDetails/:postId
@@ -277,6 +304,7 @@ const reportPost = asyncHandler(async (req, res) => {
 
 export {
     createProduct,
+    showLandingPosts,
     showPosts,
     postDetails,
     getUserPosts,

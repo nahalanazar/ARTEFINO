@@ -221,7 +221,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                     <Box>
                         <p style={{ margin: "0" }}>{getSender(userId, selectedChat.users)}</p>
                         {selectedChat.online ? (
-                              <p style={{ fontSize: "14px", margin: "0" }}>{`${selectedChat.userId} online`}</p>
+                            <p style={{ fontSize: "14px", margin: "0" }}>online</p>
+                            //<p style={{ fontSize: "14px", margin: "0" }}>{`${selectedChat.userId} online`}</p>
                         ) : (
                             <p style={{ fontSize: "14px", margin: "0" }}>
                                 Last seen: {moment(selectedChat.lastSeen).format('MMMM D, YYYY h:mm A')}

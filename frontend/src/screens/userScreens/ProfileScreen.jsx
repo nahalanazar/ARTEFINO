@@ -26,6 +26,7 @@ const ProfileScreen = () => {
     const fetchFollowedUsers = async () => {
       try {
         const response = await fetchingFollowedUsers();
+        console.log("response fetchFollowedUsers: ", response);
         const followerIds = response.data.followers.map((follower) => follower._id);
         setFollowedUsers(followerIds);
         setIsFollowed(followerIds.includes(id));
@@ -42,7 +43,7 @@ const handleFollow = async (userIdToFollow) => {
   try {
     const artistId = String(userIdToFollow);
     const response = await followArtist(artistId);
-    
+    console.log("response follow", response);
     if (response.data.status === 'success') {
       toast.success("Started Following New Artist");
       setFollowedUsers([...followedUsers, userIdToFollow]);

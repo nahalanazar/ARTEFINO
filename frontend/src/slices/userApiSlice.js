@@ -96,6 +96,12 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 method: 'GET'
             })
         }),
+        showLandingPosts: builder.mutation({
+            query: () => ({
+                url: `${USERS_URL}/showLandingPosts`,
+                method: 'GET'
+            })
+        }),
         getPostById: builder.mutation({
             query: (data) => ({
                 url: `${USERS_URL}/postDetails/${data}`,
@@ -237,6 +243,28 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 method: 'PUT'
             })
         }),
+        fetchUserNotifications: builder.mutation({
+            query: () => ({
+                url: `${USERS_URL}/userNotifications`,
+                method: 'GET'
+            })
+        }),
+        acceptRequest: builder.mutation({          
+            query: (data) => ({
+                url: `${USERS_URL}/acceptRequest/${data}`,
+                method: 'PUT',
+                body: data
+            })
+
+        }),
+        rejectRequest: builder.mutation({          
+            query: (data) => ({
+                url: `${USERS_URL}/rejectRequest/${data}`,
+                method: 'PUT',
+                body: data
+            })
+
+        }),
     })
 })
 
@@ -274,5 +302,9 @@ export const {
     useFetchMessagesMutation,
     useCheckBlockMutation,
     useFetchNotificationsMutation,
-    useDeleteNotificationMutation
+    useDeleteNotificationMutation,
+    useFetchUserNotificationsMutation,
+    useAcceptRequestMutation,
+    useRejectRequestMutation,
+    useShowLandingPostsMutation
 } = userApiSlice

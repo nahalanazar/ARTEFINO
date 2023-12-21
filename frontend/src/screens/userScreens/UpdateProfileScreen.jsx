@@ -9,15 +9,16 @@ import { useUpdateUserMutation } from '../../slices/userApiSlice'
 
 const UpdateProfileScreen = () => {
     const VITE_PROFILE_IMAGE_DIR_PATH = import.meta.env.VITE_PROFILE_IMAGE_DIR_PATH;
+    const { userInfo } = useSelector((state) => state.userAuth)
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [profileImage, setProfileImage] = useState();
+    const [isPrivate, setIsPrivate] = useState(userInfo.isPrivate);
 
     const dispatch = useDispatch()
 
-    const { userInfo } = useSelector((state) => state.userAuth)
     const [updateProfile, {isLoading}] = useUpdateUserMutation()
     
     useEffect(() => {
@@ -36,6 +37,7 @@ const UpdateProfileScreen = () => {
                 formData.append('email', email);
                 formData.append('password', password);
                 formData.append('profileImage', profileImage);
+                formData.append('isPrivate', isPrivate);
 
                 const responseFromApiCall = await updateProfile( formData ).unwrap();
 
@@ -115,6 +117,15 @@ const UpdateProfileScreen = () => {
                 type="file"
                 onChange={(e) => setProfileImage(e.target.files[0])}
               ></Form.Control>
+            </Form.Group>
+            
+            <Form.Group controlId='isPrivate' className='my-2'>
+                <Form.Check
+                    type='checkbox'
+                    label='Make Account Private'
+                    checked={isPrivate}
+                    onChange={(e) => setIsPrivate(e.target.checked)}
+                />
             </Form.Group>
             
             {isLoading && <Loader />}

@@ -40,6 +40,12 @@ const userSchema = mongoose.Schema({
             ref: 'User'
         }
     ],
+    followRequests: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }
+    ],
     is_blocked: {
         type: Boolean,
         default: false
@@ -52,6 +58,28 @@ const userSchema = mongoose.Schema({
         type: Date,
         default: null,
     },
+    isPrivate: {
+        type: Boolean,
+        default: false
+    },
+    notifications: [
+        {
+            type: {
+                type: String,
+                required: true,
+            },
+            sender: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User',
+                required: true,
+            },
+            createdAt: {
+                type: Date,
+                required: true,
+                default: Date.now,
+            }
+        }
+    ],
 }, {
     timestamps: true
 });

@@ -52,7 +52,7 @@ const router = createBrowserRouter(
       {/* USER PRIVATE ROUTES */}
       <Route path='' element={ <UserPrivateRoutes /> } >    
         <Route path='/updateProfile' element={<UserUpdateProfileScreen />} />
-        <Route path='/profile/:id?' element={<UserProfileScreen />} />
+        <Route path='/profile/:id?' element={<UserProfileScreen />} /> 
         <Route path='/sell' element={<UserSellScreen />} />
         <Route path={`/postDetails/:postId`} element={<PostDetailScreen />} />
         <Route path='/chat' element={<ChatScreen />} />
@@ -81,8 +81,8 @@ const router = createBrowserRouter(
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <Provider store={store}>
-    <React.StrictMode>
+    {/* <React.StrictMode> */}
       <RouterProvider router={router} />
-    </React.StrictMode>
+    {/* </React.StrictMode> */}
   </Provider>
 )

@@ -51,7 +51,8 @@ const authUser = asyncHandler(async (req, res) => {
             email: user.email,
             id: user._id,
             followers: user.followers,
-            following: user.following
+            following: user.following,
+            isPrivate: user.isPrivate
         }
         if (user.profileImageName) {
             registeredUserData.profileImageName = user.profileImageName
@@ -134,7 +135,8 @@ const registerUser = asyncHandler(async (req, res) => {
             email: user.email,
             id: user._id,
             followers: user.followers,
-            following: user.following
+            following: user.following,
+            isPrivate: user.isPrivate
         }
         res.status(200).json({"message":registeredUserData})
     } else {
@@ -236,7 +238,8 @@ const verifyOtp = asyncHandler(async (req, res) => {
                         email: req.user.email,
                         id: req.user._id,
                         followers: req.user.followers,
-                        following: req.user.following
+                        following: req.user.following,
+                        isPrivate: req.user.isPrivate
                     }
                     res.status(201).json(registeredUserData)
                 }
@@ -283,7 +286,8 @@ const googleRegisterUser = asyncHandler(async (req, res) => {
             email: existingUser.email,
             id: existingUser._id,
             followers: existingUser.followers,
-            following: existingUser.following
+            following: existingUser.following,
+            isPrivate: existingUser.isPrivate
         }
         if (existingUser.profileImageName) {
             registeredUserData.profileImageName = existingUser.profileImageName
@@ -306,7 +310,8 @@ const googleRegisterUser = asyncHandler(async (req, res) => {
                 email: user.email,
                 id: user._id,
                 followers: user.followers,
-                following: user.following
+                following: user.following,
+                isPrivate: user.isPrivate
             }
             res.status(201).json(registeredUserData)
         } else {
@@ -401,6 +406,9 @@ const updateUserProfile = asyncHandler(async (req, res) => {
             // user.profileImageName = req.file.filename || user.profileImageName;
             user.profileImageName = req.file.filename || null;
         }
+
+        user.isPrivate = req.body.isPrivate || false; // Default to false if not provided
+
         const updatedUserData = await user.save();
 
         // Send the response with updated user data
@@ -408,7 +416,8 @@ const updateUserProfile = asyncHandler(async (req, res) => {
             id: updatedUserData._id,
             name: updatedUserData.name,
             email: updatedUserData.email,
-            profileImageName: updatedUserData.profileImageName
+            profileImageName: updatedUserData.profileImageName,
+            isPrivate: updatedUserData.isPrivate
         });
 
     } else {
@@ -438,11 +447,98 @@ const getFollowedUsers = asyncHandler(async (req, res) => {
 const followArtist = asyncHandler(async (req, res) => {
     const userId = req.user._id;
     const artistId = req.params.artistId;
-    await User.findByIdAndUpdate(userId, { $addToSet: { following: artistId } });
-    await User.findByIdAndUpdate(artistId, { $addToSet: { followers: userId } });
-    res.status(200).json({ status: 'success', message: 'Followed artist successfully' });
+
+    const artist = await User.findById(artistId);
+    if (!artist) {
+        res.status(404).json({ status: 'error', message: 'Artist not found' });
+        return;
+    }
+
+    if (artist.isPrivate) {
+        // Check if the user has already sent a follow request
+        if (artist.followRequests.includes(userId)) {
+            res.status(200).json({ status: 'requested', message: 'Follow request already sent' });
+            return;
+        }
+
+        // If the artist's account is private, initiate a follow request
+        await User.findByIdAndUpdate(artistId, { $addToSet: { followRequests: userId } });
+        const updatedArtist = await User.findById(artistId);
+
+        // Add a notification to the artist
+        await User.findByIdAndUpdate(artistId, {
+            $addToSet: {
+            notifications: {
+                type: 'follow_request',
+                sender: userId,
+                createdAt: new Date(),
+            },
+            },
+        });
+
+        res.status(200).json({ status: 'requested', message: 'Follow request sent successfully', artist: updatedArtist });
+    } else {
+        // If the artist's account is not private, update following and followers lists
+        await User.findByIdAndUpdate(userId, { $addToSet: { following: artistId } });
+        await User.findByIdAndUpdate(artistId, { $addToSet: { followers: userId } });
+        const updatedArtist = await User.findById(artistId);
+        res.status(200).json({ status: 'success', message: 'Followed artist successfully', artist: updatedArtist });
+    }
 })
- 
+
+// desc    Accept Follow Request
+// route   PUT /api/users/acceptRequest/:artistId
+// access  Private
+const acceptFollowRequest = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const artistId = req.params.artistId;
+
+    const artist = await User.findById(artistId);
+    if (!artist) {
+        res.status(404).json({ status: 'error', message: 'Artist not found' });
+        return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user || !user.followRequests.includes(artistId)) {
+        res.status(404).json({ status: 'error', message: 'Follow request not found' });
+        return;
+    }
+    
+    // Update the artist's and user's following and followers lists
+    await User.findByIdAndUpdate(userId, { $addToSet: { followers: artistId } });
+    await User.findByIdAndUpdate(artistId, { $addToSet: { following: userId } });
+    
+    // Remove the follow request from the user's document
+    await User.findByIdAndUpdate(userId, { $pull: { followRequests: artistId } });
+
+    await User.findByIdAndUpdate(userId, { $pull: { notifications: { sender: artistId, type: 'follow_request' } } });
+
+    res.status(200).json({ status: 'success', message: 'Follow request accepted successfully' });
+});
+
+// desc    Accept Follow Request
+// route   PUT /api/users/acceptRequest/:artistId
+// access  Private
+const rejectFollowRequest = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const artistId = req.params.artistId;
+
+    const artist = await User.findById(artistId);
+    if (!artist) {
+        res.status(404).json({ status: 'error', message: 'Artist not found' });
+        return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user || !user.followRequests.includes(artistId)) {
+        res.status(404).json({ status: 'error', message: 'Follow request not found' });
+        return;
+    }
+
+    res.status(200).json({ status: 'success', message: 'Follow request rejected successfully' });
+});
+
 // desc    UnFollow an artist
 // route   PUT /api/users/unFollowArtist/:artistId
 // access  Private
@@ -477,7 +573,8 @@ const showArtists = asyncHandler(async (req, res) => {
 
   // Find artists who are not in the current user's following list
   const artists = await User.find({
-    _id: { $ne: userId, $nin: followingList }
+      _id: { $ne: userId, $nin: followingList },
+      verified: true
   }).limit(5);
 
   res.status(200).json(artists);
@@ -507,6 +604,20 @@ const checkBlock = asyncHandler(async (req, res) => {
     
 })
 
+// desc    Fetch user Notifications
+// route   PUT /api/users/fetchUserNotifications
+// access  Private
+const fetchUserNotifications = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const user = await User.findById(userId).populate('notifications.sender');
+    if (!user) {
+        return res.status(404).json({ status: 'error', message: 'User not found' });
+    }
+
+    const notifications = user.notifications || [];
+    return res.status(200).json({ status: 'success', notifications });
+})
+
 export {
     authUser,
     registerUser,
@@ -524,5 +635,8 @@ export {
     removeArtist,
     showArtists,
     allUsers,
-    checkBlock
+    checkBlock,
+    acceptFollowRequest,
+    rejectFollowRequest,
+    fetchUserNotifications
 } 

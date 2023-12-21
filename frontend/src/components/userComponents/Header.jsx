@@ -1,5 +1,5 @@
 import { Navbar, Nav, Form, Container, NavDropdown, Image, InputGroup, Button } from 'react-bootstrap';
-import { FaSearch, FaSignInAlt, FaSignOutAlt, FaComments } from 'react-icons/fa';
+import { FaSearch, FaComments } from 'react-icons/fa';
 import { LinkContainer } from 'react-router-bootstrap'
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -9,18 +9,19 @@ import { ChatState } from '../context/ChatProvider.jsx';
 import { ChakraProvider } from "@chakra-ui/react"
 import NotificationBadge from 'react-notification-badge'
 import { Effect } from "react-notification-badge"
-// import SearchDrawer from './SearchDrawer.jsx';
+import NotificationDrawer from './NotificationDrawer.jsx';
 import {lazy, Suspense} from 'react'
 const SearchDrawer = lazy(() => import('./SearchDrawer.jsx'))
 const Header = () => {
-  const {notification, setNotification} = ChatState()
   const { userInfo } = useSelector((state) => state.userAuth);
+  const { notification } = ChatState()
+  
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [logoutApiCall] = useLogoutMutation();
 
-  const VITE_LOGO_IMAGE_DIR_PATH = import.meta.env.VITE_LOGO_IMAGE_DIR_PATH
+  const VITE_LOGO_IMAGE_DIR_PATH = import.meta.env.VITE_FAVICON_IMAGE_DIR_PATH
 
   const logoutHandler = async () => {
     try {
@@ -35,19 +36,17 @@ const Header = () => {
   return (
     <ChakraProvider>
       <header>
-        {/* <Navbar className='header-bg' variant='dark' expand='lg' collapseOnSelect> */}
-          <Navbar className='header-bg' variant='dark' expand='lg' collapseOnSelect>
-
+        <Navbar className='header-bg' variant='dark' expand='lg' collapseOnSelect>
           <Container>
             <LinkContainer to='/'>
               <Navbar.Brand>
                 <Image
-                  src= {VITE_LOGO_IMAGE_DIR_PATH}
+                  src= "/favicon.png"
                   alt="ArteFino"
                   style={{
                     width: '60px',
                     height: '60px',
-                    borderRadius: '50%',
+                    borderRadius: '0%',
                     objectFit: 'cover'
                   }}
                 />
@@ -68,12 +67,21 @@ const Header = () => {
               <Nav className='ms-auto'>
                 {userInfo && (
                   <Nav.Item>
-                    <LinkContainer to='/sell'>
-                      <Nav.Link>
-                        <Button variant="warning" style={{ backgroundColor: '#FF6347', color: 'white', borderColor: 'transparent' }}>Sell +</Button>
-                      </Nav.Link>
-                    </LinkContainer>
-                  </Nav.Item>
+                    <Nav.Link>
+                      <NotificationDrawer userInfo={userInfo} />
+                    </Nav.Link>
+                  </Nav.Item> 
+                )}
+                {userInfo && (
+                  <> 
+                    <Nav.Item>
+                      <LinkContainer to='/sell'>
+                        <Nav.Link>
+                          <Button variant="warning" style={{ backgroundColor: '#FF6347', color: 'white', borderColor: 'transparent' }}>Sell +</Button>
+                        </Nav.Link>
+                      </LinkContainer>
+                    </Nav.Item>
+                  </>
                 )}
                 {userInfo && (
                   <Nav.Item>

@@ -13,7 +13,17 @@ const accessChat = asyncHandler(async (req, res) => {
     const { userId } = req.body
     if (!userId) {
         console.log("UserId param not send with request")
-        return res.status(400)
+        return res.status(400).json({ error: "UserId parameter is required" });
+    }
+
+    const currentUser = await User.findById(req.user._id);
+    const otherUser = await User.findById(userId);
+
+    const currentUserFollowsOther = currentUser.following.includes(userId);
+    const otherUserFollowsCurrent = otherUser.following.includes(req.user._id);
+
+    if (!currentUserFollowsOther || !otherUserFollowsCurrent) {
+        return res.status(403).json({ error: "Unauthorized: Users must follow each other to access the chat" });
     }
 
     let isChat = await ChatRoom.find({

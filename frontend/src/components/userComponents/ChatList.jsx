@@ -126,17 +126,16 @@ const ChatList = ({ fetchAgain }) => {
                     key={chat._id}
                   >
                     <Text>
-                      {getSender(userId, chat.users)}
+                      {chat.users && chat.users.length > 0
+                        ? getSender(userId, chat.users)
+                        : "Unknown Sender"}
                     </Text>
                   </Box>
                 ))}
               </Stack>
             ) : (
-              <Text>
-                No Chats to Display
-              </Text>
+              <Text>No Chats to Display</Text>
             )}
-
           </Stack>
         ): (
           <Text>

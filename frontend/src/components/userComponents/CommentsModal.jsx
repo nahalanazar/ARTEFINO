@@ -13,12 +13,7 @@ import {
   Image,
   VStack,
   HStack,
-  Spacer,
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogOverlay,
-  Divider,
+  Spacer
 } from '@chakra-ui/react'
 import { toast } from 'react-toastify'
 import React, { useEffect, useRef, useState } from 'react'
@@ -31,9 +26,10 @@ const CommentsModal = ({ post, isOpen, onClose, onCommentPost, formatTimeDiffere
   const btnRef = useRef(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
-  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [hoveredCommentIndex, setHoveredCommentIndex] = useState(null);
-  const deleteAlertDialogRef = useRef();
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+  const [commentToDeleteIndex, setCommentToDeleteIndex] = useState(null);
+
   const { userInfo } = useSelector((state) => state.userAuth);
 
   const [commentPost] = useCommentPostMutation();
@@ -67,27 +63,29 @@ const CommentsModal = ({ post, isOpen, onClose, onCommentPost, formatTimeDiffere
     }
   };
 
-  // const handleOpenDeleteAlert = () => {
-  //   setIsDeleteAlertOpen(true);
-  // };
+  const handleOpenConfirmDelete = (index) => {
+    setCommentToDeleteIndex(index);
+    setIsConfirmDeleteOpen(true);
+  };
 
-  // const handleCloseDeleteAlert = () => {
-  //   setIsDeleteAlertOpen(false);
-  // };
+  const handleCloseConfirmDelete = () => {
+    setCommentToDeleteIndex(null);
+    setIsConfirmDeleteOpen(false);
+  };
 
   const handleConfirmDelete = async () => {
      // Check if hoveredCommentIndex is a valid index
-    if (hoveredCommentIndex === null || hoveredCommentIndex < 0 || hoveredCommentIndex >= comments.length) {
-      console.error('Invalid hoveredCommentIndex');
+    if (commentToDeleteIndex === null || commentToDeleteIndex < 0 || commentToDeleteIndex >= comments.length) {
+      console.error('Invalid commentToDeleteIndex');
       toast.error('Error deleting comment');
       return;
     }
     try {
-      const response = await commentDelete({ postId: post._id, commentId: comments[hoveredCommentIndex]._id }).unwrap()
+      const response = await commentDelete({ postId: post._id, commentId: comments[commentToDeleteIndex]._id }).unwrap()
       console.log("response:", response);
       // Update local state (remove the deleted comment)
       const updatedComments = [...comments];
-      updatedComments.splice(hoveredCommentIndex, 1);
+      updatedComments.splice(commentToDeleteIndex, 1);
       setComments(updatedComments);
 
       // Update local state (remove the deleted comment from the post)
@@ -95,50 +93,13 @@ const CommentsModal = ({ post, isOpen, onClose, onCommentPost, formatTimeDiffere
           post._id === post._id ? { ...post, comments: updatedComments } : post
       );
       setPosts(updatedPosts);
-      if (response && response.statusCode === 200) {
-          toast.warning("Comment Deleted");
-      }
+      toast.warning("Comment Deleted");
+      handleCloseConfirmDelete();
     } catch (error) {
       console.error('Error deleting comment:', error);
       toast.error('Error deleting comment', error);
     }
   };
-
-//   const handleConfirmDelete = async () => {
-//   try {
-//     console.log("deleting");
-//     // Check if hoveredCommentIndex is a valid index
-//     if (hoveredCommentIndex !== null && hoveredCommentIndex >= 0 && hoveredCommentIndex < comments.length) {
-//       // Get the comment from the comments array
-//       const commentToDelete = comments[hoveredCommentIndex];
-
-//       // Check if the comment is defined and has a valid _id
-//       if (commentToDelete && commentToDelete._id) {
-//         // Delete the comment
-//         const response = await commentDelete(post._id, commentToDelete._id);
-//         console.log("response from comment delete: ", response);
-
-//         // Update local state (remove the deleted comment)
-//         const updatedComments = [...comments];
-//         updatedComments.splice(hoveredCommentIndex, 1);
-//         setComments(updatedComments);
-
-//         // Update post
-//         onCommentPost(post._id, updatedComments);
-//         setIsDeleteAlertOpen(false);
-//       } else {
-//         console.error('Comment not found or missing _id property');
-//         toast.error('Error deleting comment');
-//       }
-//       console.error('Invalid hoveredCommentIndex');
-//       toast.error('Error deleting comment');
-//     }
-//   } catch (error) {
-//     console.error('Error deleting comment:', error);
-//     toast.error('Error deleting comment', error);
-//   }
-// };
-
 
   return (
     <>
@@ -183,8 +144,11 @@ const CommentsModal = ({ post, isOpen, onClose, onCommentPost, formatTimeDiffere
                       </HStack>
                       <HStack spacing={2} align="center">
                         <Spacer />
-                        {userInfo.id === comment.user._id && hoveredCommentIndex === index && (
-                          <DeleteIcon onClick={handleConfirmDelete} />
+                        {userInfo && userInfo.id === comment.user._id && hoveredCommentIndex === index && (
+                          <DeleteIcon
+                            onClick={() => handleOpenConfirmDelete(index)}
+                            style={{ cursor: 'pointer' }}
+                          />
                         )}
                       </HStack>
                     </HStack>
@@ -213,24 +177,25 @@ const CommentsModal = ({ post, isOpen, onClose, onCommentPost, formatTimeDiffere
             </Button>
           </ModalFooter>
         </ModalContent>
-        {/* Delete Alert Dialog */}
-        <AlertDialog
-          isOpen={isDeleteAlertOpen}
-          leastDestructiveRef={deleteAlertDialogRef}
-          // onClose={handleCloseDeleteAlert}
-        >
-          <AlertDialogOverlay>
-            <AlertDialogContent mx="auto" my="auto" width="20%">
-              <AlertDialogBody>
-                <VStack spacing={2} align="stretch">
-                  <Button colorScheme="red" onClick={handleConfirmDelete}>Delete</Button>
-                  <Divider />
-                  {/* <Button onClick={handleCloseDeleteAlert}>Cancel</Button> */}
-                </VStack>
-              </AlertDialogBody>
-            </AlertDialogContent>
-          </AlertDialogOverlay>
-        </AlertDialog>
+      </Modal>
+      {/* Confirmation modal */}
+      <Modal
+        isOpen={isConfirmDeleteOpen}
+        onClose={handleCloseConfirmDelete}
+        isCentered
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Confirm Delete</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            Are you sure you want to delete this comment?
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="red" onClick={handleConfirmDelete}>Yes</Button>
+            <Button variant="ghost" onClick={handleCloseConfirmDelete}>No</Button>
+          </ModalFooter>
+        </ModalContent>
       </Modal>
     </>
   );

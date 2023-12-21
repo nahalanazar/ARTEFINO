@@ -23,7 +23,10 @@ import {
     removeArtist,
     showArtists,
     allUsers,
-    checkBlock
+    checkBlock,
+    fetchUserNotifications,
+    acceptFollowRequest,
+    rejectFollowRequest
 } from '../controllers/userController.js'
 
 import {
@@ -33,6 +36,7 @@ import {
 import {
     createProduct,
     showPosts,
+    showLandingPosts,
     postDetails,
     getUserPosts,
     removePost,
@@ -76,7 +80,8 @@ router.get('/userPosts/:userId', authenticateUser, getUserPosts)
 router.put('/profile', authenticateUser, multerUploadUserProfile.single('profileImage'), updateUserProfile)
 router.get('/getCategories', getAllCategories)
 router.post('/addProduct', authenticateUser, multerUploadProductImages, createProduct)
-router.get('/showPosts', showPosts)
+router.get('/showLandingPosts', showLandingPosts)
+router.get('/showPosts', authenticateUser, showPosts)
 router.get('/postDetails/:postId', authenticateUser, postDetails)
 router.delete('/removePost/:postId', authenticateUser, removePost)
 router.put('/updatePost/:postId', authenticateUser, multerUploadProductImages, updatePost)
@@ -97,8 +102,9 @@ router.get('/allMessages/:chatId', authenticateUser, allMessages)
 router.put('/checkBlock', checkBlock)
 router.get('/allNotifications', authenticateUser, fetchNotifications)
 router.put('/deleteNotification/:notificationId', authenticateUser, deleteNotification)
-
-
+router.get('/userNotifications', authenticateUser, fetchUserNotifications)
+router.put('/acceptRequest/:artistId', authenticateUser, acceptFollowRequest)
+router.put('/rejectRequest/:artistId', authenticateUser, rejectFollowRequest)
 
 
 export default router;

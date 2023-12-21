@@ -2,11 +2,10 @@ import Hero from '../../components/userComponents/Hero'
 import CategoriesTab from '../../components/userComponents/CategoriesTab'
 import Posts from '../../components/userComponents/Posts'
 import UserProfile from '../../components/userComponents/UserProfile'
-import {lazy, Suspense} from 'react'
-// import ArtistsList from '../../components/userComponents/ArtistsList'
-const ArtistsList = lazy(() => import('../../components/userComponents/ArtistsList'))
+import ArtistsList from '../../components/userComponents/ArtistsList'
 
-const HomeScreen = () => {
+
+const LandingScreen = () => {
   return (
     <>
       <CategoriesTab />
@@ -22,9 +21,7 @@ const HomeScreen = () => {
           </div>
  
           <div className="col-md-3 d-none d-md-block">
-            <Suspense fallback={<div>Loading...</div>}>
-              <ArtistsList />
-            </Suspense>
+            <ArtistsList />
           </div>
         </div>
       </div>
@@ -32,4 +29,4 @@ const HomeScreen = () => {
   )
 }
 
-export default HomeScreen
+export default LandingScreen

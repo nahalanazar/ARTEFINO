@@ -33,7 +33,7 @@ const ChatButton = ({ userId }) => {
           
       } catch (error) {
           toast({
-              title: "Error fetching the Chat",
+              title: "Follow each other to access the chat",
               description: error.response?.data?.message || "An error occurred",
               status: "error",
               duration: 5000,

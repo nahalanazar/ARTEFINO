@@ -38,7 +38,8 @@ function FollowModal({ userDetails, isOwnProfile }) {
     useEffect(() => {
       const fetchFollowedUsers = async () => {
         try {
-            const response = await fetchingFollowedUsers();
+          const response = await fetchingFollowedUsers();
+          console.log("response fetchingFollowedUsers followersMod:", response);
             const followingIds = response.data.followers.map((follower) => follower._id);
 
             // Move the followingIds processing here
@@ -75,7 +76,6 @@ function FollowModal({ userDetails, isOwnProfile }) {
     try {
       const artistId = String(followerToRemove._id);
       const response = await removeArtist(artistId);
-
       if (response.data.status === "success") {
         toast.warning(`Removed ${followerToRemove.name}`);
       } else {
@@ -100,7 +100,7 @@ function FollowModal({ userDetails, isOwnProfile }) {
     try {
         const artistId = String(userIdToFollow);
         const response = await followArtist(artistId);
-
+        console.log("followersModal: ", response);
         if (response.data.status === 'success') {
             toast.success(`Started Following ${follower.name}`)
             console.log(follower.name);
