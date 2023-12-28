@@ -1,7 +1,7 @@
 import express from 'express'
 import { authenticateUser } from '../middleware/userAuthMiddleware.js'
 import nocache from 'nocache'
-
+import fileupload from 'express-fileupload'
 const router = express.Router()
 
 router.use(nocache())
@@ -77,7 +77,8 @@ router.post('/resetPassword', authenticateUser, resetPassword)
 router.post('/logout', logoutUser)
 router.get('/profile/:userId', authenticateUser, getUserProfile)
 router.get('/userPosts/:userId', authenticateUser, getUserPosts)
-router.put('/profile', authenticateUser, multerUploadUserProfile.single('profileImage'), updateUserProfile)
+// router.put('/profile', authenticateUser, multerUploadUserProfile.single('profileImage'), updateUserProfile)
+router.post('/profile', authenticateUser, updateUserProfile)
 router.get('/getCategories', getAllCategories)
 router.post('/addProduct', authenticateUser, multerUploadProductImages, createProduct)
 router.get('/showLandingPosts', showLandingPosts)

@@ -54,19 +54,43 @@ const createProduct = asyncHandler(async (req, res) => {
 // route  GET /api/users/showPosts
 // access Private
 const showPosts = asyncHandler(async (req, res) => {
-    const currentUser = req.user; 
-    const posts = await Product.find({
-        isRemoved: false,
-        $or: [
-            { 'stores': { $in: currentUser.following } }, 
-            { 'stores.isPrivate': false }, 
-            { 'stores': currentUser._id } 
-        ]
-    }).populate('category stores comments.user').exec();
-    res.status(200).json(posts);
+    try {
+        const currentUser = req.user;
+
+        const posts = await Product.find({})
+            .populate('category stores comments.user')
+            .exec();
+
+        const filteredPosts = posts.filter(post => (
+            !post.isRemoved &&
+            (post.stores.isPrivate === false || currentUser.following.includes(post.stores._id) || post.stores._id.equals(currentUser._id)) &&
+            post.stores.is_blocked === false
+        ));
+
+        const sortedPosts = filteredPosts.sort((a, b) => {
+            // Sort by posted time in descending order (newest first)
+            const timeDifference = b.dateListed - a.dateListed;
+
+            // Give higher priority to posts of followed users
+            if (currentUser.following.includes(a.stores._id) && !currentUser.following.includes(b.stores._id)) {
+                return -1;
+            } else if (!currentUser.following.includes(a.stores._id) && currentUser.following.includes(b.stores._id)) {
+                return 1;
+            }
+
+            return timeDifference;
+        });
+
+        res.status(200).json(sortedPosts);
+    } catch (error) {
+        console.error('Error fetching, filtering, and sorting posts:', error);
+        res.status(500).json({ error: 'Failed to fetch, filter, and sort posts' });
+    }
 });
 
-// desc   Show all posts in home
+
+
+// desc   Show all posts in landing home
 // route  GET /api/users/showPosts
 // access Public
 const showLandingPosts = asyncHandler(async (req, res) => {
@@ -75,7 +99,7 @@ const showLandingPosts = asyncHandler(async (req, res) => {
             isRemoved: false,
         }).populate('category stores comments.user').exec();
 
-        const nonPrivatePosts = posts.filter(post => !post.stores.isPrivate);
+        const nonPrivatePosts = posts.filter(post => !post.stores.isPrivate && !post.stores.is_blocked);
 
         res.status(200).json(nonPrivatePosts);
     } catch (error) {

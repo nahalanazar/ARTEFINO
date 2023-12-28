@@ -136,7 +136,7 @@ const CommentsModal = ({ post, isOpen, onClose, onCommentPost, formatTimeDiffere
                         <Image
                           boxSize="40px"
                           borderRadius="full"
-                          src={`${VITE_PROFILE_IMAGE_DIR_PATH}${comment.user.profileImageName}`}
+                          src={comment.user.profileImageName ? comment.user.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg'}
                           alt={comment.user.name}
                         />
                         <b>{comment.user.name}</b>

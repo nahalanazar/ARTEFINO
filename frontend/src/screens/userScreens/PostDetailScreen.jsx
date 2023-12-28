@@ -28,7 +28,7 @@ const PostDetailScreen = () => {
     const [showReportModal, setShowReportModal] = useState(false);
     const [isReported, setIsReported] = useState(false);
 
-    const imageUrl = post?.stores?.profileImageName ? VITE_PROFILE_IMAGE_DIR_PATH + post.stores.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg';
+    const imageUrl = post?.stores?.profileImageName ?  post.stores.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg';
     const navigate = useNavigate()
 
     const [getPostById] = useGetPostByIdMutation();

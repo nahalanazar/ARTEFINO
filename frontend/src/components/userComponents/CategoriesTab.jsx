@@ -2,10 +2,9 @@ import { useState, useEffect } from 'react';
 import { Nav } from 'react-bootstrap';
 import { useGetCategoriesMutation } from '../../slices/userApiSlice'
 
-const CategoriesTab = () => {
+const CategoriesTab = ({ selectedCategory, onCategorySelect }) => {
     const [categories, setCategories] = useState([]);
     const [getCategories] = useGetCategoriesMutation()
-    const [selectedCategory, setSelectedCategory] = useState(null);
 
 
     useEffect(() => {
@@ -14,8 +13,8 @@ const CategoriesTab = () => {
         try {
             const response = await getCategories() // 'unwrap' to unwrap the returned promise
             const categoryData = response.data.categoryData
-            const listedCategories = categoryData.filter((category) => category.isListed);
-            setCategories(listedCategories.map(category => category.name)); 
+            const listedCategories = ['ALL', ...categoryData.filter((category) => category.isListed).map(category => category.name)];
+            setCategories(listedCategories); 
         } catch (error) {
             console.error('Error fetching categories:', error);
         }
@@ -35,8 +34,8 @@ const CategoriesTab = () => {
                     fontWeight: category === selectedCategory ? 'bold' : 'normal',
                 }}
                 active={category === selectedCategory}
-                  onClick={() => {
-                    setSelectedCategory(category)
+                onClick={() => {
+                  onCategorySelect(category);
                 }}
             >
             {category}

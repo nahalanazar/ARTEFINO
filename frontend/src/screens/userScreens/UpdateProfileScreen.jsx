@@ -14,7 +14,7 @@ const UpdateProfileScreen = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
-    const [profileImage, setProfileImage] = useState();
+    const [profileImage, setProfileImage] = useState('');
     const [isPrivate, setIsPrivate] = useState(userInfo.isPrivate);
 
     const dispatch = useDispatch()
@@ -26,23 +26,40 @@ const UpdateProfileScreen = () => {
        setEmail(userInfo.email) 
     }, [userInfo.name, userInfo.email])
 
+    // handle and convert it in base 64
+    const handleImage = (e) => {
+        const file = e.target.files[0]
+        setFileToBase(file)
+        console.log(file)
+    }
+
+    const setFileToBase = (file) => {
+        const reader = new FileReader()
+        reader.readAsDataURL(file)
+        reader.onloadend = () => {
+            setProfileImage(reader.result)
+            console.log(profileImage);
+        }
+    }
+
     const submitHandler = async (e) => {
         e.preventDefault();
         if (password !== confirmPassword) {
             toast.error('Passwords do not match')
         } else {
             try {
+                console.log(profileImage);
                 const formData = new FormData();
                 formData.append('name', name);
                 formData.append('email', email);
                 formData.append('password', password);
                 formData.append('profileImage', profileImage);
                 formData.append('isPrivate', isPrivate);
-
-                const responseFromApiCall = await updateProfile( formData ).unwrap();
-
-                dispatch( setCredentials( { ...responseFromApiCall } ) );
-                toast.success('Profile updated')
+                const responseFromApiCall = await updateProfile({name,email,password,profileImage,isPrivate}).unwrap();
+                if (responseFromApiCall) {      
+                    dispatch( setCredentials( { ...responseFromApiCall } ) );
+                    toast.success('Profile updated')
+               }
             } catch (err) {
                 console.log("blocked", err?.data?.error?.message)
                 toast.error(err?.data?.message || err.error || err?.data?.error?.message)
@@ -53,9 +70,8 @@ const UpdateProfileScreen = () => {
     <FormContainer>
         <h1>Update Profile</h1>
 
-          {userInfo.profileImageName && (
             <img
-            src={VITE_PROFILE_IMAGE_DIR_PATH + userInfo.profileImageName}
+            src={userInfo.profileImageName ? userInfo.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg'}
             alt={userInfo.name}
             style={{
                 width: "150px",
@@ -68,7 +84,7 @@ const UpdateProfileScreen = () => {
                 marginBottom: "10px",
             }}                      
             />
-          )}
+        
           
         <Form onSubmit={submitHandler}>
             <Form.Group className='my-2' controlId='name'>
@@ -115,7 +131,8 @@ const UpdateProfileScreen = () => {
               <Form.Label>Profile Picture</Form.Label>
               <Form.Control
                 type="file"
-                onChange={(e) => setProfileImage(e.target.files[0])}
+                onChange={handleImage}
+                // onChange={(e) => setProfileImage(e.target.files[0])}
               ></Form.Control>
             </Form.Group>
             

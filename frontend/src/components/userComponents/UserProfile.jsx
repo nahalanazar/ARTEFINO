@@ -13,7 +13,7 @@ const UserProfile = () => {
   const [getUserProfile] = useGetUserProfileMutation()
   const [userDetails, setUserDetails] = useState({});
   const [memberSince, setMemberSince] = useState('');
-  const imageUrl = userDetails.profileImageName? VITE_PROFILE_IMAGE_DIR_PATH + userDetails.profileImageName: VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg'
+  const imageUrl = userDetails.profileImageName? userDetails.profileImageName: VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg'
   // Determine if it's the user's own profile
   const isOwnProfile = userInfo && userDetails && userDetails._id === userInfo.id;
 

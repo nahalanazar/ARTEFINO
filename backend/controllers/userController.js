@@ -5,6 +5,7 @@ import destroyUserToken from '../utils/jwtConfig/userJwtConfig/destroyUserToken.
 import OTPVerification from '../models/otpVerificationModel.js'
 import nodemailer from 'nodemailer'
 import bcrypt from 'bcryptjs';
+import cloudinary from '../utils/cloudinary.js'
 
 // desc   Auth user/set token
 // route  POST /api/users/login
@@ -389,43 +390,48 @@ const getUserProfile = asyncHandler(async (req, res) => {
 // route  PUT /api/users/profile
 // access Private
 const updateUserProfile = asyncHandler(async (req, res) => {
-
+    console.log("update body:", req.body);
     const user = await User.findById(req.user._id);
-
     if (user) {
-        // Update the user with new data if found or keep the old data itself.
-        user.name = req.body.name || user.name;
-        user.email = req.body.email || user.email;
+        user.name = req.body.name !== undefined ? req.body.name : user.name;
+        user.email = req.body.email !== undefined ? req.body.email : user.email;
 
-        // If request has new password, update the user with the new password
         if (req.body.password) {
-            user.password = req.body.password
+            user.password = req.body.password;
         }
 
-        if(req.file){
+        if (req.body.profileImage) {
+            console.log("file");
             // user.profileImageName = req.file.filename || user.profileImageName;
-            user.profileImageName = req.file.filename || null;
+            // user.profileImageName = req.file.filename || null;
+            const result = await cloudinary.uploader.upload(req.body.profileImage, {
+                folder: "profileImage",
+                // width: 300,
+                // crop: "scale"
+            });
+            console.log("result", result);
+            user.profileImageName = result.secure_url
+              
+        
         }
 
-        user.isPrivate = req.body.isPrivate || false; // Default to false if not provided
+        user.isPrivate = req.body.isPrivate !== undefined ? req.body.isPrivate : false;
 
         const updatedUserData = await user.save();
-
-        // Send the response with updated user data
         res.status(200).json({
             id: updatedUserData._id,
             name: updatedUserData.name,
             email: updatedUserData.email,
             profileImageName: updatedUserData.profileImageName,
-            isPrivate: updatedUserData.isPrivate
+            isPrivate: updatedUserData.isPrivate,
         });
 
     } else {
         res.status(404);
         throw new Error("Requested User not found.");
-    };
-
+    }
 });
+
 
 // desc   Get  FollowedUsers
 // route  GET /api/users/followedUsers

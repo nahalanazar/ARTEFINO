@@ -1,15 +1,20 @@
-import Hero from '../../components/userComponents/Hero'
+// import Hero from '../../components/userComponents/Hero'
 import CategoriesTab from '../../components/userComponents/CategoriesTab'
 import Posts from '../../components/userComponents/Posts'
 import UserProfile from '../../components/userComponents/UserProfile'
-import {lazy, Suspense} from 'react'
+import {lazy, Suspense, useState} from 'react'
 // import ArtistsList from '../../components/userComponents/ArtistsList'
 const ArtistsList = lazy(() => import('../../components/userComponents/ArtistsList'))
 
 const HomeScreen = () => {
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+  };
   return (
     <>
-      <CategoriesTab />
+      <CategoriesTab selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} />
       {/* <Hero /> */}
        <div className="container-fluid mt-3">
         <div className="row">
@@ -18,7 +23,7 @@ const HomeScreen = () => {
           </div>
 
           <div className="col-md-6 col-12">
-            <Posts  />
+            <Posts selectedCategory={selectedCategory} />
           </div>
  
           <div className="col-md-3 d-none d-md-block">

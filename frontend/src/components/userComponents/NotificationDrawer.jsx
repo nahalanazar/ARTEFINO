@@ -93,8 +93,8 @@ const NotificationDrawer = (userInfo) => {
                         <img 
                           src={
                           notification.sender.profileImageName
-                            ? `${VITE_PROFILE_IMAGE_DIR_PATH}${notification.sender.profileImageName}`
-                            : `${VITE_PROFILE_IMAGE_DIR_PATH}defaultImage.jpeg`
+                            ? notification.sender.profileImageName
+                            : VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg'
                         }
                           alt='Profile' 
                           style={{

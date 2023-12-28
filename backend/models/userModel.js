@@ -18,7 +18,7 @@ const userSchema = mongoose.Schema({
         type: String
     },
     profileImageName: {
-        type: String
+        type:String
     },
     bio: {
         type: String,

@@ -24,10 +24,12 @@ connectDB();
 
 
 // ========================================== Middleware's ==========================================
-app.use(express.json()) // to parse raw json
-app.use(express.urlencoded({extended: true})) // to send form data
+// app.use(express.json()) // to parse raw json
+// app.use(express.urlencoded({extended: true})) // to send form data
 app.use(cookieParser()); // CookieParser Middleware
 
+app.use(express.json({ limit: "30mb", extended: true }));
+app.use(express.urlencoded({ limit: "30mb", extended: true }));
 
 // ========================================== Serve static files ==========================================
 app.use(express.static("./public"));

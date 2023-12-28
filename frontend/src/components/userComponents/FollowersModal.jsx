@@ -165,10 +165,7 @@ function FollowModal({ userDetails, isOwnProfile }) {
                     <Box display="flex" alignItems="center">
                       <Avatar
                         name={follower.name}
-                        src={
-                          VITE_PROFILE_IMAGE_DIR_PATH +
-                          follower.profileImageName
-                        }
+                        src={follower.profileImageName ? follower.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg'}
                       />
                       <Text ml={4}>{follower.name}</Text>
                     </Box>
