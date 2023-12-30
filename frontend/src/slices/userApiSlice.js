@@ -116,11 +116,14 @@ export const userApiSlice = apiSlice.injectEndpoints({
             })
         }),
         updatePost: builder.mutation({
-            query: ({ postId, formData }) => ({
+            query: ({ postId, postData }) => ({
                 url: `${USERS_URL}/updatePost/${postId}`,
-                method: 'PUT',
-                body: formData
-            })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Set the content type to JSON
+                },
+                body: JSON.stringify(postData), // Convert postData to a JSON string
+            }),
         }),
         reportPost: builder.mutation({
             query: ({ postId, data }) => ({

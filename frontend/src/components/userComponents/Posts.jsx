@@ -10,7 +10,7 @@ import CommentsModal from './CommentsModal';
 
 const Posts = ({ selectedCategory }) => {
     const VITE_PROFILE_IMAGE_DIR_PATH = import.meta.env.VITE_PROFILE_IMAGE_DIR_PATH
-    const VITE_PRODUCT_IMAGE_DIR_PATH = import.meta.env.VITE_PRODUCT_IMAGE_DIR_PATH
+    // const VITE_PRODUCT_IMAGE_DIR_PATH = import.meta.env.VITE_PRODUCT_IMAGE_DIR_PATH
     const { userInfo } = useSelector((state) => state.userAuth);
     const [posts, setPosts] = useState([]);
     const [commentModalPost, setCommentModalPost] = useState(null);
@@ -182,7 +182,8 @@ const Posts = ({ selectedCategory }) => {
 
                             <Card.Img
                                 variant="top"
-                                src={`${VITE_PRODUCT_IMAGE_DIR_PATH}${post.images[0]}`}
+                                src={post.images[0].url}
+                                // src={`${VITE_PRODUCT_IMAGE_DIR_PATH}${post.images[0]}`}
                                 style={{ objectFit: 'cover', height: '400px', cursor: 'pointer' }} 
                                 onClick={() => handlePostClick(post._id)} 
                             />
@@ -224,7 +225,7 @@ const Posts = ({ selectedCategory }) => {
                             <small className="text-muted">{formatTimeDifference(post.dateListed)}</small>
                             {/* <small className="text-muted">Uploaded on {new Date(post.dateListed).toLocaleDateString()}</small> */}
                             <br />
-                            <small className="text-muted">Category: {post.category.name}</small>
+                            <small className="text-muted">Category: {post.category ? post.category.name : 'Unknown'}</small>
                             </Card.Footer>
                         </Card>
                 ))

@@ -19,16 +19,16 @@ const UpdatePostScreen = () => {
     const [accessLongitude, setAccessLongitude] = useState('');
     const [address, setAddress] = useState('');
     const [imagePreviews, setImagePreviews] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [imageToRemoveIndex, setImageToRemoveIndex] = useState(null);
     const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
 
     const navigate = useNavigate()
 
     const [getPostById] = useGetPostByIdMutation();
-    const [updatePost, { postLoading }] = useUpdatePostMutation();
+    const [updatePost] = useUpdatePostMutation();
     const [getCategories] = useGetCategoriesMutation();
-    const VITE_PRODUCT_IMAGE_DIR_PATH = import.meta.env.VITE_PRODUCT_IMAGE_DIR_PATH;
+    // const VITE_PRODUCT_IMAGE_DIR_PATH = import.meta.env.VITE_PRODUCT_IMAGE_DIR_PATH;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -47,7 +47,7 @@ const UpdatePostScreen = () => {
                 setAccessLongitude(postDetails.longitude);
                 setAddress(postDetails.address);
                 setCategories(categoriesResponse.data.categoryData);
-                setImagePreviews(postDetails.images.map(image => `${VITE_PRODUCT_IMAGE_DIR_PATH}${image}`));
+                setImagePreviews(postDetails.images.map(image =>  image ));
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -56,34 +56,43 @@ const UpdatePostScreen = () => {
         fetchData();
        
     }, [getCategories, getPostById, postId]);
-
+   
     const handleImageChange = (e) => {
-        const files = e.target.files;
-        const newImages = Array.from(files);
-        const newImagePreviews = Array.from(files).map(file => URL.createObjectURL(file));
+    const files = Array.from(e.target.files);
 
-        setImages(existingImages => [...existingImages, ...newImages]);
-        setImagePreviews(existingPreviews => [...existingPreviews, ...newImagePreviews]);
-    };
+    // Validate file types
+    const isValidImage = files.every((file) => file.type.startsWith('image/'));
+
+    if (!isValidImage) {
+        toast.error('Please upload only image files.');
+        return;
+    }
+
+    const newImagePreviews = files.map((file) => URL.createObjectURL(file));
+
+    setImagePreviews((existingPreviews) => [...existingPreviews, ...newImagePreviews]);
+
+    files.forEach((file) => {
+        if (file instanceof File) {
+            // Handle newly added images
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+
+            reader.onloadend = () => {
+                setImages((existingImages) => [...existingImages, { url: reader.result, isCloudinary: false }]);
+            };
+        } else if (typeof file === 'string') {
+            // Handle existing Cloudinary images
+            setImages((existingImages) => [...existingImages, { url: file, isCloudinary: true }]);
+        }
+    });
+};
+
 
     const handleCategoryChange = (e) => {
         const selectedCategoryId = e.target.value;
         setCategoryId(selectedCategoryId);
     };
-
-    // const handleRemoveImage = (index) => {
-    //     setImages((existingImages) => {
-    //         const updatedImages = [...existingImages];
-    //         updatedImages.splice(index, 1);
-    //         return updatedImages;
-    //     });
-
-    //     setImagePreviews((existingPreviews) => {
-    //         const updatedPreviews = [...existingPreviews];
-    //         updatedPreviews.splice(index, 1);
-    //         return updatedPreviews;
-    //     });
-    // };
 
     const handleRemoveImage = (index) => {
         setImageToRemoveIndex(index);
@@ -114,7 +123,6 @@ const UpdatePostScreen = () => {
 
     const submitHandler = async (e) => {
         e.preventDefault();
-
         if (!title.trim() || !description.trim() || !categoryId || images.length === 0) {
             toast.error('Please fill out all required fields.');
             return;
@@ -125,54 +133,34 @@ const UpdatePostScreen = () => {
             return;
         }
 
-        for (let i = 0; i < images.length; i++) {
-            const fileType = typeof images[i] === 'object' ? images[i].type.split('/')[0] : null;
-
-            // If it's not an object, assume it's a URL (string) and continue
-            if (fileType && fileType !== 'image') {
-                toast.error('Please upload only images (JPEG, PNG, etc.).');
-                return;
-            }
-        }
-
-        // Create form data and update the post
-        const formData = new FormData();
-        formData.append('title', title);
-        formData.append('description', description);
-        formData.append('category', categoryId);
-
-        if(images.length > 0){
-            images.forEach((image, index) => {
-                if (index < imagePreviews.length) {
-                    // Existing image details
-                    if (typeof image === 'string') {
-                        // URL string (existing image)
-                        formData.append('existingImages', image);
-                    } else {
-                        // File object (newly added image)
-                        formData.append('images', image);
-                    }
-                } else {
-                    // Newly added images
-                    formData.append('images', image);
-                }
-            });
-        }
-        
-        formData.append('latitude', accessLatitude);
-        formData.append('longitude', accessLongitude);
-        formData.append('address', address);
+        const postData = {
+            title,
+            description,
+            category: categoryId,
+            images: images.map((image) => ({
+                url: image.url,
+                isCloudinary: image.isCloudinary,
+                isNew: !image.isCloudinary, // Flag to indicate new images
+            })),
+            latitude: accessLatitude,
+            longitude: accessLongitude,
+            address,
+        };
 
         try {
-            const response = await updatePost({ postId, formData } ).unwrap();
-            console.log("response from update post: ", response);
+            setLoading(true)
+            const response = await updatePost({ postId, postData }).unwrap();
             if (response.error) {
-                toast.error(response.error.data.message)
-            } else {          
+                setLoading(false)
+                toast.error(response.error.data.message);
+            } else {
+                setLoading(false)
                 toast.success('Post Updated successfully');
             }
-            navigate(`/postDetails/${response.postId}`)
+            navigate(`/postDetails/${response.postId}`);
         } catch (error) {
+            setLoading(false)
+            toast.error(error.data.message)
             console.error('Error updating post:', error);
         }
     };
@@ -225,19 +213,39 @@ const UpdatePostScreen = () => {
                 <Row className="mt-3">
                     {imagePreviews.map((preview, index) => (
                         <Col key={index} xs={4} className="mb-3">
-                            <img
-                                src={preview}
-                                alt={`Preview ${index + 1}`}
-                                style={{ width: '100%', height: '100%' }}
-                            />
-                            <Button 
-                                variant="danger"
-                                size="sm"
-                                className="mt-2"
-                                onClick={() => handleRemoveImage(index)}
-                            >
-                                Remove
-                            </Button>
+                            {preview.url ? (
+                                <div>
+                                    <img
+                                        src={preview.url}
+                                        alt={`Preview ${index + 1}`}
+                                        style={{ width: '100%', height: '150px', objectFit: 'cover' }}
+                                    />
+                                    <Button
+                                        variant="danger"
+                                        size="sm"
+                                        className="mt-2"
+                                        onClick={() => handleRemoveImage(index)}
+                                    >
+                                        Remove
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div>
+                                    <img
+                                        src={preview}
+                                        alt={`New Preview ${index + 1}`}
+                                        style={{ width: '100%', height: '150px', objectFit: 'cover' }}
+                                    />
+                                    <Button
+                                        variant="danger"
+                                        size="sm"
+                                        className="mt-2"
+                                        onClick={() => handleRemoveImage(index)}
+                                    >
+                                        Remove
+                                    </Button>
+                                </div>
+                            )}
                         </Col>
                     ))}
                 </Row>
@@ -249,6 +257,7 @@ const UpdatePostScreen = () => {
                 )}
                 <Form.Control className="mt-5" type="file" multiple name="images" onChange={handleImageChange} />
             </Form.Group>
+
               
             <Form.Group controlId="latitude">
                 <Form.Label>Latitude</Form.Label>
@@ -280,10 +289,10 @@ const UpdatePostScreen = () => {
                 />
             </Form.Group>     
 
-            {postLoading && <Loader />}      
+            {loading && <Loader />}      
 
-            <Button type='submit' variant='primary' className='mt-3'>
-                Update
+            <Button type='submit' variant='primary' className='mt-3' disabled={loading}>
+                {loading ? "Updating..." : "Update"}
             </Button>  
         </Form>  
     </FormContainer>

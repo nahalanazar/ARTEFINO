@@ -14,11 +14,12 @@ const SellScreen = () => {
   const [categoryId, setCategoryId] = useState('');
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
-  const [addProduct, { isLoading }] = useAddProductMutation();
+  const [addProduct] = useAddProductMutation();
   const [getCategories] = useGetCategoriesMutation();
   const [accessLatitude, setAccessLatitude] = useState('');
   const [accessLongitude, setAccessLongitude] = useState('');
   const [address, setAddress] = useState('');
+  const [loading, setLoading] = useState(false)
 
   const navigate = useNavigate()
 
@@ -27,7 +28,6 @@ const SellScreen = () => {
       navigator.permissions
         .query({ name: "geolocation" })
         .then(function (result) {
-          console.log(result);
           if (result.state === "granted") {
             //If granted then you can directly call your function here
             navigator.geolocation.getCurrentPosition(success, errors, options);
@@ -57,20 +57,44 @@ const SellScreen = () => {
     fetchCategories();
   }, []);
 
+
   const handleImageChange = (e) => {
-    const files = e.target.files;
-    const previews = Array.from(files).map(file => URL.createObjectURL(file));
-    setImages(Array.from(files)); // Convert files to an array
+    const files = Array.from(e.target.files)
+    const previews = files.map(file => URL.createObjectURL(file));
+    for (let i = 0; i < files.length; i++) {
+      const fileType = files[i].type.split('/')[0];
+      if (fileType !== 'image') {
+        toast.error('Please upload only images (JPEG, PNG, etc.).');
+        setImagePreviews([])
+        setImages([])
+        e.target.value = null;
+        return;
+      }
+    }
+    if (files.length > 3) {
+      toast.error('You can upload up to 3 images.');
+      e.target.value = null;
+      setImagePreviews([])
+      setImages([])
+      return;
+    }
+    files.forEach(file => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onloadend = () => {
+        setImages(oldArray => [...oldArray, reader.result])
+      }
+    })
+
     setImagePreviews(previews);
   };
 
   const handleCategoryChange = (e) => {
     const selectedCategoryId = e.target.value;
     setCategoryId(selectedCategoryId);
-    const selectedCategory = categories.find((cat) => cat._id === selectedCategoryId);
-    console.log("selectedCategory: ", selectedCategory);
+    // const selectedCategory = categories.find((cat) => cat._id === selectedCategoryId);
+    // console.log("selectedCategory: ", selectedCategory);
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -85,15 +109,8 @@ const SellScreen = () => {
       return;
     }
 
-    for (let i = 0; i < images.length; i++) {
-      const fileType = images[i].type.split('/')[0];
-      if (fileType !== 'image') {
-        toast.error('Please upload only images (JPEG, PNG, etc.).');
-        return;
-      }
-    }
-
     try {
+      setLoading(true)
       const formData = new FormData();
       formData.append('title', title);
       formData.append('description', description);
@@ -104,13 +121,19 @@ const SellScreen = () => {
       formData.append('latitude', accessLatitude);
       formData.append('longitude', accessLongitude);
       formData.append('address', address)
-      const response = await addProduct(formData).unwrap();
-      console.log("response: ", response);
-      toast.success('Product added successfully');
-      navigate(`/postDetails/${response.postId}`)
+      // const response = await addProduct(formData).unwrap();
+      const response = await addProduct({title, description, categoryId, images, accessLatitude, accessLongitude, address}).unwrap();
+      if (response) {
+        setLoading(false)
+        setImages([])
+        console.log("response: ", response);
+        toast.success('Product added successfully');
+        navigate(`/postDetails/${response.postId}`)
+      }
     } catch (error) {
+      setLoading(false)
       console.error('Error adding product:', error);
-      toast.error(error.data.error.message);
+      toast.error(error.data.error);
     }
   };
 
@@ -123,8 +146,6 @@ const SellScreen = () => {
   function success(pos) {
     var crd = pos.coords;
     console.log("Your current position is:", crd);
-    console.log(`Latitude : ${crd.latitude}`);
-    console.log(`Longitude: ${crd.longitude}`);
     setAccessLatitude(crd.latitude)
     setAccessLongitude(crd.longitude)
   }
@@ -221,10 +242,10 @@ const SellScreen = () => {
           />
         </Form.Group>
 
-        {isLoading && <Loader />}
+        {loading && <Loader />}
 
-        <Button type="submit" variant="primary" className="mt-3">
-          Add Product
+        <Button type="submit" variant="primary" className="mt-3" disabled={loading}>
+          {loading ? "Uploading..." : "Add Product"}
         </Button>
       </Form>
     </FormContainer>

@@ -38,7 +38,6 @@ const UpdateProfileScreen = () => {
         reader.readAsDataURL(file)
         reader.onloadend = () => {
             setProfileImage(reader.result)
-            console.log(profileImage);
         }
     }
 
@@ -48,7 +47,6 @@ const UpdateProfileScreen = () => {
             toast.error('Passwords do not match')
         } else {
             try {
-                console.log(profileImage);
                 const formData = new FormData();
                 formData.append('name', name);
                 formData.append('email', email);

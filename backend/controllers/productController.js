@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url'; // Import fileURLToPath
 import Report from '../models/reportModel.js';
+import cloudinary from '../utils/cloudinary.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,26 +16,44 @@ const { ObjectId } = mongoose.Types;
 // route  GET /api/users/userPosts/:userId
 // access Private
 const createProduct = asyncHandler(async (req, res) => {
-    const { title, description, category, latitude, longitude, address } = req.body;
-    const images = req.files.map((file) => file.filename);
+    const { title, description, categoryId, accessLatitude, accessLongitude, address } = req.body;
+    // const images = req.files.map((file) => file.filename);
+    console.log("images:", req.body)
+    let images = [...req.body.images]
+    console.log("body create", images)
+    let imagesBuffer = []
 
-    let categoryId;
-    try {
-        categoryId = new ObjectId(category);
-    } catch (error) {
-        console.error('Invalid category ObjectId:', error);
-        return res.status(400).json({ success: false, message: 'Invalid category ObjectId' });
+    for (let i = 0; i < images.length; i++){
+        const result = await cloudinary.uploader.upload(images[i], {
+            folder: "Products",
+            width: 1920,
+            crop: "scale"
+        })
+        imagesBuffer.push({
+            public_id: result.public_id,
+            url: result.url
+        })
     }
+
+    // req.body.images = imagesBuffer
+
+    // let categoryId;
+    // try {
+    //     categoryId = new ObjectId(category);
+    // } catch (error) {
+    //     console.error('Invalid category ObjectId:', error);
+    //     return res.status(400).json({ success: false, message: 'Invalid category ObjectId' });
+    // }
 
     // Create a new product
     const newProduct = new Product({
         title,
-        description,
+        description, 
         category: categoryId,
-        images,
+        images: imagesBuffer,
         stores: req.user._id,
-        latitude,
-        longitude,
+        latitude: accessLatitude,
+        longitude: accessLongitude,
         address
     });
  
@@ -49,7 +68,6 @@ const createProduct = asyncHandler(async (req, res) => {
     }
 
 });
-
 // desc   Show all posts in home
 // route  GET /api/users/showPosts
 // access Private
@@ -87,8 +105,6 @@ const showPosts = asyncHandler(async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch, filter, and sort posts' });
     }
 });
-
-
 
 // desc   Show all posts in landing home
 // route  GET /api/users/showPosts
@@ -167,36 +183,56 @@ const removePost = asyncHandler(async (req, res) => {
 })
 
 // desc   update post
-// route  PUT /api/users/updatePost/:postId
+// route  POST /api/users/updatePost/:postId
 // access Private
 const updatePost = asyncHandler(async (req, res) => {
+    const postId = req.params.postId;
+    const postData = req.body;
+
+    console.log('Received request to update post:', postId);
+    console.log('Post data:', postData);
     const post = await Product.findById(req.params.postId);
 
     if (post) {
         post.title = req.body.title || post.title;
         post.description = req.body.description || post.description;
-        post.category = req.body.category || post.category
+        post.category = req.body.category || post.category;
         post.latitude = req.body.latitude || post.latitude;
         post.longitude = req.body.longitude || post.longitude;
-        post.address = req.body.address || post.address
+        post.address = req.body.address || post.address;
 
-        // Add existing images with new images
-        if (req.body.existingImages) {
-            const existingImages = req.body.existingImages.split(',');
-            post.images = [...existingImages, ...req.files.map((file) => file.filename)];
-        } else {
-            // If no existing images, use only new images
-            post.images = req.files.map((file) => file.filename);
+        let images = [...req.body.images];
+        let imagesBuffer = [];
+
+        for (let i = 0; i < images.length; i++) {
+            if (images[i].isNew) {
+                // Handle newly added images
+                const result = await cloudinary.uploader.upload(images[i].url, {
+                    folder: "Products",
+                    width: 1920,
+                    crop: "scale",
+                });
+                imagesBuffer.push({
+                    public_id: result.public_id,
+                    url: result.url,
+                });
+            } else {
+                // Use existing Cloudinary images
+                imagesBuffer.push({
+                    public_id: images[i].public_id,
+                    url: images[i].url,
+                });
+            }
         }
 
-        const updatedPost = await post.save();
-        res.status(200).json({status: 'success', message: "Post updated", postId: updatedPost._id});
+        post.images = imagesBuffer;
 
-    } else { 
+        const updatedPost = await post.save();
+        res.status(200).json({ status: 'success', message: "Post updated", postId: updatedPost._id });
+    } else {
         res.status(404);
         throw new Error("Requested Post not found.");
-    };
-
+    }
 });
 
 // desc   add like to the Post

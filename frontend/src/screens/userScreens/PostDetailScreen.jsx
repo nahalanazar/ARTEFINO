@@ -204,7 +204,8 @@ console.log("response", response);
                             <div className="image-section pt-5">
                                 <div className="large-image-container">
                                     <img
-                                        src={`${VITE_PRODUCT_IMAGE_DIR_PATH}${post.images[selectedImage]}`}
+                                        // src={`${VITE_PRODUCT_IMAGE_DIR_PATH}${post.images[selectedImage]}`}
+                                        src={post.images[selectedImage]?.url}
                                         alt="Large"
                                         className="large-image"
                                     />
@@ -218,7 +219,7 @@ console.log("response", response);
                                         post.images.map((image, index) => (
                                             <img
                                                 key={index}
-                                                src={`${VITE_PRODUCT_IMAGE_DIR_PATH}${image}`}
+                                                src={image?.url}
                                                 alt={`Small ${index}`}
                                                 onClick={() => handleImageClick(index)}
                                                 className={index === selectedImage ? 'selected' : ''} // Adding margins between images on large screens

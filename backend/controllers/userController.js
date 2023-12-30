@@ -401,7 +401,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
         }
 
         if (req.body.profileImage) {
-            console.log("file");
+            console.log("file", req.body.profileImage);
             // user.profileImageName = req.file.filename || user.profileImageName;
             // user.profileImageName = req.file.filename || null;
             const result = await cloudinary.uploader.upload(req.body.profileImage, {
