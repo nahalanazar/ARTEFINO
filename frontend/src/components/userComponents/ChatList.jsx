@@ -39,9 +39,9 @@ const ChatList = ({ fetchAgain }) => {
     fetchChats()
   }, [fetchAgain])
 
+
   const handleNotificationClick = async (notification) => {
     try {
-      console.log("notification: ", notification);
         setSelectedChat(notification.chat);
         setNotification((prevNotifications) => [
           ...prevNotifications.filter((n) => n._id !== notification._id),

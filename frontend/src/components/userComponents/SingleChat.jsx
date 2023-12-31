@@ -28,7 +28,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     const [fetchAllMessages] = useFetchMessagesMutation()
     const [fetchNotifications] = useFetchNotificationsMutation()
 
-    const { selectedChat, setSelectedChat, notification, setNotification } = ChatState()
+    const { selectedChat, setSelectedChat, notification, setNotification, setChats } = ChatState()
     const { userInfo } = useSelector((state) => state.userAuth);
     const userId = userInfo.id
 
@@ -84,6 +84,20 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             try {
                 setNewMessage(""); 
                 const { data } = await sendNewMessage({ content: newMessage, chatId: selectedChat._id });
+                // Update the updatedAt property of the selectedChat to the current time
+                setChats((prevChats) => {
+                    const updatedChats = prevChats.map((chat) => {
+                        if (chat._id === selectedChat._id) {
+                            return { ...chat, updatedAt: new Date() };
+                        }
+                        return chat;
+                    });
+
+                    // Sort chats based on updatedAt (newest first)
+                    const sortedChats = updatedChats.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+                    return sortedChats;
+                });
                 socket.emit('new Message', data)
                 setMessages([...messages, data]);
             } catch (error) {

@@ -21,7 +21,7 @@ const Header = () => {
   const navigate = useNavigate();
   const [logoutApiCall] = useLogoutMutation();
 
-  const VITE_LOGO_IMAGE_DIR_PATH = import.meta.env.VITE_FAVICON_IMAGE_DIR_PATH
+  // const VITE_LOGO_IMAGE_DIR_PATH = import.meta.env.VITE_FAVICON_IMAGE_DIR_PATH
 
   const logoutHandler = async () => {
     try {
@@ -68,7 +68,9 @@ const Header = () => {
                 {userInfo && (
                   <Nav.Item>
                     <Nav.Link>
-                      <NotificationDrawer userInfo={userInfo} />
+                      <div style={{ position: 'relative', marginTop: '5px' }}>                          
+                        <NotificationDrawer userInfo={userInfo} />
+                      </div>
                     </Nav.Link>
                   </Nav.Item> 
                 )}
@@ -87,7 +89,7 @@ const Header = () => {
                   <Nav.Item>
                     <LinkContainer to='/chat'>
                       <Nav.Link>
-                        <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'relative', marginTop: '5px' }}>
                           <NotificationBadge
                             count={notification?.length}
                             effect={Effect.SCALE}
@@ -100,12 +102,14 @@ const Header = () => {
                   </Nav.Item> 
                 )}
                 {userInfo ? (
-                  <NavDropdown title={userInfo.name} id='username'>
-                    <LinkContainer to='/profile'>
-                      <NavDropdown.Item>Profile</NavDropdown.Item>
-                    </LinkContainer>
-                    <NavDropdown.Item onClick={logoutHandler}>Logout</NavDropdown.Item>
-                  </NavDropdown>
+                  <div style={{ position: 'relative', marginTop: '5px' }}>
+                    <NavDropdown title={userInfo.name} id='username'>
+                      <LinkContainer to='/profile'>
+                        <NavDropdown.Item>Profile</NavDropdown.Item>
+                      </LinkContainer>
+                      <NavDropdown.Item onClick={logoutHandler}>Logout</NavDropdown.Item>
+                    </NavDropdown>
+                  </div>
                 ) : (
                   <>
                     <LinkContainer to='/login'>

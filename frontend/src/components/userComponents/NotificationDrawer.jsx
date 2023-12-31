@@ -19,7 +19,7 @@ const NotificationDrawer = (userInfo) => {
     const [userNotification, setUserNotification] = useState([])
     const [fetchUserNotification] = useFetchUserNotificationsMutation();
     const [acceptRequestMutation] = useAcceptRequestMutation();
-    const [rejectREquestMutation] = useRejectRequestMutation();
+    const [rejectRequestMutation] = useRejectRequestMutation();
     const VITE_PROFILE_IMAGE_DIR_PATH = import.meta.env.VITE_PROFILE_IMAGE_DIR_PATH
 
     useEffect(() => {
@@ -52,7 +52,7 @@ const NotificationDrawer = (userInfo) => {
 
   const handleReject = async (artistId, notificationId) => {
     try {
-      const response = await acceptRequestMutation(artistId);
+      const response = await rejectRequestMutation(artistId);
       console.log("response reject", response);
       setUserNotification((prevNotifications) =>
         prevNotifications.filter((notification) => notification._id !== notificationId)

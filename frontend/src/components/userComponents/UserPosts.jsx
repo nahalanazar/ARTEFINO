@@ -15,7 +15,8 @@ const UserPosts = () => {
       const fetchPosts = async () => {
         try {
           const userIdToFetch = String(id || userInfo.id);
-          await getUserPosts(userIdToFetch);
+          const res = await getUserPosts(userIdToFetch);
+          console.log("res:", res)
         } catch (error) {
           console.error('Error fetching user posts:', error);
         }
@@ -44,7 +45,7 @@ const UserPosts = () => {
               <>
                 <Card.Img
                   variant="top"
-                  src={`${VITE_PRODUCT_IMAGE_DIR_PATH}${post.images[0]}`}
+                  src={post.images[0].url}
                   onClick={() => handlePostClick(post._id)}
                 />
                 <Card.Body>

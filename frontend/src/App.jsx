@@ -24,7 +24,6 @@ const App = () => {
       </ChatProvider>
     </>
   );
-
 }
 
 export default App;

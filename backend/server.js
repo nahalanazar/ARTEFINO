@@ -69,7 +69,7 @@ import("socket.io").then((socketIO) => {
         let userInfo;
 
         socket.on("setup", async (user) => {
-            console.log("User set up:", user);
+            // console.log("User set up:", user);
             userInfo = { ...user, online: true } // Include online status
             socket.join(userInfo.id)
             socket.emit("connected")
