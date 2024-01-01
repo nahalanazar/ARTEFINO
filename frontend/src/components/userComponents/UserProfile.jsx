@@ -39,7 +39,14 @@ const UserProfile = () => {
     }
   }, [getUserProfile, id, userInfo]);
 
-
+  const updateFollowersCount = (removedUserId) => {
+    setUserDetails((prevUserDetails) => ({
+      ...prevUserDetails,
+      followers: prevUserDetails.followers.filter(
+        (follower) => follower._id !== removedUserId
+      ),
+    }));
+  };
 
   if (!userInfo) {
     return <div>Login To see Profile</div>;
@@ -76,12 +83,22 @@ const UserProfile = () => {
             </div>
             <div className="follower-following">
               <div className="followers">
-                <div className="label"><FollowModal userDetails={userDetails} isOwnProfile={isOwnProfile}/></div>
+                <div className="label">
+                  <FollowModal
+                    userDetails={userDetails}
+                    isOwnProfile={isOwnProfile} 
+                    onUpdateFollowersCount={updateFollowersCount}
+                  />
+                </div>
                 <div className="count">{userDetails.followers?.length || 0}</div>
               </div>
               <div className="icon"></div>
               <div className="following">
-                <div className="label"><FollowingModal userDetails={userDetails} /></div>
+                <div className="label">
+                  <FollowingModal
+                    userDetails={userDetails} 
+                  />
+                </div>
                 <div className="count">{userDetails.following?.length || 0}</div>
               </div>
             </div>

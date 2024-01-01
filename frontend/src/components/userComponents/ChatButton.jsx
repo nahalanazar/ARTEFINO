@@ -19,9 +19,30 @@ const ChatButton = ({ userId }) => {
 
     const accessChat = async (userId) => {
       try {
-          setLoadingChat(true)
-          const response = await getChat(userId)
-          console.log("response from access chat: ", response);
+        setLoadingChat(true)
+        const response = await getChat(userId)
+        console.log("response from access chat: ", response);
+        if (response.data.error) {
+          toast({
+            title: "Follow each other to access the chat",
+            description: response?.data?.error || "An error occurred",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "top-right"
+          })
+          setLoadingChat(false)
+        } else if (response.error.data) {
+          toast({
+            title: "Follow each other to access the chat",
+            description: response?.error.data.error|| "An error occurred",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "top-right"
+          })
+          setLoadingChat(false)
+        } else {
           const {data} = response
           if (!chats.find((c) => c._id === data._id)) {
             setChats([data, ...chats])
@@ -30,17 +51,19 @@ const ChatButton = ({ userId }) => {
           setSelectedChat(data)
           setLoadingChat(false)
           navigate('/chat')
-          
+        }
       } catch (error) {
-          toast({
-              title: "Follow each other to access the chat",
-              description: error.response?.data?.message || "An error occurred",
-              status: "error",
-              duration: 5000,
-              isClosable: true,
-              position: "top-right"
-            })
-            console.log("hi",error.message)
+        console.log("error:", error);
+        toast({
+          title: "Follow each other to access the chat",
+          description: error.response?.data?.message || "An error occurred",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "top-right"
+        })
+        console.log("hi", error.message)
+        setLoadingChat(false)
       }
     }
     //  toast.error(error?.message || error?.error);

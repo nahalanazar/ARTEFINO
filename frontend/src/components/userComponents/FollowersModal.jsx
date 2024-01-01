@@ -20,7 +20,7 @@ import { useFollowedUsersMutation, useRemoveArtistMutation, useFollowArtistMutat
 import ConfirmationDialog from "./RemoveArtistConfDialog";
 import { useSelector } from "react-redux";
 
-function FollowModal({ userDetails, isOwnProfile }) {
+function FollowModal({ userDetails, isOwnProfile, onUpdateFollowersCount }) {
   const { userInfo } = useSelector((state) => state.userAuth);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef(null);
@@ -29,43 +29,43 @@ function FollowModal({ userDetails, isOwnProfile }) {
   const [followerToRemove, setFollowerToRemove] = useState(null);
   const [followedUsers, setFollowedUsers] = useState([]);
   const [followerStates, setFollowerStates] = useState({});
-  
+
   const [fetchingFollowedUsers] = useFollowedUsersMutation()
   const [removeArtist] = useRemoveArtistMutation();
   const [followArtist] = useFollowArtistMutation();
   const [unFollowArtist] = useUnFollowArtistMutation();
 
-    useEffect(() => {
-      const fetchFollowedUsers = async () => {
-        try {
-          const response = await fetchingFollowedUsers();
-          console.log("response fetchingFollowedUsers followersMod:", response);
-            const followingIds = response.data.followers.map((follower) => follower._id);
+  useEffect(() => {
+    const fetchFollowedUsers = async () => {
+      try {
+        const response = await fetchingFollowedUsers();
+        console.log("followersMod fetchingFollowedUsers:", response);
+        const followingIds = response.data.followers.map((follower) => follower._id);
 
-            // Move the followingIds processing here
-            const followerIds = userDetails.followers?.map((follower) => follower._id);
-            if (followerIds) {
-                setFollowedUsers(followerIds);
-                const followerStatesObj = {};
+        // Move the followingIds processing here
+        const followerIds = userDetails.followers?.map((follower) => follower._id);
+        if (followerIds) {
+          setFollowedUsers(followerIds);
+          const followerStatesObj = {};
 
-                // Initialize followerStates based on whether the current user follows each artist or not.
-                followerIds.forEach((id) => {
-                    // Check if the current user follows this artist (id).
-                    const isCurrentUserFollowing = followingIds?.includes(id);
-
-                    // Set the following state accordingly.
-                    followerStatesObj[id] = isCurrentUserFollowing;
-                });
-                setFollowerStates(followerStatesObj);
-            }
-        } catch (error) {
-            toast.error(error?.data?.message || error?.error);
-            console.error('Error fetching followed users:', error);
+          followerIds.forEach((id) => {
+            const isCurrentUserFollowing = followingIds?.includes(id);
+            followerStatesObj[id] = {
+              isFollowing: isCurrentUserFollowing,
+              isRequested: response.data.followRequestsSend.some((request) => request._id === id),
+            };
+          });
+          setFollowerStates(followerStatesObj);
         }
-      };
+      } catch (error) {
+        toast.error(error?.data?.message || error?.error);
+        console.error('Error fetching followed users:', error);
+      }
+    };
 
-      fetchFollowedUsers();
-    }, [userDetails.followers, userInfo, fetchingFollowedUsers]);
+    fetchFollowedUsers();
+  }, [userDetails.followers, userInfo, fetchingFollowedUsers, followerToRemove]);
+
   
   const handleRemove = async (follower) => {
     setFollowerToRemove(follower);
@@ -78,6 +78,7 @@ function FollowModal({ userDetails, isOwnProfile }) {
       const response = await removeArtist(artistId);
       if (response.data.status === "success") {
         toast.warning(`Removed ${followerToRemove.name}`);
+        onUpdateFollowersCount(followerToRemove._id);
       } else {
         console.error("Error Removing artist:", response);
         toast.error("Failed to Remove artist");
@@ -100,15 +101,22 @@ function FollowModal({ userDetails, isOwnProfile }) {
     try {
         const artistId = String(userIdToFollow);
         const response = await followArtist(artistId);
-        console.log("followersModal: ", response);
         if (response.data.status === 'success') {
-            toast.success(`Started Following ${follower.name}`)
-            console.log(follower.name);
-            setFollowedUsers([...followedUsers, userIdToFollow]);
-            setFollowerStates((prevStates) => ({ ...prevStates, [userIdToFollow]: true }));
+          toast.success(`Started Following ${follower.name}`)
+          setFollowedUsers([...followedUsers, userIdToFollow]);
+          setFollowerStates((prevStates) => ({
+            ...prevStates,
+            [userIdToFollow]: { isFollowing: true, isRequested: false },
+          }));
+        } else if (response.data.status === 'requested') {
+          toast.info('Follow Request sent')
+          setFollowerStates((prevStates) => ({
+            ...prevStates,
+            [userIdToFollow]: { isFollowing: false, isRequested: true },
+          }));
         } else {
-            console.error('Error following user:', response);
-            toast.error("Failed to follow artist");
+          console.error('Error following user:', response);
+          toast.error("Failed to follow artist");
         }
     } catch (err) {
         console.error('Error following user:', err);
@@ -121,17 +129,20 @@ function FollowModal({ userDetails, isOwnProfile }) {
           const artistId = String(userIdToUnFollow);
           const response = await unFollowArtist(artistId);
 
-          if (response.data.status === 'success') {
-              toast.warning(`Un Followed ${follower.name}`);
-              setFollowedUsers((prevFollowedUsers) => prevFollowedUsers.filter((id) => id !== userIdToUnFollow));
-              setFollowerStates((prevStates) => ({ ...prevStates, [userIdToUnFollow]: false }));
+        if (response.data.status === 'success') {
+            toast.warning(`Un Followed ${follower.name}`);
+            setFollowedUsers((prevFollowedUsers) => prevFollowedUsers.filter((id) => id !== userIdToUnFollow));
+            setFollowerStates((prevStates) => ({
+              ...prevStates,
+              [userIdToUnFollow]: { isFollowing: false, isRequested: false },
+            }));
           } else {
-              console.error('Error un Following user:', response);
-              toast.error("Failed to un Follow artist");
+            console.error('Error un Following user:', response);
+            toast.error("Failed to un Follow artist");
           }
       } catch (err) {
-          console.error('Error un Following user:', err);
-          toast.error(err?.data?.message || err?.error);
+        console.error('Error un Following user:', err);
+        toast.error(err?.data?.message || err?.error);
       }
   };
 
@@ -192,9 +203,14 @@ function FollowModal({ userDetails, isOwnProfile }) {
                             borderRadius: '4px',
                             cursor: 'pointer'
                           }}
-                          onClick={() => (followerStates[follower._id] ? handleUnFollow(follower._id, follower) : handleFollow(follower._id, follower))}
+                          onClick={() => (followerStates[follower._id]?.isFollowing ? handleUnFollow(follower._id, follower) : handleFollow(follower._id, follower))}
+                          disabled={followerStates[follower._id]?.isRequested}
                         >
-                          {followerStates[follower._id] ? 'Following' : 'Follow'}
+                          {followerStates[follower._id]?.isRequested
+                            ? 'Requested'
+                            : followerStates[follower._id]?.isFollowing
+                            ? 'Following'
+                            : 'Follow'}
                         </button>
                       )
                     )}

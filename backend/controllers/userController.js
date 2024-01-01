@@ -390,7 +390,6 @@ const getUserProfile = asyncHandler(async (req, res) => {
 // route  PUT /api/users/profile
 // access Private
 const updateUserProfile = asyncHandler(async (req, res) => {
-    console.log("update body:", req.body);
     const user = await User.findById(req.user._id);
     if (user) {
         user.name = req.body.name !== undefined ? req.body.name : user.name;
@@ -401,7 +400,6 @@ const updateUserProfile = asyncHandler(async (req, res) => {
         }
 
         if (req.body.profileImage) {
-            console.log("file", req.body.profileImage);
             // user.profileImageName = req.file.filename || user.profileImageName;
             // user.profileImageName = req.file.filename || null;
             const result = await cloudinary.uploader.upload(req.body.profileImage, {
@@ -409,10 +407,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
                 // width: 300,
                 // crop: "scale"
             });
-            console.log("result", result);
-            user.profileImageName = result.secure_url
-              
-        
+            user.profileImageName = result.secure_url             
         }
 
         user.isPrivate = req.body.isPrivate !== undefined ? req.body.isPrivate : false;
@@ -444,7 +439,8 @@ const getFollowedUsers = asyncHandler(async (req, res) => {
       res.status(404).json({ error: 'User not found' });
     }
     const followers = await User.find({ _id: { $in: user.following } }) 
-    res.status(200).json({followers});
+    const followRequestsSend = await User.find({ followRequests: id });
+    res.status(200).json({followers, followRequestsSend});
 });
 
 // desc    Follow an artist
@@ -542,6 +538,10 @@ const rejectFollowRequest = asyncHandler(async (req, res) => {
         return;
     }
 
+    await User.findByIdAndUpdate(userId, { $pull: { followRequests: artistId } });
+
+    await User.findByIdAndUpdate(userId, { $pull: { notifications: { sender: artistId, type: 'follow_request' } } });
+    
     res.status(200).json({ status: 'success', message: 'Follow request rejected successfully' });
 });
 

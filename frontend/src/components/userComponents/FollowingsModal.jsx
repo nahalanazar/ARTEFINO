@@ -35,7 +35,7 @@ function FollowingModal({ userDetails }) {
         const fetchFollowedUsers = async () => {
             try {
                 const response = await fetchingFollowedUsers();
-                console.log("ffollowing fetchFollowedUsers", response);
+                console.log("following modal fetchFollowedUsers", response);
                 const followingIds = response.data.followers.map((follower) => follower._id);
 
                 // Move the followingIds processing here
@@ -46,11 +46,11 @@ function FollowingModal({ userDetails }) {
 
                     // Initialize followerStates based on whether the current user follows each artist or not.
                     followerIds.forEach((id) => {
-                        // Check if the current user follows this artist (id).
                         const isCurrentUserFollowing = followingIds?.includes(id);
-
-                        // Set the following state accordingly.
-                        followerStatesObj[id] = isCurrentUserFollowing;
+                        followerStatesObj[id] = {
+                        isFollowing: isCurrentUserFollowing,
+                        isRequested: response.data.followRequestsSend.some((request) => request._id === id),
+                        };
                     });
                     setFollowerStates(followerStatesObj);
                 }
@@ -68,13 +68,19 @@ function FollowingModal({ userDetails }) {
         try {
             const artistId = String(userIdToFollow);
             const response = await followArtist(artistId);
-            console.log("followingsMod:", response);
             if (response.data.status === 'success') {
-                console.log("response.data.status: ", response.data.status);
                 toast.success(`Started Following ${follower.name}`)
                 setFollowedUsers([...followedUsers, userIdToFollow]);
-                setFollowerStates((prevStates) => ({ ...prevStates, [userIdToFollow]: true }));
-                console.log(followerStates, "followerStates");
+                setFollowerStates((prevStates) => ({
+                    ...prevStates,
+                    [userIdToFollow]: { isFollowing: true, isRequested: false },
+                }));
+            } else if (response.data.status === 'requested') {
+                toast.info('Follow Request sent')
+                setFollowerStates((prevStates) => ({
+                    ...prevStates,
+                    [userIdToFollow]: { isFollowing: false, isRequested: true },
+                }));
             } else {
                 console.error('Error following user:', response);
                 toast.error("Failed to follow artist");
@@ -93,8 +99,10 @@ function FollowingModal({ userDetails }) {
             if (response.data.status === 'success') {
                 toast.warning(`Un Followed ${follower.name}`);
                 setFollowedUsers((prevFollowedUsers) => prevFollowedUsers.filter((id) => id !== userIdToUnFollow));
-                setFollowerStates((prevStates) => ({ ...prevStates, [userIdToUnFollow]: false }));
-                console.log(followerStates, "followerStates");
+                setFollowerStates((prevStates) => ({
+                    ...prevStates,
+                    [userIdToUnFollow]: { isFollowing: false, isRequested: false },
+                }));
             } else {
                 console.error('Error un Following user:', response);
                 toast.error("Failed to un Follow artist");
@@ -140,9 +148,14 @@ function FollowingModal({ userDetails }) {
                                                     borderRadius: '4px',
                                                     cursor: 'pointer'
                                                 }}
-                                                onClick={() => (followerStates[follower._id] ? handleUnFollow(follower._id, follower) : handleFollow(follower._id, follower))}
+                                                onClick={() => (followerStates[follower._id]?.isFollowing ? handleUnFollow(follower._id, follower) : handleFollow(follower._id, follower))}
+                                                disabled={followerStates[follower._id]?.isRequested}
                                             >
-                                                {followerStates[follower._id] ? 'Following' : 'Follow'}
+                                                {followerStates[follower._id]?.isRequested
+                                                    ? 'Requested'
+                                                    : followerStates[follower._id]?.isFollowing
+                                                    ? 'Following'
+                                                    : 'Follow'}
                                             </button>
                                         )}
                                     </Box>

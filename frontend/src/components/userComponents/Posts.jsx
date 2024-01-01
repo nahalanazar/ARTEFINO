@@ -30,7 +30,6 @@ const Posts = ({ selectedCategory }) => {
             try {
                 const response = await getPosts()
                 const postsData = response.data;
-                console.log("postsData", postsData);
                 setPosts(postsData);
 
                 // Check if the current user has liked each post

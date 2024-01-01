@@ -14,7 +14,7 @@ const ProfileScreen = () => {
   const [followedUsers, setFollowedUsers] = useState([]);
   const { id } = useParams();
   const [isFollowed, setIsFollowed] = useState(false);
-  
+  const [isFollowRequested, setIsFollowRequested] = useState(false);
 
   // If there's no ID in the params, it's the current user's profile
   const isCurrentUserProfile = !id;
@@ -26,10 +26,13 @@ const ProfileScreen = () => {
     const fetchFollowedUsers = async () => {
       try {
         const response = await fetchingFollowedUsers();
-        console.log("response fetchFollowedUsers: ", response);
+        console.log("response fetchFollowedUsers Profile: ", response);
         const followerIds = response.data.followers.map((follower) => follower._id);
         setFollowedUsers(followerIds);
-        setIsFollowed(followerIds.includes(id));
+
+        const isUserFollowed = followerIds.includes(id);
+        setIsFollowed(isUserFollowed);
+        setIsFollowRequested(response.data.followRequestsSend.some((request) => request._id === id));        
       } catch (error) {
         toast.error(error?.data?.message || error?.error);
         console.error('Error fetching followed users:', error);
@@ -46,8 +49,13 @@ const handleFollow = async (userIdToFollow) => {
     console.log("response follow", response);
     if (response.data.status === 'success') {
       toast.success("Started Following New Artist");
-      setFollowedUsers([...followedUsers, userIdToFollow]);
+      // setFollowedUsers([...followedUsers, userIdToFollow]);
       setIsFollowed(true);
+      setIsFollowRequested(false);  
+    } else if (response.data.status === 'requested') {
+      toast.info('Follow Request sent')
+      setIsFollowed(false);
+      setIsFollowRequested(true);
     } else {
       console.error('Error following user:', response);
       toast.error("Failed to follow artist");
@@ -67,6 +75,7 @@ const handleUnFollow = async (userIdToUnFollow) => {
       toast.success("UnFollowed Artist");
       setFollowedUsers(followedUsers.filter((id) => id !== userIdToUnFollow));
       setIsFollowed(false);
+      setIsFollowRequested(false);
     } else {
       console.error('Error unFollowing user:', response);
       toast.error("Failed to unFollow artist");
@@ -142,8 +151,13 @@ const handleUnFollow = async (userIdToUnFollow) => {
                   cursor: 'pointer',
                   }}
                   onClick={() => (isFollowed ? handleUnFollow(id) : handleFollow(id))}
+                  disabled={isFollowRequested}
               >
-                {isFollowed ? 'UnFollow' : 'Follow'}
+                {isFollowRequested
+                  ? 'Requested'
+                  : isFollowed
+                  ? 'UnFollow'
+                  : 'Follow'}
               </button>
               <ChatButton userId={id} />
             </div>
