@@ -33,16 +33,6 @@ const ArtistsList = () => {
     }
   }, [getArtists, userInfo]);
 
-  const handleFollowChange = (artistId, isFollowed) => {
-    setArtists((prevArtists) =>
-      prevArtists.map((artist) =>
-        artist._id === artistId
-          ? { ...artist, isFollowed, isFollowRequested: false }
-          : artist
-      )
-    );
-  };
-
   if (!userInfo) {
     return <div>Login To Get Artists Suggestion</div>;
   }
@@ -72,7 +62,7 @@ const ArtistsList = () => {
             >
               {artist.name}
             </span>
-            <FollowButton artistId={artist._id} onFollowChange={(isFollowed) => handleFollowChange(artist._id, isFollowed)} />
+            <FollowButton artistId={artist._id} />
           </Card.Body>
         </Card>
       ))}

@@ -17,7 +17,7 @@ import { useRef } from "react";
 import { useSelector } from 'react-redux';
 import FollowButton from "./FollowButton";
 
-function FollowingModal({ userDetails, onFollowChange }) {
+function FollowingModal({ userDetails }) {
     const { userInfo } = useSelector((state) => state.userAuth);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const btnRef = useRef(null);
@@ -45,7 +45,7 @@ function FollowingModal({ userDetails, onFollowChange }) {
                                             <Text ml={4}>{follower.name}</Text>
                                         </Box>
                                         {follower._id !== userInfo.id && (
-                                            <FollowButton artistId={follower._id} onFollowChange={onFollowChange} />
+                                            <FollowButton artistId={follower._id} />
                                         )}
                                     </Box>
                                 ))

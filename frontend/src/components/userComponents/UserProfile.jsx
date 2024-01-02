@@ -1,11 +1,13 @@
 import { ChakraProvider } from "@chakra-ui/react"
 import '../../styles/userProfile.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useSelector } from 'react-redux';
 import { useGetUserProfileMutation } from '../../slices/userApiSlice'
 import { useParams } from "react-router-dom";
-import FollowModal from './FollowersModal';
-import FollowingModal from "./FollowingsModal";
+// import FollowModal from './FollowersModal';
+// import FollowingModal from "./FollowingsModal";
+const FollowModal = lazy(() => import('./FollowersModal'))
+const FollowingModal = lazy(() => import('./FollowingsModal'))
 const UserProfile = () => {
   const VITE_PROFILE_IMAGE_DIR_PATH = import.meta.env.VITE_PROFILE_IMAGE_DIR_PATH;
   const { userInfo } = useSelector((state) => state.userAuth);
@@ -52,21 +54,6 @@ const UserProfile = () => {
     }));
   };
 
-  const updateFollowersCount = (artistId, isFollowed) => {
-    if (isFollowed) {
-      // Increase following count of the current user
-      setUserDetails((prevUserDetails) => ({
-        ...prevUserDetails,
-        following: [...prevUserDetails.following, artistId],
-      }));
-    } else {
-      // Decrease following count of the current user
-      setUserDetails((prevUserDetails) => ({
-        ...prevUserDetails,
-        following: prevUserDetails.following.filter((followedId) => followedId !== artistId),
-      }));
-    }
-  };
 
   return (
     <ChakraProvider>
@@ -100,22 +87,24 @@ const UserProfile = () => {
             <div className="follower-following">
               <div className="followers">
                 <div className="label">
-                  <FollowModal
-                    userDetails={userDetails}
-                    isOwnProfile={isOwnProfile} 
-                    onUpdateFollowersCount={updateFollowersCountOnRemove}
-                    onFollowChange={(isFollowed) => updateFollowersCount(isFollowed)}
-                  />
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <FollowModal
+                      userDetails={userDetails}
+                      isOwnProfile={isOwnProfile} 
+                      onUpdateFollowersCount={updateFollowersCountOnRemove}
+                    />
+                  </Suspense>
                 </div>
                 <div className="count">{userDetails.followers?.length || 0}</div>
               </div>
               <div className="icon"></div>
               <div className="following">
                 <div className="label">
-                  <FollowingModal
-                    userDetails={userDetails} 
-                    onFollowChange={(isFollowed) => updateFollowersCount(isFollowed)}
-                  />
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <FollowingModal
+                      userDetails={userDetails} 
+                    />
+                  </Suspense>
                 </div>
                 <div className="count">{userDetails.following?.length || 0}</div>
               </div>

@@ -19,7 +19,7 @@ import { useRemoveArtistMutation } from "../../slices/userApiSlice";
 import ConfirmationDialog from "./RemoveArtistConfDialog";
 import { useSelector } from "react-redux";
 import FollowButton from "./FollowButton";
-function FollowModal({ userDetails, isOwnProfile, onUpdateFollowersCount, onFollowChange }) {
+function FollowModal({ userDetails, isOwnProfile, onUpdateFollowersCount }) {
   const { userInfo } = useSelector((state) => state.userAuth);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef(null);
@@ -103,7 +103,7 @@ function FollowModal({ userDetails, isOwnProfile, onUpdateFollowersCount, onFoll
                       </Button>
                     ) : (
                       follower._id !== userInfo.id && (
-                        <FollowButton artistId={follower._id} onFollowChange={onFollowChange} />
+                        <FollowButton artistId={follower._id} />
                       )
                     )}
                   </Box>
