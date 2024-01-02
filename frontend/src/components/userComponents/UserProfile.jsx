@@ -39,7 +39,11 @@ const UserProfile = () => {
     }
   }, [getUserProfile, id, userInfo]);
 
-  const updateFollowersCount = (removedUserId) => {
+  if (!userInfo) {
+    return <div>Login To see Profile</div>;
+  }
+  
+  const updateFollowersCountOnRemove = (removedUserId) => {
     setUserDetails((prevUserDetails) => ({
       ...prevUserDetails,
       followers: prevUserDetails.followers.filter(
@@ -48,9 +52,21 @@ const UserProfile = () => {
     }));
   };
 
-  if (!userInfo) {
-    return <div>Login To see Profile</div>;
-  }
+  const updateFollowersCount = (artistId, isFollowed) => {
+    if (isFollowed) {
+      // Increase following count of the current user
+      setUserDetails((prevUserDetails) => ({
+        ...prevUserDetails,
+        following: [...prevUserDetails.following, artistId],
+      }));
+    } else {
+      // Decrease following count of the current user
+      setUserDetails((prevUserDetails) => ({
+        ...prevUserDetails,
+        following: prevUserDetails.following.filter((followedId) => followedId !== artistId),
+      }));
+    }
+  };
 
   return (
     <ChakraProvider>
@@ -87,7 +103,8 @@ const UserProfile = () => {
                   <FollowModal
                     userDetails={userDetails}
                     isOwnProfile={isOwnProfile} 
-                    onUpdateFollowersCount={updateFollowersCount}
+                    onUpdateFollowersCount={updateFollowersCountOnRemove}
+                    onFollowChange={(isFollowed) => updateFollowersCount(isFollowed)}
                   />
                 </div>
                 <div className="count">{userDetails.followers?.length || 0}</div>
@@ -97,6 +114,7 @@ const UserProfile = () => {
                 <div className="label">
                   <FollowingModal
                     userDetails={userDetails} 
+                    onFollowChange={(isFollowed) => updateFollowersCount(isFollowed)}
                   />
                 </div>
                 <div className="count">{userDetails.following?.length || 0}</div>

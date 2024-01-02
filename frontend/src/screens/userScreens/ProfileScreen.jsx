@@ -2,89 +2,22 @@ import { Link, useParams } from 'react-router-dom';
 import CategoriesTab from '../../components/userComponents/CategoriesTab';
 import UserProfile from '../../components/userComponents/UserProfile';
 import UserPosts from '../../components/userComponents/UserPosts';
-import { useSelector } from 'react-redux';
-import { useState, useEffect } from 'react';
-import { useFollowedUsersMutation, useFollowArtistMutation, useUnFollowArtistMutation } from '../../slices/userApiSlice';
-import { toast } from "react-toastify";
+import { useState } from 'react';
 import ChatButton from "../../components/userComponents/ChatButton";
-
+import FollowButton from '../../components/userComponents/FollowButton';
 
 const ProfileScreen = () => {
-  const { userInfo } = useSelector((state) => state.userAuth);
-  const [followedUsers, setFollowedUsers] = useState([]);
   const { id } = useParams();
   const [isFollowed, setIsFollowed] = useState(false);
   const [isFollowRequested, setIsFollowRequested] = useState(false);
 
   // If there's no ID in the params, it's the current user's profile
   const isCurrentUserProfile = !id;
-  const [fetchingFollowedUsers] = useFollowedUsersMutation()
-  const [followArtist] = useFollowArtistMutation()
-  const [unFollowArtist] = useUnFollowArtistMutation()
-
-  useEffect(() => {
-    const fetchFollowedUsers = async () => {
-      try {
-        const response = await fetchingFollowedUsers();
-        console.log("response fetchFollowedUsers Profile: ", response);
-        const followerIds = response.data.followers.map((follower) => follower._id);
-        setFollowedUsers(followerIds);
-
-        const isUserFollowed = followerIds.includes(id);
-        setIsFollowed(isUserFollowed);
-        setIsFollowRequested(response.data.followRequestsSend.some((request) => request._id === id));        
-      } catch (error) {
-        toast.error(error?.data?.message || error?.error);
-        console.error('Error fetching followed users:', error);
-      }
-    };
-
-    fetchFollowedUsers();
-  }, [id, fetchingFollowedUsers]);
-
-const handleFollow = async (userIdToFollow) => {
-  try {
-    const artistId = String(userIdToFollow);
-    const response = await followArtist(artistId);
-    console.log("response follow", response);
-    if (response.data.status === 'success') {
-      toast.success("Started Following New Artist");
-      // setFollowedUsers([...followedUsers, userIdToFollow]);
-      setIsFollowed(true);
-      setIsFollowRequested(false);  
-    } else if (response.data.status === 'requested') {
-      toast.info('Follow Request sent')
-      setIsFollowed(false);
-      setIsFollowRequested(true);
-    } else {
-      console.error('Error following user:', response);
-      toast.error("Failed to follow artist");
-    }
-  } catch (err) {
-    console.error('Error following user:', err);
-    toast.error(err?.data?.message || err?.error);
-  }
-};
-
-const handleUnFollow = async (userIdToUnFollow) => {
-  try {
-    const artistId = String(userIdToUnFollow);
-    const response = await unFollowArtist(artistId);
-
-    if (response.data.status === 'success') {
-      toast.success("UnFollowed Artist");
-      setFollowedUsers(followedUsers.filter((id) => id !== userIdToUnFollow));
-      setIsFollowed(false);
-      setIsFollowRequested(false);
-    } else {
-      console.error('Error unFollowing user:', response);
-      toast.error("Failed to unFollow artist");
-    }
-  } catch (err) {
-    console.error('Error unFollowing user:', err);
-    toast.error(err?.data?.message || err?.error);
-  }
-};
+  
+  const handleFollowChange = (isFollowed) => {
+    setIsFollowed(isFollowed);
+    setIsFollowRequested(false);
+  };
 
   return (
     <div>
@@ -136,29 +69,8 @@ const handleUnFollow = async (userIdToUnFollow) => {
                 cursor: 'pointer'
               }}
             >
-              <button
-                className="followButton"
-                style={{
-                  color: 'white',  
-                  backgroundColor: '#007BFF',  
-                  fontSize: 16,
-                  fontFamily: 'Roboto',
-                  fontWeight: '700',
-                  padding: '8px 16px',  
-                  marginRight: '10px',
-                  border: 'none',  
-                  borderRadius: '4px',  
-                  cursor: 'pointer',
-                  }}
-                  onClick={() => (isFollowed ? handleUnFollow(id) : handleFollow(id))}
-                  disabled={isFollowRequested}
-              >
-                {isFollowRequested
-                  ? 'Requested'
-                  : isFollowed
-                  ? 'UnFollow'
-                  : 'Follow'}
-              </button>
+              {/* <FollowButton artistId={id} onFollowChange={(isFollowed) => handleFollowChange(isFollowed)} /> */}
+              <FollowButton artistId={id} onFollowChange={handleFollowChange} />
               <ChatButton userId={id} />
             </div>
           )}

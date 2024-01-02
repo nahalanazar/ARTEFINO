@@ -1,18 +1,15 @@
 import Card from 'react-bootstrap/Card';
-import Button from 'react-bootstrap/Button';
 import { useEffect, useState } from 'react';
-import { useGetArtistsMutation, useFollowArtistMutation, useUnFollowArtistMutation } from '../../slices/userApiSlice';
-import { toast } from "react-toastify";
+import { useGetArtistsMutation } from '../../slices/userApiSlice';
 import { useNavigate } from "react-router-dom";
 import { useSelector } from 'react-redux';
+import FollowButton from './FollowButton';
 
 const ArtistsList = () => {
   const { userInfo } = useSelector((state) => state.userAuth);
   const [getArtists] = useGetArtistsMutation();
   const [artists, setArtists] = useState([]);
   const VITE_PROFILE_IMAGE_DIR_PATH = import.meta.env.VITE_PROFILE_IMAGE_DIR_PATH;
-  const [followArtist] = useFollowArtistMutation();
-  const [unFollowArtist] = useUnFollowArtistMutation();
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -36,61 +33,14 @@ const ArtistsList = () => {
     }
   }, [getArtists, userInfo]);
 
-
-  const handleFollow = async (userIdToFollow) => {
-    try {
-      const artistId = String(userIdToFollow);
-
-      // Check if the artist is already followed
-      const isAlreadyFollowed = artists.some((artist) => artist._id === userIdToFollow && artist.isFollowed);
-
-      // If already followed, unfollow; otherwise, follow
-      if (isAlreadyFollowed) {
-        const response = await unFollowArtist(artistId);
-
-        if (response.data.status === 'success') {
-          toast.warning('Un Followed');
-          setArtists((prevArtists) =>
-            prevArtists.map((artist) =>
-              artist._id === userIdToFollow
-                ? { ...artist, isFollowed: false, isFollowRequested: false }
-                : artist
-            )
-          );
-        } else {
-          console.error('Error un Following user:', response);
-          toast.error('Failed to un Follow artist');
-        }
-      } else {
-        const response = await followArtist(artistId);
-
-        if (response.data.status === 'success') {
-          toast.success('Started Following New Artist');
-          setArtists((prevArtists) =>
-            prevArtists.map((artist) =>
-              artist._id === userIdToFollow
-                ? { ...artist, isFollowed: true, isFollowRequested: false }
-                : artist
-            )
-          );
-        } else if (response.data.status === 'requested') {
-          toast.info('Follow request sent');
-          setArtists((prevArtists) =>
-            prevArtists.map((artist) =>
-              artist._id === userIdToFollow
-                ? { ...artist, isFollowed: false, isFollowRequested: true }
-                : artist
-            )
-          );
-        } else {
-          console.error('Error following user:', response);
-          toast.error('Failed to follow artist');
-        }
-      }
-    } catch (err) {
-      console.error('Error following user:', err);
-      toast.error(err?.data?.message || err?.error);
-    }
+  const handleFollowChange = (artistId, isFollowed) => {
+    setArtists((prevArtists) =>
+      prevArtists.map((artist) =>
+        artist._id === artistId
+          ? { ...artist, isFollowed, isFollowRequested: false }
+          : artist
+      )
+    );
   };
 
   if (!userInfo) {
@@ -122,13 +72,7 @@ const ArtistsList = () => {
             >
               {artist.name}
             </span>
-            <Button
-              variant="primary"
-              onClick={() => handleFollow(artist._id)}
-              disabled={artist.isFollowRequested}
-            >
-              {artist.isFollowed ? 'Following' : (artist.isFollowRequested ? 'Requested' : 'Follow')}
-            </Button>
+            <FollowButton artistId={artist._id} onFollowChange={(isFollowed) => handleFollowChange(artist._id, isFollowed)} />
           </Card.Body>
         </Card>
       ))}
