@@ -14,6 +14,7 @@ import {
     forgotPassword,
     resetPassword,
     logoutUser,
+    getAllUsers,
     getUserProfile,
     updateUserProfile,
     getFollowedUsers,
@@ -74,14 +75,15 @@ router.post('/googleRegister', googleRegisterUser)
 router.post('/forgotPassword', forgotPassword)
 router.post('/resetPassword', authenticateUser, resetPassword)
 router.post('/logout', logoutUser)
+router.post('/getUsers', authenticateUser, getAllUsers);
 router.get('/profile/:userId', authenticateUser, getUserProfile)
 router.get('/userPosts/:userId', authenticateUser, getUserPosts)
 // router.put('/profile', authenticateUser, multerUploadUserProfile.single('profileImage'), updateUserProfile)
 router.post('/profile', authenticateUser, updateUserProfile)
 router.get('/getCategories', getAllCategories)
 router.post('/addProduct', authenticateUser, createProduct)
-router.get('/showLandingPosts', showLandingPosts)
-router.get('/showPosts', authenticateUser, showPosts)
+router.get('/showLandingPosts/:offset', showLandingPosts)
+router.get('/showPosts/:offset', authenticateUser, showPosts)
 router.get('/postDetails/:postId', authenticateUser, postDetails)
 router.delete('/removePost/:postId', authenticateUser, removePost)
 router.post('/updatePost/:postId', authenticateUser, updatePost)

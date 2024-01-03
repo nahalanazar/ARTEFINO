@@ -19,7 +19,7 @@ import { useRemoveArtistMutation } from "../../slices/userApiSlice";
 import ConfirmationDialog from "./RemoveArtistConfDialog";
 import { useSelector } from "react-redux";
 import FollowButton from "./FollowButton";
-function FollowModal({ userDetails, isOwnProfile, onUpdateFollowersCount }) {
+function FollowModal({ userDetails, isOwnProfile, onUpdateFollowersCount, fetchUserDetails }) {
   const { userInfo } = useSelector((state) => state.userAuth);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef(null);
@@ -41,6 +41,7 @@ function FollowModal({ userDetails, isOwnProfile, onUpdateFollowersCount }) {
       if (response.data.status === "success") {
         toast.warning(`Removed ${followerToRemove.name}`);
         onUpdateFollowersCount(followerToRemove._id);
+        // fetchUserDetails();
       } else {
         console.error("Error Removing artist:", response);
         toast.error("Failed to Remove artist");
@@ -103,7 +104,7 @@ function FollowModal({ userDetails, isOwnProfile, onUpdateFollowersCount }) {
                       </Button>
                     ) : (
                       follower._id !== userInfo.id && (
-                        <FollowButton artistId={follower._id} />
+                        <FollowButton artistId={follower._id} fetchUserDetails={fetchUserDetails} />
                       )
                     )}
                   </Box>

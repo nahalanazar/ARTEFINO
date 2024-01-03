@@ -586,6 +586,19 @@ const showArtists = asyncHandler(async (req, res) => {
   res.status(200).json(artists);
 });
 
+// desc    GET all users
+// route   GET /api/users/getUsers
+// access  PRIVATE
+const getAllUsers = asyncHandler(async (req, res) => {
+    const usersData = await User.find({}, { name: 1, email: 1, mobile: 1, is_blocked: 1, profileImageName: 1 });
+    if(usersData){
+        res.status(200).json({ usersData });
+    }else{
+        res.status(404);
+        throw new Error("Users data fetch failed.");
+    }
+});
+
 // desc   Show all artists except the current user in search
 // route  GET /api/users?search=name/email
 // access Private
@@ -633,6 +646,7 @@ export {
     forgotPassword,
     resetPassword,
     logoutUser,
+    getAllUsers,
     getUserProfile,
     updateUserProfile,
     getFollowedUsers,

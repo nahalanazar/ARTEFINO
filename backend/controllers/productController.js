@@ -74,8 +74,10 @@ const createProduct = asyncHandler(async (req, res) => {
 const showPosts = asyncHandler(async (req, res) => {
     try {
         const currentUser = req.user;
-
-        const posts = await Product.find({})
+        const offset = req.params.offset || 2
+        const limit = 2
+        // const {offset = 2, limit = 2} = req.params
+        const posts = await Product.find({}).skip(offset).limit(limit)
             .populate('category stores comments.user')
             .exec();
 
@@ -110,18 +112,16 @@ const showPosts = asyncHandler(async (req, res) => {
 // route  GET /api/users/showPosts
 // access Public
 const showLandingPosts = asyncHandler(async (req, res) => {
-    try {
-        const posts = await Product.find({
-            isRemoved: false,
-        }).populate('category stores comments.user').exec();
+    const offset = req.params.offset || 2
+    const limit = 2
+    const posts = await Product.find({
+        isRemoved: false,
+    }).skip(offset).limit(limit).populate('category stores comments.user').exec();
 
-        const nonPrivatePosts = posts.filter(post => !post.stores.isPrivate && !post.stores.is_blocked);
+    const nonPrivatePosts = posts.filter(post => !post.stores.isPrivate && !post.stores.is_blocked);
 
-        res.status(200).json(nonPrivatePosts);
-    } catch (error) {
-        console.error("Error fetching posts:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
+    res.status(200).json(nonPrivatePosts);
+    
 });
 
 

@@ -58,6 +58,12 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 method: 'POST'
             })
         }),
+        getUsersData: builder.mutation({
+            query: () => ({
+                url: `${USERS_URL}/getUsers`,
+                method: 'POST'
+            })
+        }),
         getUserProfile: builder.mutation({
             query: (userId) => ({
                 url: `${USERS_URL}/profile/${userId}`,
@@ -91,14 +97,14 @@ export const userApiSlice = apiSlice.injectEndpoints({
             })
         }),
         showPosts: builder.mutation({
-            query: () => ({
-                url: `${USERS_URL}/showPosts`,
+            query: (data) => ({
+                url: `${USERS_URL}/showPosts/${data}`,
                 method: 'GET'
-            })
+            }) 
         }),
         showLandingPosts: builder.mutation({
-            query: () => ({
-                url: `${USERS_URL}/showLandingPosts`,
+            query: (data) => ({
+                url: `${USERS_URL}/showLandingPosts/${data}`,
                 method: 'GET'
             })
         }),
@@ -280,6 +286,7 @@ export const {
     useForgotPasswordMutation,
     useResetPasswordMutation,
     useGoogleRegisterMutation,
+    useGetUsersDataMutation,
     useGetUserProfileMutation,
     useGetUserPostsMutation,
     useUpdateUserMutation,

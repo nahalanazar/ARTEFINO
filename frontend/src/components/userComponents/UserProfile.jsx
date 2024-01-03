@@ -19,8 +19,7 @@ const UserProfile = () => {
   // Determine if it's the user's own profile
   const isOwnProfile = userInfo && userDetails && userDetails._id === userInfo.id;
 
-  useEffect(() => {
-    const fetchUserDetails = async () => {
+  const fetchUserDetails = async () => {
       try {
         const userIdToFetch = String(id || userInfo.id); // Use id from params if available, otherwise use current user's id
         const response = await getUserProfile(userIdToFetch).unwrap();
@@ -35,7 +34,10 @@ const UserProfile = () => {
       } catch (error) {
         console.error('Error fetching user details:', error);
       }
-    };
+  };
+  
+  useEffect(() => {
+    
     if (userInfo) {
       fetchUserDetails();
     }
@@ -90,8 +92,9 @@ const UserProfile = () => {
                   <Suspense fallback={<div>Loading...</div>}>
                     <FollowModal
                       userDetails={userDetails}
-                      isOwnProfile={isOwnProfile} 
+                      isOwnProfile={isOwnProfile}
                       onUpdateFollowersCount={updateFollowersCountOnRemove}
+                      fetchUserDetails={fetchUserDetails}
                     />
                   </Suspense>
                 </div>
@@ -103,6 +106,7 @@ const UserProfile = () => {
                   <Suspense fallback={<div>Loading...</div>}>
                     <FollowingModal
                       userDetails={userDetails} 
+                      fetchUserDetails={fetchUserDetails}
                     />
                   </Suspense>
                 </div>

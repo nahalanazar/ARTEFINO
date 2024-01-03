@@ -3,7 +3,7 @@ import { useFollowArtistMutation, useUnFollowArtistMutation, useFollowedUsersMut
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
-const FollowButton = ({ artistId }) => {
+const FollowButton = ({ artistId, fetchUserDetails }) => {
   const { userInfo } = useSelector((state) => state.userAuth);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isFollowRequested, setIsFollowRequested] = useState(false);
@@ -38,6 +38,7 @@ const FollowButton = ({ artistId }) => {
         toast.success('Started Following New Artist');
         setIsFollowing(true);
         setIsFollowRequested(false);
+        fetchUserDetails()
       } else if (response.data.status === 'requested') {
         toast.info('Follow Request sent');
         setIsFollowing(false);
@@ -60,6 +61,7 @@ const FollowButton = ({ artistId }) => {
         toast.success('UnFollowed Artist');
         setIsFollowing(false);
         setIsFollowRequested(false);
+        fetchUserDetails()
       } else {
         console.error('Error unFollowing user:', response);
         toast.error('Failed to unFollow artist');

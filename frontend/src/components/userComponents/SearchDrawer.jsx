@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux';
 import { Button } from 'react-bootstrap'
 import { toast } from "react-toastify";
 import Loader from "../../components/Loader";
-import { useGetUsersDataMutation } from "../../slices/adminApiSlice";
+import { useGetUsersDataMutation } from "../../slices/userApiSlice";
 import { useNavigate } from 'react-router-dom';
 
 const SearchDrawer = () => {
