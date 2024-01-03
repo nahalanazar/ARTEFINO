@@ -5,6 +5,7 @@ import generateAdminToken from '../utils/jwtConfig/adminJwtConfig/generateAdminT
 import destroyAdminToken from '../utils/jwtConfig/adminJwtConfig/destroyAdminToken.js'
 import { fetchAllUsers, deleteUser, blockUser, unblockUser } from '../utils/helpers/adminHelper.js';
 import Product from '../models/productModel.js';
+import User from '../models/userModel.js';
 
 // desc    Auth admin/set token
 // route   POST /api/admin/auth
@@ -35,7 +36,6 @@ const authAdmin = asyncHandler(async (req, res) => {
         throw new Error('Invalid Email or Password, Admin authentication failed.')
     }
 })
-
 
 // desc    Register admin
 // route   POST /api/admin/register
@@ -251,6 +251,126 @@ const removeReportedPost = asyncHandler(async (req, res) => {
     res.status(200).json({status: 'success', message: 'Report marked as reviewed'});
 });
 
+// desc    DashboardDatas
+// route   GET /api/admin/dashboardDatas
+// access  PRIVATE
+// const dashboardData = asyncHandler(async (req, res) => {
+//     // Get new users registered in the past 7 days
+//     const newUserCounts = await User.aggregate([
+//       {
+//         $match: {
+//           createdAt: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) },
+//         },
+//       },
+//       {
+//         $group: {
+//           _id: {
+//             $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
+//           },
+//           count: { $sum: 1 },
+//         },
+//       },
+//     ]);
+
+
+//     // Get new users registered per Month
+//     // const newUserCounts = await User.aggregate([
+//     //     {
+//     //         $match: {
+//     //             createdAt: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) },
+//     //         },
+//     //     },
+//     //     {
+//     //         $group: {
+//     //             _id: {
+//     //                 $dateToString: { format: '%Y-%m', date: '$createdAt' }, // Change the format to '%Y-%m'
+//     //             },
+//     //             count: { $sum: 1 },
+//     //         },
+//     //     },
+//     // ]);
+
+//     // Get new posts created in the past 7 days
+//     const newPostCounts = await Product.aggregate([
+//       {
+//         $match: {
+//           dateListed: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) },
+//         },
+//       },
+//       {
+//         $group: {
+//           _id: {
+//             $dateToString: { format: '%Y-%m-%d', date: '$dateListed' },
+//           },
+//           count: { $sum: 1 },
+//         },
+//       },
+//     ]);
+
+//     const responseData = {
+//       newUsers: newUserCounts.map((item) => item.count),
+//       newPosts: newPostCounts.map((item) => item.count),
+//     };
+//     console.log("responseDASH: ", responseData)
+//     res.json(responseData);
+// });
+
+const dashboardData = asyncHandler(async (req, res) => {
+  // Get new users registered in the past 7 days
+  const newUserCounts = await User.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000),
+        },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          $dateToString: {
+            format: '%Y-%m-%d',
+            date: '$createdAt',
+          },
+        },
+        count: {
+          $sum: 1,
+        },
+      },
+    },
+  ]);
+
+  // Get new posts created in the past 7 days
+  const newPostCounts = await Product.aggregate([
+    {
+      $match: {
+        dateListed: {
+          $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000),
+        },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          $dateToString: {
+            format: '%Y-%m-%d',
+            date: '$dateListed',
+          },
+        },
+        count: {
+          $sum: 1,
+        },
+      },
+    },
+  ]);
+
+  const responseData = {
+    newUserCounts: newUserCounts.map((item) => ({ _id: item._id, count: item.count })),
+    newPostCounts: newPostCounts.map((item) => ({ _id: item._id, count: item.count }))
+  };
+  console.log('responseDASH: ', responseData);
+  res.json(responseData);
+});
 
 export {
     authAdmin,
@@ -263,5 +383,6 @@ export {
     blockUserData,
     unblockUserData,
     showReportedPosts,
-    removeReportedPost
+    removeReportedPost,
+    dashboardData
 }

@@ -14,7 +14,8 @@ import {
     blockUserData,
     unblockUserData,
     showReportedPosts,
-    removeReportedPost
+    removeReportedPost,
+    dashboardData
 } from '../controllers/adminController.js'
 
 import {
@@ -40,5 +41,6 @@ router.put('/unListCategory', authenticateAdmin, unListCategoryData);
 router.put('/reListCategory', authenticateAdmin, reListCategoryData);
 router.get('/reportedPosts', authenticateAdmin, showReportedPosts);
 router.put('/removeReportedPost', authenticateAdmin, removeReportedPost);
+router.get('/dashboardData', authenticateAdmin, dashboardData);
 
 export default router

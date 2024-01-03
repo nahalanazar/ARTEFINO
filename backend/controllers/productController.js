@@ -165,18 +165,18 @@ const removePost = asyncHandler(async (req, res) => {
     }
 
     // Remove images from the server
-    if (post.images && post.images.length > 0) {
-        post.images.forEach((imageName) => {
-            const imagePath = path.join(__dirname, '../Public/ProductImages', imageName);
-            // Check if the image file exists before attempting to delete
-            if (fs.existsSync(imagePath)) {
-                fs.unlinkSync(imagePath);
-                console.log(`Deleted image: ${imageName}`);
-            } else {
-                console.log(`Image not found: ${imageName}`);
-            }
-        });
-    }
+    // if (post.images && post.images.length > 0) {
+    //     post.images.forEach((imageName) => {
+    //         const imagePath = path.join(__dirname, '../Public/ProductImages', imageName);
+    //         // Check if the image file exists before attempting to delete
+    //         if (fs.existsSync(imagePath)) {
+    //             fs.unlinkSync(imagePath);
+    //             console.log(`Deleted image: ${imageName}`);
+    //         } else {
+    //             console.log(`Image not found: ${imageName}`);
+    //         }
+    //     });
+    // }
 
     await Product.deleteOne({ _id: postId });
     res.status(200).json({ status: 'success', message: 'Removed Post successfully' });
