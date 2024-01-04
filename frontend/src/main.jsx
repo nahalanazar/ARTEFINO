@@ -9,7 +9,7 @@ import App from './App.jsx'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './index.css'
 import ErrorBoundary from './components/ErrorBoundary.jsx';
-
+import ErrorPage from './components/userComponents/ErrorPage.jsx';
 //? ==================================== User Screens Import ====================================
 import UserPrivateRoutes from './screens/userScreens/PrivateRoutes.jsx';
 import UserHomeScreen from './screens/userScreens/HomeScreen.jsx';
@@ -61,8 +61,7 @@ export { UserLoginScreen };
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path='/' element={<App/>} >
-<Route path='*' element={<ErrorBoundary />} />
-
+<Route path='*' element={<ErrorPage />} />
       { /* ===================================== User Routes ===================================== */}
       <Route index={true} path='/' element={<UserHomeScreen className="w-100" /> } />
       <Route path='/login' element={ <UserLoginScreen /> } />

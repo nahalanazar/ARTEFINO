@@ -74,13 +74,9 @@ const createProduct = asyncHandler(async (req, res) => {
 const showPosts = asyncHandler(async (req, res) => {
     try {
         const currentUser = req.user;
-        const offset = req.params.offset || 2
-        const limit = 2
-        // const {offset = 2, limit = 2} = req.params
-        const posts = await Product.find({}).skip(offset).limit(limit)
+        const posts = await Product.find({})
             .populate('category stores comments.user')
             .exec();
-
         const filteredPosts = posts.filter(post => (
             !post.isRemoved &&
             (post.stores.isPrivate === false || currentUser.following.includes(post.stores._id) || post.stores._id.equals(currentUser._id)) &&
@@ -100,7 +96,6 @@ const showPosts = asyncHandler(async (req, res) => {
 
             return timeDifference;
         });
-
         res.status(200).json(sortedPosts);
     } catch (error) {
         console.error('Error fetching, filtering, and sorting posts:', error);
@@ -112,11 +107,9 @@ const showPosts = asyncHandler(async (req, res) => {
 // route  GET /api/users/showPosts
 // access Public
 const showLandingPosts = asyncHandler(async (req, res) => {
-    const offset = req.params.offset || 2
-    const limit = 2
     const posts = await Product.find({
         isRemoved: false,
-    }).skip(offset).limit(limit).populate('category stores comments.user').exec();
+    }).populate('category stores comments.user').exec();
 
     const nonPrivatePosts = posts.filter(post => !post.stores.isPrivate && !post.stores.is_blocked);
 

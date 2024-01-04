@@ -58,6 +58,23 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                     userId: userId
                 }));
             }
+            // if (selectedChat && selectedChat.users.some(user => user._id === userId)) {
+            //     console.log("selectedchat:", selectedChat)
+            //     // Update the online status for the specific user in the selected chat
+            //     setSelectedChat(prevChat => {
+            //         const updatedUsers = prevChat.users.map(user => {
+            //         if (user._id === userId) {
+            //             return { ...user, online, lastSeen: online ? null : new Date(lastSeen) };
+            //         }
+            //         return user;
+            //     });
+            //         return {
+            //             ...prevChat,
+            //             users: updatedUsers,
+            //             lastSeen: online ? null : new Date(lastSeen),
+            //         };
+            //     });
+            // }
         });
         socket.on("connected", () => setSocketConnected(true))
         socket.on("typing", () => setIsTyping(true))
@@ -142,39 +159,79 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
 
     useEffect(() => {
-        socket.on("message received", (newMessageReceived) => {
+        const handleNewMessage = (newMessageReceived) => {
             if (!selectedChatCompare || selectedChatCompare._id !== newMessageReceived.chat._id) {
                 const existingNotification = notification.find((n) => n.chat._id === newMessageReceived.chat._id);
 
                 if (!existingNotification) {
-                    // Notify users about the new message
-                    // const senderId = newMessageReceived.sender._id;
-                    // const receiverId = userId; // Assume the current user is the receiver
-                    // createNotification(senderId, receiverId, `New message from ${getSender(userId, newMessageReceived.chat.users)}`);
-                    
                     setNotification([newMessageReceived, ...notification]);
-                    setFetchAgain(!fetchAgain)
+                    setFetchAgain(!fetchAgain);
                 } else {
-                    // Update the existing notification
                     setNotification([
-                    ...notification.filter((n) => n.chat._id !== newMessageReceived.chat._id),
-                    newMessageReceived,
+                        ...notification.filter((n) => n.chat._id !== newMessageReceived.chat._id),
+                        newMessageReceived,
                     ]);
                     setFetchAgain(!fetchAgain);
                 }
             } else {
-                setMessages([...messages, newMessageReceived]);
+                setMessages((prevMessages) => {
+                    if (prevMessages) {
+                        return [...prevMessages, newMessageReceived];
+                    } else {
+                        return [newMessageReceived];
+                    }
+                });
             }
-        });
-        return () => {
-            // Cleanup event listeners when the component unmounts
-            socket.off("connected");
-            socket.off("typing");
-            socket.off("stop typing");
-            socket.off("userStatus");
         };
 
-    },[notification, selectedChat]);
+        socket.on("message received", handleNewMessage);
+
+        return () => {
+            socket.off("message received", handleNewMessage);
+        };
+    }, [notification, selectedChat]);
+
+    
+    // useEffect(() => {
+    //     socket.on("message received", (newMessageReceived) => {
+    //         if (!selectedChatCompare || selectedChatCompare._id !== newMessageReceived.chat._id) {
+    //             const existingNotification = notification.find((n) => n.chat._id === newMessageReceived.chat._id);
+
+    //             if (!existingNotification) {
+    //                 // Notify users about the new message
+    //                 // const senderId = newMessageReceived.sender._id;
+    //                 // const receiverId = userId; // Assume the current user is the receiver
+    //                 // createNotification(senderId, receiverId, `New message from ${getSender(userId, newMessageReceived.chat.users)}`);
+                    
+    //                 setNotification([newMessageReceived, ...notification]);
+    //                 setFetchAgain(!fetchAgain)
+    //             } else {
+    //                 // Update the existing notification
+    //                 setNotification([
+    //                 ...notification.filter((n) => n.chat._id !== newMessageReceived.chat._id),
+    //                 newMessageReceived,
+    //                 ]);
+    //                 setFetchAgain(!fetchAgain);
+    //             }
+    //         } else {
+    //             // setMessages([...messages, newMessageReceived]);
+    //             // setMessages(prevMessages => [...prevMessages, newMessageReceived]);
+    //             setMessages(prevMessages => {
+    //                 if (prevMessages) {
+    //                     return [...prevMessages, newMessageReceived];
+    //                 } else {
+    //                     return [newMessageReceived];
+    //                 }
+    //             });
+    //         }
+    //     });
+    //     return () => {
+    //         // Cleanup event listeners when the component unmounts
+    //         socket.off("connected");
+    //         socket.off("userStatus");
+    //     };
+
+    // },[notification, selectedChat]);
 
     useEffect(() => {
         const fetchNotificationsData = async () => {

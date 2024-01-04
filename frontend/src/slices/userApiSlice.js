@@ -97,14 +97,14 @@ export const userApiSlice = apiSlice.injectEndpoints({
             })
         }),
         showPosts: builder.mutation({
-            query: (data) => ({
-                url: `${USERS_URL}/showPosts/${data}`,
+            query: () => ({
+                url: `${USERS_URL}/showPosts`,
                 method: 'GET'
             }) 
         }),
         showLandingPosts: builder.mutation({
-            query: (data) => ({
-                url: `${USERS_URL}/showLandingPosts/${data}`,
+            query: () => ({
+                url: `${USERS_URL}/showLandingPosts`,
                 method: 'GET'
             })
         }),

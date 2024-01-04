@@ -50,7 +50,7 @@ const Header = () => {
                     objectFit: 'cover'
                   }}
                 />
-              </Navbar.Brand>
+              </Navbar.Brand> 
             </LinkContainer>
             {userInfo && (
               <Suspense fallback={<div>Loading...</div>}>
