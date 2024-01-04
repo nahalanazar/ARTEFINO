@@ -2,29 +2,56 @@ import { Link, useParams } from 'react-router-dom';
 import CategoriesTab from '../../components/userComponents/CategoriesTab';
 import UserProfile from '../../components/userComponents/UserProfile';
 import UserPosts from '../../components/userComponents/UserPosts';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ChatButton from "../../components/userComponents/ChatButton";
 import FollowButton from '../../components/userComponents/FollowButton';
+import { useGetUserProfileMutation } from '../../slices/userApiSlice'
+import { useSelector } from 'react-redux';
 
 const ProfileScreen = () => {
   const { id } = useParams();
   const [isFollowed, setIsFollowed] = useState(false);
   const [isFollowRequested, setIsFollowRequested] = useState(false);
+  const [getUserProfile] = useGetUserProfileMutation()
+  const [userDetails, setUserDetails] = useState({})
+  const { userInfo } = useSelector((state) => state.userAuth);
 
   // If there's no ID in the params, it's the current user's profile
   const isCurrentUserProfile = !id;
-  
-  const handleFollowChange = (isFollowed) => {
-    setIsFollowed(isFollowed);
-    setIsFollowRequested(false);
+
+  useEffect(() => {
+    
+    if (userInfo) {
+      fetchUserDetails();
+    }
+  }, [getUserProfile, id, userInfo]);
+
+  const fetchUserDetails = async () => {
+      try {
+        const userIdToFetch = String(id || userInfo.id); // Use id from params if available, otherwise use current user's id
+        const response = await getUserProfile(userIdToFetch).unwrap();
+        setUserDetails(response.user)
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
   };
+
+  const updateFollowersCountOnRemove = (removedUserId) => {
+    setUserDetails((prevUserDetails) => ({
+      ...prevUserDetails,
+      followers: prevUserDetails.followers.filter(
+        (follower) => follower._id !== removedUserId
+      ),
+    }));
+  };
+
 
   return (
     <div>
       <CategoriesTab />
       <div style={{ display: 'flex' }}>
         <div>
-          <UserProfile />
+          <UserProfile UserDetails={userDetails} fetchUserDetails={fetchUserDetails} updateFollowersCountOnRemove={updateFollowersCountOnRemove} />
           {isCurrentUserProfile ? (
             <Link to="/updateProfile">
               <div
@@ -70,7 +97,7 @@ const ProfileScreen = () => {
               }}
             >
               {/* <FollowButton artistId={id} onFollowChange={(isFollowed) => handleFollowChange(isFollowed)} /> */}
-              <FollowButton artistId={id} onFollowChange={handleFollowChange} />
+              <FollowButton artistId={id} fetchUserDetails={fetchUserDetails} />
               <ChatButton userId={id} />
             </div>
           )}

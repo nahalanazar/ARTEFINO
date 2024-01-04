@@ -1,60 +1,32 @@
 import { ChakraProvider } from "@chakra-ui/react"
 import '../../styles/userProfile.css';
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useGetUserProfileMutation } from '../../slices/userApiSlice'
-import { useParams } from "react-router-dom";
-// import FollowModal from './FollowersModal';
-// import FollowingModal from "./FollowingsModal";
 const FollowModal = lazy(() => import('./FollowersModal'))
 const FollowingModal = lazy(() => import('./FollowingsModal'))
-const UserProfile = () => {
+const UserProfile = ({UserDetails, fetchUserDetails, updateFollowersCountOnRemove}) => {
   const VITE_PROFILE_IMAGE_DIR_PATH = import.meta.env.VITE_PROFILE_IMAGE_DIR_PATH;
   const { userInfo } = useSelector((state) => state.userAuth);
-  const { id } = useParams()
-  const [getUserProfile] = useGetUserProfileMutation()
-  const [userDetails, setUserDetails] = useState({});
   const [memberSince, setMemberSince] = useState('');
-  const imageUrl = userDetails.profileImageName? userDetails.profileImageName: VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg'
+  const imageUrl = UserDetails.profileImageName? UserDetails.profileImageName: VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg'
   // Determine if it's the user's own profile
-  const isOwnProfile = userInfo && userDetails && userDetails._id === userInfo.id;
+  const isOwnProfile = userInfo && UserDetails && UserDetails._id === userInfo.id;
 
-  const fetchUserDetails = async () => {
-      try {
-        const userIdToFetch = String(id || userInfo.id); // Use id from params if available, otherwise use current user's id
-        const response = await getUserProfile(userIdToFetch).unwrap();
-        setUserDetails(response.user);
-        const createdAt = new Date(response.user.createdAt);
-        const formattedJoiningDate = createdAt.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        })
-        setMemberSince(`Member since: ${formattedJoiningDate}`);
-      } catch (error) {
-        console.error('Error fetching user details:', error);
-      }
-  };
-  
   useEffect(() => {
-    
-    if (userInfo) {
-      fetchUserDetails();
+    if (UserDetails.createdAt) {
+      const createdAt = new Date(UserDetails.createdAt);
+      const formattedJoiningDate = createdAt.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      setMemberSince(`Member since: ${formattedJoiningDate}`);
     }
-  }, [getUserProfile, id, userInfo]);
+  }, [UserDetails]);
 
   if (!userInfo) {
     return <div>Login To see Profile</div>;
   }
-  
-  const updateFollowersCountOnRemove = (removedUserId) => {
-    setUserDetails((prevUserDetails) => ({
-      ...prevUserDetails,
-      followers: prevUserDetails.followers.filter(
-        (follower) => follower._id !== removedUserId
-      ),
-    }));
-  };
 
 
   return (
@@ -80,7 +52,7 @@ const UserProfile = () => {
           </div>
           <div className="profile-details-container">
             <div className="profile-name">
-              <div className="name">{userDetails.name}</div>
+              <div className="name">{UserDetails.name}</div>
             </div>
             <div className="member-since">
               <div className="icon"></div>
@@ -91,26 +63,26 @@ const UserProfile = () => {
                 <div className="label">
                   <Suspense fallback={<div>Loading...</div>}>
                     <FollowModal
-                      userDetails={userDetails}
+                      userDetails={UserDetails}
                       isOwnProfile={isOwnProfile}
                       onUpdateFollowersCount={updateFollowersCountOnRemove}
                       fetchUserDetails={fetchUserDetails}
                     />
                   </Suspense>
                 </div>
-                <div className="count">{userDetails.followers?.length || 0}</div>
+                <div className="count">{UserDetails.followers?.length  || 0}</div>
               </div>
               <div className="icon"></div>
               <div className="following">
                 <div className="label">
                   <Suspense fallback={<div>Loading...</div>}>
                     <FollowingModal
-                      userDetails={userDetails} 
+                      userDetails={UserDetails} 
                       fetchUserDetails={fetchUserDetails}
                     />
                   </Suspense>
                 </div>
-                <div className="count">{userDetails.following?.length || 0}</div>
+                <div className="count">{ UserDetails.following?.length || 0}</div>
               </div>
             </div>
           </div>

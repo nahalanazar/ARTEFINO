@@ -5,13 +5,14 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import FollowButton from './FollowButton';
 
-const ArtistsList = () => {
+const ArtistsList = ({fetchUserDetails}) => {
   const { userInfo } = useSelector((state) => state.userAuth);
   const [getArtists] = useGetArtistsMutation();
   const [artists, setArtists] = useState([]);
   const VITE_PROFILE_IMAGE_DIR_PATH = import.meta.env.VITE_PROFILE_IMAGE_DIR_PATH;
   const navigate = useNavigate()
 
+  
   useEffect(() => {
     const fetchArtists = async () => {
       try {
@@ -62,7 +63,7 @@ const ArtistsList = () => {
             >
               {artist.name}
             </span>
-            <FollowButton artistId={artist._id} />
+            <FollowButton artistId={artist._id} fetchUserDetails={fetchUserDetails} />
           </Card.Body>
         </Card>
       ))}
