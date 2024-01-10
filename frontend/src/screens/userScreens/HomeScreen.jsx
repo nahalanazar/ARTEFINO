@@ -1,17 +1,14 @@
-// import Hero from '../../components/userComponents/Hero'
 import CategoriesTab from '../../components/userComponents/CategoriesTab'
 import Posts from '../../components/userComponents/Posts'
 import UserProfile from '../../components/userComponents/UserProfile'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { useGetUserProfileMutation } from '../../slices/userApiSlice'
 import { useSelector } from 'react-redux'
-// import ArtistsList from '../../components/userComponents/ArtistsList'
 const ArtistsList = lazy(() => import('../../components/userComponents/ArtistsList'))
-
 
   
 const HomeScreen = () => {
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [userDetails, setUserDetails] = useState({})
   const [getUserProfile] = useGetUserProfileMutation()
   const { userInfo } = useSelector((state) => state.userAuth);
@@ -29,7 +26,7 @@ const HomeScreen = () => {
 
   const fetchUserDetails = async () => {
       try {
-        const userIdToFetch = String(userInfo.id); // Use id from params if available, otherwise use current user's id
+        const userIdToFetch = String(userInfo.id); 
         const response = await getUserProfile(userIdToFetch).unwrap();
         setUserDetails(response.user)
       } catch (error) {
@@ -49,7 +46,6 @@ const HomeScreen = () => {
   return (
     <>
       <CategoriesTab selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} />
-      {/* <Hero /> */}
        <div className="container-fluid mt-3">
         <div className="row">
           <div className="col-md-3 d-none d-md-block">
@@ -57,7 +53,7 @@ const HomeScreen = () => {
           </div>
 
           <div className="col-md-6 col-12">
-            <Posts selectedCategory={selectedCategory} />
+            <Posts selectedCategory={selectedCategory._id} />
           </div>
  
           <div className="col-md-3 d-none d-md-block">

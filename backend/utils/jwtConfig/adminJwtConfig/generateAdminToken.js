@@ -15,3 +15,21 @@ const generateAdminToken = (res, userId) => {
 }
 
 export default generateAdminToken;
+
+// generateAdminToken.js
+// import jwt from 'jsonwebtoken';
+
+// const generateAdminToken = (res, adminId) => {
+//   const jwtToken = jwt.sign({ adminId, role: 'admin' }, process.env.JWT_SECRET_KEY_USER, { expiresIn: '30d' });
+
+//   const cookieOption = {
+//     httpOnly: true,
+//     secure: process.env.NODE_ENV !== 'development',
+//     sameSite: 'strict',
+//     maxAge: 30 * 24 * 60 * 60 * 1000
+//   };
+
+//   res.cookie('adminJwt', jwtToken, cookieOption);
+// };
+
+// export default generateAdminToken;

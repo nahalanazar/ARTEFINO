@@ -68,53 +68,313 @@ const createProduct = asyncHandler(async (req, res) => {
     }
 
 });
+
 // desc   Show all posts in home
 // route  GET /api/users/showPosts
 // access Private
+// const showPosts = asyncHandler(async (req, res) => {
+//     try {
+//         console.log("req.query: ", req.query)
+//         const currentUser = req.user;
+//         const { category } = req.query;
+//         let query = {};
+
+//         // If a category is specified, filter by category
+//         if (category && category !== 'null') {
+//             query = { ...query, 'category': category };
+//         }
+
+//         const posts = await Product.find(query)
+//             .populate('category stores comments.user')
+//             .exec();
+         
+//         const filteredPosts = posts.filter(post => (
+//             !post.isRemoved &&
+//             (post.stores.isPrivate === false || currentUser.following.includes(post.stores._id) || post.stores._id.equals(currentUser._id)) &&
+//             post.stores.is_blocked === false
+//         ));
+
+//         const sortedPosts = filteredPosts.sort((a, b) => {
+//             // Sort by posted time in descending order (newest first)
+//             const timeDifference = b.dateListed - a.dateListed;
+
+//             // Give higher priority to posts of followed users
+//             if (currentUser.following.includes(a.stores._id) && !currentUser.following.includes(b.stores._id)) {
+//                 return -1;
+//             } else if (!currentUser.following.includes(a.stores._id) && currentUser.following.includes(b.stores._id)) {
+//                 return 1;
+//             }
+
+//             return timeDifference;
+//         });
+//         res.status(200).json(sortedPosts);
+//     } catch (error) {
+//         console.error('Error fetching, filtering, and sorting posts:', error);
+//         res.status(500).json({ error: 'Failed to fetch, filter, and sort posts' });
+//     }
+// });
+
 const showPosts = asyncHandler(async (req, res) => {
     try {
         const currentUser = req.user;
-        const posts = await Product.find({})
-            .populate('category stores comments.user')
-            .exec();
-        const filteredPosts = posts.filter(post => (
-            !post.isRemoved &&
-            (post.stores.isPrivate === false || currentUser.following.includes(post.stores._id) || post.stores._id.equals(currentUser._id)) &&
-            post.stores.is_blocked === false
-        ));
 
-        const sortedPosts = filteredPosts.sort((a, b) => {
-            // Sort by posted time in descending order (newest first)
-            const timeDifference = b.dateListed - a.dateListed;
-
-            // Give higher priority to posts of followed users
-            if (currentUser.following.includes(a.stores._id) && !currentUser.following.includes(b.stores._id)) {
-                return -1;
-            } else if (!currentUser.following.includes(a.stores._id) && currentUser.following.includes(b.stores._id)) {
-                return 1;
+        const { category, offset } = req.query;
+       
+        const limit = 2
+        
+        const pipeline = [
+            {
+                $match: {
+                    isRemoved: false,
+                    ...(category && category !== 'null' &&
+                    {
+                        $expr: {
+                        $eq: ['$category', { $convert: { input: category, to: 'objectId' } }]
+                    }})
+                    
+                }
+            }, 
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'stores', 
+                    foreignField: '_id',
+                    as: 'stores'
+                }
+            },
+            {
+                $match: {
+                    $or: [
+                        { 'stores.isPrivate': false, 'stores.is_blocked': false },
+                        {
+                            'stores.isPrivate': true,
+                            'stores._id': {
+                                $in: currentUser.following
+                            }
+                        },
+                        { 'stores._id': currentUser._id }
+                    ]
+                }
+            },
+            {
+                $lookup: {
+                    from: 'categories',
+                    localField: 'category',
+                    foreignField: '_id',
+                    as: 'category'
+                }
+            },
+            {
+                $lookup: {
+                from: 'users',
+                localField: 'comments.user',  // Reference the user ID in each comment
+                foreignField: '_id',
+                as: 'commentUsers'  // Store fetched user details under 'commentUsers'
+                }
+            },
+            {
+                $sort: {
+                    dateListed: -1
+                }
+            },
+            {
+                $skip: parseInt(offset) || 0
+            },
+            {
+                $limit: limit,
+            },
+            {
+                $project: {
+                    title: 1,
+                    description: 1,
+                    images: 1,
+                    category: {
+                        $cond: {
+                            if: { $isArray: "$category" },
+                            then: {
+                                _id: { $arrayElemAt: ["$category._id", 0] },
+                                name: { $arrayElemAt: ["$category.name", 0] },
+                                description: { $arrayElemAt: ["$category.description", 0] }
+                            },
+                            else: {
+                                _id: "$category",  // Use the category directly if it's not an array
+                                name: "$category",  // You can customize this based on how your category is stored
+                                description: null
+                            }
+                        }
+                    },
+                    stores: {
+                        $cond: {
+                            if: { $isArray: "$stores" },
+                            then: {
+                                _id: { $arrayElemAt: ["$stores._id", 0] },
+                                name: { $arrayElemAt: ["$stores.name", 0] },
+                                profileImageName: { $arrayElemAt: ["$stores.profileImageName", 0] }
+                            },
+                            else: null
+                        }
+                    },
+                    latitude: 1,
+                    longitude: 1,
+                    address: 1,
+                    dateListed: 1,
+                    likes: 1,
+                    comments: {
+                        $map: {
+                        input: "$comments",
+                        as: "comment",
+                        in: {
+                            _id: "$$comment._id",
+                            text: "$$comment.text",
+                            date: "$$comment.date",
+                            user: {
+                            $arrayElemAt: ["$commentUsers", { $indexOfArray: ["$commentUsers._id", "$$comment.user"] }]  // Extract matching user details
+                            }
+                        }
+                        }
+                    },
+                    reports: 1,
+                    isRemoved: 1
+                }
             }
+        ];
 
-            return timeDifference;
-        });
-        res.status(200).json(sortedPosts);
+        const products = await Product.aggregate(pipeline);
+        res.status(200).json(products);
     } catch (error) {
-        console.error('Error fetching, filtering, and sorting posts:', error);
-        res.status(500).json({ error: 'Failed to fetch, filter, and sort posts' });
+        console.error('Error fetching and aggregating products:', error);
+        res.status(500).json({ error: 'Failed to fetch and aggregate products' });
     }
 });
+
 
 // desc   Show all posts in landing home
 // route  GET /api/users/showPosts
 // access Public
-const showLandingPosts = asyncHandler(async (req, res) => {
-    const posts = await Product.find({
-        isRemoved: false,
-    }).populate('category stores comments.user').exec();
-
-    const nonPrivatePosts = posts.filter(post => !post.stores.isPrivate && !post.stores.is_blocked);
-
-    res.status(200).json(nonPrivatePosts);
+// const showLandingPosts = asyncHandler(async (req, res) => {
+//     console.log("req.query: ", req.query)
+//     const { category } = req.query;
+//     let query = {};
+   
+//     // If a category is specified, filter by category
+//     if (category && category !== 'null') {
+//         query = { ...query, 'category': category };
+//     }
+   
     
+//     const posts = await Product.find({
+//         isRemoved: false,
+//         ...query
+//     })
+//     .populate('category stores comments.user').exec();
+
+//     const nonPrivatePosts = posts.filter(post => !post.stores.isPrivate && !post.stores.is_blocked);
+
+//     res.status(200).json(nonPrivatePosts);
+     
+// });
+
+const showLandingPosts = asyncHandler(async (req, res) => {
+    try {
+        const { category, offset } = req.query;
+        
+        const limit = 2
+ 
+        const pipeline = [ 
+            {
+                $match: {
+                    isRemoved: false,
+                    ...(category && category !== 'null' &&
+                    {
+                        $expr: {
+                        $eq: ['$category', { $convert: { input: category, to: 'objectId' } }]
+                    }})
+                    
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'stores',
+                    foreignField: '_id',
+                    as: 'stores'
+                }
+            },
+            {
+                $match: {
+                    'stores.isPrivate': false, 'stores.is_blocked': false 
+                }
+            },
+            {
+                $lookup: {
+                    from: 'categories',
+                    localField: 'category',
+                    foreignField: '_id',
+                    as: 'category'
+                }
+            },
+            {
+                $sort: {
+                    dateListed: -1
+                }
+            },
+            {
+                $skip: parseInt(offset) || 0
+            },
+            {
+                $limit: limit,
+            },
+            {
+                $project: {
+                    title: 1,
+                    description: 1,
+                    images: 1,
+                    category: {
+                        $cond: {
+                            if: { $isArray: "$category" },
+                            then: {
+                                _id: { $arrayElemAt: ["$category._id", 0] },
+                                name: { $arrayElemAt: ["$category.name", 0] },
+                                description: { $arrayElemAt: ["$category.description", 0] }
+                            },
+                            else: {
+                                _id: "$category",
+                                name: "$category",
+                                description: null
+                            }
+                        }
+                    },
+                    stores: {
+                        $cond: {
+                            if: { $isArray: "$stores" },
+                            then: {
+                                _id: { $arrayElemAt: ["$stores._id", 0] },
+                                name: { $arrayElemAt: ["$stores.name", 0] },
+                                profileImageName: { $arrayElemAt: ["$stores.profileImageName", 0] }
+                            },
+                            else: null
+                        }
+                    },
+                    latitude: 1,
+                    longitude: 1,
+                    address: 1,
+                    dateListed: 1,
+                    likes: 1,
+                    comments: 1,
+                    reports: 1,
+                    isRemoved: 1
+                }
+            }
+        ];
+
+        const posts = await Product.aggregate(pipeline);
+        // const nonPrivatePosts = posts.filter(post => !post.stores.isPrivate && !post.stores.is_blocked);
+
+        res.status(200).json(posts);
+    } catch (error) {
+        console.error('Error fetching and aggregating landing posts:', error);
+        res.status(500).json({ error: 'Failed to fetch and aggregate landing posts' });
+    }
 });
 
 
@@ -271,6 +531,22 @@ const unlikePost = asyncHandler(async (req, res) => {
     res.status(200).json({ message: 'Like removed successfully', likes: post.likes });
 })
 
+// desc   fetch liked users
+// route  POST /api/users/likedUsers/:postId
+// access Private
+const fetchLikedUsers = asyncHandler(async (req, res) => {
+    const postId = req.params.postId;
+    const post = await Product.findById(postId).populate('likes');
+
+    if (!post) {
+        res.status(404);
+        throw new Error('Liked post not found');
+    }
+    const likedUsers = post.likes;
+    const likedUsersDetails = await User.find({ _id: { $in: likedUsers } }, 'name profileImageName');
+    res.status(200).json(likedUsersDetails)
+})
+
 // desc   add comment to the Post
 // route  POST /api/users/commentPost/:postId
 // access Private
@@ -365,6 +641,7 @@ export {
     updatePost,
     likePost,
     unlikePost,
+    fetchLikedUsers,
     commentPost,
     commentDelete,
     reportPost

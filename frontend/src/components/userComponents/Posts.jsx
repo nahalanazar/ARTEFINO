@@ -9,13 +9,15 @@ import { useShowPostsMutation, useShowLandingPostsMutation, useLikePostMutation,
 import CommentsModal from './CommentsModal';
 import InfiniteScroll from 'react-infinite-scroll-component'
 import Loader from '../../components/Loader';
+import LikedUsersModal from "./LikedUsersModal";
 
 const Posts = ({ selectedCategory }) => {
     const VITE_PROFILE_IMAGE_DIR_PATH = import.meta.env.VITE_PROFILE_IMAGE_DIR_PATH
-    // const VITE_PRODUCT_IMAGE_DIR_PATH = import.meta.env.VITE_PRODUCT_IMAGE_DIR_PATH
     const { userInfo } = useSelector((state) => state.userAuth);
     const [posts, setPosts] = useState([]);
     const [commentModalPost, setCommentModalPost] = useState(null);
+    const [hasMorePosts, setHasMorePosts] = useState(true)
+    const [selectedPostId, setSelectedPostId] = useState(null);
     
     const { isOpen: isCommentsModalOpen, onOpen: onOpenCommentsModal, onClose: onCloseCommentsModal } = useDisclosure();
     const navigate = useNavigate();
@@ -27,10 +29,10 @@ const Posts = ({ selectedCategory }) => {
 
     const toast = useToast();  
     
-    
-    const fetchPosts = async () => {
+    const fetchPosts = async (categoryId, resetPosts = false) => {
         try {
-            const response = await getPosts();
+            const offset = resetPosts ? 0 : posts.length;
+            const response = await getPosts({ category: categoryId, offset });
             const postsData = response.data;
             // Check if the current user has liked each post
             const likedPosts = postsData.map((post) => ({
@@ -38,17 +40,20 @@ const Posts = ({ selectedCategory }) => {
                 isLiked: userInfo ? post.likes.includes(userInfo.id) : false
             }));
 
-            setPosts(likedPosts);
+            setPosts(resetPosts ? likedPosts : (prevPosts) => [...prevPosts, ...likedPosts]);
+            setHasMorePosts(likedPosts.length > 0)
         } catch (error) {
             console.error('Error Getting posts:', error);
         }
     };
 
-    const fetchLandingPosts = async () => {
+    const fetchLandingPosts = async (categoryId, resetPosts = false) => {
         try {
-            const response = await getLandingPosts();
+            const offset = resetPosts ? 0 : posts.length;
+            const response = await getLandingPosts({ category: categoryId, offset });
             const postsData = response.data;
-            setPosts(postsData);
+            setPosts(resetPosts ? postsData : (prevPosts) => [...prevPosts, ...postsData]);
+            setHasMorePosts(postsData.length > 0);
         } catch (error) {
             console.error('Error Getting landing posts:', error);
         }
@@ -57,11 +62,11 @@ const Posts = ({ selectedCategory }) => {
     
     useEffect(() => {
         if (userInfo) {
-            fetchPosts();
+            fetchPosts(selectedCategory, true);
         } else {
-            fetchLandingPosts()
+            fetchLandingPosts(selectedCategory, true)
         }
-    }, [getPosts, getLandingPosts, userInfo]);
+    }, [ getPosts, getLandingPosts, userInfo, selectedCategory]);
     
     // Function to format the time difference
     const formatTimeDifference = (timestamp) => {
@@ -102,12 +107,11 @@ const Posts = ({ selectedCategory }) => {
             );
 
             setPosts(updatedPosts);
-
+            
         } catch (error) {
             console.log("Error adding like:", error);
         }
     };
-
     const handleCommentClick = (event, postId) => {
         event.stopPropagation(); // Prevent the event from propagating to the parent (Card) click handler
         if (!userInfo) {
@@ -142,90 +146,124 @@ const Posts = ({ selectedCategory }) => {
     }
     };
 
-    const filteredPosts = selectedCategory && selectedCategory !== "ALL"
-    ? posts.filter((post) => post.category.name === selectedCategory)
-    : posts;
+    const openLikeModal = (postId) => {
+        if (!userInfo) {
+            navigate('/login')
+        }
+        setSelectedPostId(postId);
+    };
+
     
     return (
-        <ChakraProvider>
-            <div>
-                {filteredPosts.length > 0 ? (
-                filteredPosts.map((post) => (
-                    <Card key={post._id} style={{ marginBottom: '20px' }}>
-                            <Card.Header style={{ display: 'flex', alignItems: 'center' }}>
-                                {post.stores && post.stores.name && (
-                                    <>
-                                        <img
-                                            src={post?.stores?.profileImageName ? post.stores.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg'}
-                                            alt="Profile"
-                                            style={{
-                                                width: '30px',
-                                                height: '30px',
-                                                borderRadius: '50%',
-                                                marginRight: '10px',
-                                                objectFit: 'cover',
-                                            }}
-                                        />
-                                        {post.stores.name}
-                                    </>
-                                )}
-                            </Card.Header>
+        <InfiniteScroll
+            dataLength={posts.length}
+            next={() => {
+                if (userInfo) {
+                return selectedCategory !== null ? fetchPosts(selectedCategory) : fetchPosts();
+                } else {
+                return selectedCategory !== null ? fetchLandingPosts(selectedCategory) : fetchLandingPosts();
+                }
+            }}
+            // next={userInfo ? () => fetchPosts(selectedCategory) : () => fetchLandingPosts(selectedCategory)}
+            hasMore={hasMorePosts}
+            loader={posts.length> 0 ? <Loader /> : ""}
+            endMessage={
+              <p style={{ textAlign: 'center' }}>
+                <b>Yay! You have seen it all</b>
+              </p>
+            }
+          > 
+            <ChakraProvider>
+                <div>
+                    {posts.length > 0 ? (
+                    posts.map((post) => (
+                        <Card key={post._id} style={{ marginBottom: '20px' }}>
+                                <Card.Header style={{ display: 'flex', alignItems: 'center' }}>
+                                    {post.stores && post.stores.name && (
+                                        <>
+                                            <img
+                                                src={post?.stores?.profileImageName ? post.stores.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg'}
+                                                alt="Profile"
+                                                style={{
+                                                    width: '30px',
+                                                    height: '30px',
+                                                    borderRadius: '50%',
+                                                    marginRight: '10px',
+                                                    objectFit: 'cover',
+                                                }}
+                                            />
+                                            {post.stores.name}
+                                        </>
+                                    )}
+                                </Card.Header>
 
-                            <Card.Img
-                                variant="top"
-                                src={post.images[0].url}
-                                // src={`${VITE_PRODUCT_IMAGE_DIR_PATH}${post.images[0]}`}
-                                style={{ objectFit: 'cover', height: '400px', cursor: 'pointer' }} 
-                                onClick={() => handlePostClick(post._id)} 
-                            />
-                            <Card.Body>
-                                <Card.Title >
-                                    {post.title}
-                                    <span style={{ float: 'right' }}>
-                                        <button
-                                            onClick={(event) => handleLikeClick(event, post._id)}
-                                            style={{
-                                                cursor: 'pointer',
-                                                padding: '5px',
-                                                border: 'none',
-                                                background: 'none',
-                                                display: 'inline-block'
-                                            }}
-                                        >
-                                            <FaThumbsUp style={{ color: post.isLiked ? 'blue' : '' }} /> 
-                                        </button>
-                                        <button
-                                            onClick={(event) => handleCommentClick(event, post._id)}
-                                            style={{
-                                                cursor: 'pointer',
-                                                padding: '5px',
-                                                display: 'inline-block',
-                                                border: 'none',
-                                                background: 'none',
-                                            }}
-                                        >
-                                            <FaComment style={{ marginRight: '5px' }} />
-                                        </button>
-                                        {post.comments && <>{post.comments.length > 0 && post.comments.length}</>}
-                                    </span>
-                                </Card.Title>
-                                <Card.Text>{post.description}</Card.Text>
-                                {post.likes && <>{post.likes.length > 0 && `${post.likes.length} ${post.likes.length === 1 ? 'like' : 'likes'}`}</>}
-                            </Card.Body>
-                            <Card.Footer>
-                            <small className="text-muted">{formatTimeDifference(post.dateListed)}</small>
-                            {/* <small className="text-muted">Uploaded on {new Date(post.dateListed).toLocaleDateString()}</small> */}
-                            <br />
-                            <small className="text-muted">Category: {post.category ? post.category.name : 'Unknown'}</small>
-                            </Card.Footer>
-                        </Card>
-                ))
-                ) : (
-                <p>No posts to show.</p>
-                )}
-                <CommentsModal post={commentModalPost} isOpen={isCommentsModalOpen} onClose={onCloseCommentsModal} onCommentPost={handleCommentPost} formatTimeDifference={formatTimeDifference} setPosts={setPosts} posts={posts} />
-            </div>
-        </ChakraProvider>         
+                                <Card.Img
+                                    variant="top"
+                                    src={post.images[0].url}
+                                    // src={`${VITE_PRODUCT_IMAGE_DIR_PATH}${post.images[0]}`}
+                                    style={{ objectFit: 'cover', height: '400px', cursor: 'pointer' }} 
+                                    onClick={() => handlePostClick(post._id)} 
+                                />
+                                <Card.Body>
+                                    <Card.Title >
+                                        {post.title}
+                                        <span style={{ float: 'right' }}>
+                                            <button
+                                                onClick={(event) => handleLikeClick(event, post._id)}
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    padding: '5px',
+                                                    border: 'none',
+                                                    background: 'none',
+                                                    display: 'inline-block'
+                                                }}
+                                            >
+                                                <FaThumbsUp style={{ color: post.isLiked ? 'blue' : '' }} /> 
+                                            </button>
+                                            <button
+                                                onClick={(event) => handleCommentClick(event, post._id)}
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    padding: '5px',
+                                                    display: 'inline-block',
+                                                    border: 'none',
+                                                    background: 'none',
+                                                }}
+                                            >
+                                                <FaComment style={{ marginRight: '5px' }} />
+                                            </button>
+                                            {post.comments && <>{post.comments.length > 0 && post.comments.length}</>}
+                                        </span>
+                                    </Card.Title>
+                                    <Card.Text>{post.description}</Card.Text>
+                                    <button
+                                        onClick={() => openLikeModal(post._id)}
+                                        style={{
+                                            cursor: 'pointer',
+                                            display: 'inline-block',
+                                            border: 'none',
+                                            background: 'none',
+                                        }}
+                                    >
+                                        {post.likes && <>{post.likes.length > 0 && `${post.likes.length} ${post.likes.length === 1 ? 'like' : 'likes'}`}</>}
+                                    </button>
+                                </Card.Body>
+                                <Card.Footer>
+                                <small className="text-muted">{formatTimeDifference(post.dateListed)}</small>
+                                {/* <small className="text-muted">Uploaded on {new Date(post.dateListed).toLocaleDateString()}</small> */}
+                                <br />
+                                <small className="text-muted">Category: {post.category ? post.category.name : 'Unknown'}</small>
+                                </Card.Footer>
+                            </Card>
+                    ))
+                    ) : (
+                    <p>No posts to show.</p>
+                    )}
+                    <CommentsModal post={commentModalPost} isOpen={isCommentsModalOpen} onClose={onCloseCommentsModal} onCommentPost={handleCommentPost} formatTimeDifference={formatTimeDifference} setPosts={setPosts} posts={posts} />
+                    <LikedUsersModal postId={selectedPostId} onClose={() => setSelectedPostId(null)} />
+                </div>
+            </ChakraProvider> 
+        </InfiniteScroll>  
     )
 };
 

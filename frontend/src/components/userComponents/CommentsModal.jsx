@@ -123,11 +123,9 @@ const CommentsModal = ({ post, isOpen, onClose, onCommentPost, formatTimeDiffere
                     variant="outline"
                     overflow="hidden"
                     onMouseEnter={() => {
-                      console.log('Mouse enter:', index);
                       setHoveredCommentIndex(index);
                     }}
                     onMouseLeave={() => {
-                      console.log('Mouse leave:', index);
                       setHoveredCommentIndex(null);
                     }}
                   >

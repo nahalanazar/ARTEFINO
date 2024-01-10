@@ -26,7 +26,6 @@ const NotificationDrawer = (userInfo) => {
     const fetchNotifications = async () => {
       try {
         const response = await fetchUserNotification();
-        console.log("response notif", response);
         setUserNotification(response.data.notifications);
       } catch (error) {
         console.error('Error fetching notifications:', error);

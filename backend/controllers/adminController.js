@@ -223,10 +223,9 @@ const showReportedPosts = asyncHandler(async (req, res) => {
         .exec();
     
     const reportedPosts = reports.map(report => ({
-        image: report.reportedPost.images[0], 
-        title: report.reportedPost.title,
-        postedUserName: report.reportedPost.stores.name, 
-        reportedUserName: report.reporter.name,
+        title: report?.reportedPost?.title,
+        postedUserName: report?.reportedPost?.stores.name, 
+        reportedUserName: report?.reporter?.name,
         reportedDate: report.timestamp,
         reportedReason: report.reason,
         reportId: report._id,
@@ -254,67 +253,6 @@ const removeReportedPost = asyncHandler(async (req, res) => {
 // desc    DashboardDatas
 // route   GET /api/admin/dashboardDatas
 // access  PRIVATE
-// const dashboardData = asyncHandler(async (req, res) => {
-//     // Get new users registered in the past 7 days
-//     const newUserCounts = await User.aggregate([
-//       {
-//         $match: {
-//           createdAt: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) },
-//         },
-//       },
-//       {
-//         $group: {
-//           _id: {
-//             $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
-//           },
-//           count: { $sum: 1 },
-//         },
-//       },
-//     ]);
-
-
-//     // Get new users registered per Month
-//     // const newUserCounts = await User.aggregate([
-//     //     {
-//     //         $match: {
-//     //             createdAt: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) },
-//     //         },
-//     //     },
-//     //     {
-//     //         $group: {
-//     //             _id: {
-//     //                 $dateToString: { format: '%Y-%m', date: '$createdAt' }, // Change the format to '%Y-%m'
-//     //             },
-//     //             count: { $sum: 1 },
-//     //         },
-//     //     },
-//     // ]);
-
-//     // Get new posts created in the past 7 days
-//     const newPostCounts = await Product.aggregate([
-//       {
-//         $match: {
-//           dateListed: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) },
-//         },
-//       },
-//       {
-//         $group: {
-//           _id: {
-//             $dateToString: { format: '%Y-%m-%d', date: '$dateListed' },
-//           },
-//           count: { $sum: 1 },
-//         },
-//       },
-//     ]);
-
-//     const responseData = {
-//       newUsers: newUserCounts.map((item) => item.count),
-//       newPosts: newPostCounts.map((item) => item.count),
-//     };
-//     console.log("responseDASH: ", responseData)
-//     res.json(responseData);
-// });
-
 const dashboardData = asyncHandler(async (req, res) => {
   // Get new users registered in the past 7 days
   const newUserCounts = await User.aggregate([
@@ -368,7 +306,6 @@ const dashboardData = asyncHandler(async (req, res) => {
     newUserCounts: newUserCounts.map((item) => ({ _id: item._id, count: item.count })),
     newPostCounts: newPostCounts.map((item) => ({ _id: item._id, count: item.count }))
   };
-  console.log('responseDASH: ', responseData);
   res.json(responseData);
 });
 

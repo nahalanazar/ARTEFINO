@@ -97,15 +97,17 @@ export const userApiSlice = apiSlice.injectEndpoints({
             })
         }),
         showPosts: builder.mutation({
-            query: () => ({
+            query: ({category, offset}) => ({
                 url: `${USERS_URL}/showPosts`,
-                method: 'GET'
+                method: 'GET',
+                params: { category, offset }
             }) 
         }),
         showLandingPosts: builder.mutation({
-            query: () => ({
+            query: ({category, offset}) => ({
                 url: `${USERS_URL}/showLandingPosts`,
-                method: 'GET'
+                method: 'GET',
+                params: { category, offset }
             })
         }),
         getPostById: builder.mutation({
@@ -151,6 +153,12 @@ export const userApiSlice = apiSlice.injectEndpoints({
             query: (postId) => ({
                 url: `${USERS_URL}/unlikePost/${postId}`,
                 method: 'DELETE'
+            })
+        }),
+        likedUsers: builder.mutation({          
+            query: (postId) => ({
+                url: `${USERS_URL}/likedUsers/${postId}`,
+                method: 'GET'
             })
         }),
         commentPost: builder.mutation({          
@@ -249,7 +257,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         deleteNotification: builder.mutation({
             query: (notificationId) => ({
                 url: `${USERS_URL}/deleteNotification/${notificationId}`,
-                method: 'PUT'
+                method: 'DELETE'
             })
         }),
         fetchUserNotifications: builder.mutation({
@@ -299,6 +307,7 @@ export const {
     useReportPostMutation,
     useLikePostMutation,
     useUnlikePostMutation,
+    useLikedUsersMutation,
     useCommentPostMutation,
     useCommentDeleteMutation,
     useFollowedUsersMutation,

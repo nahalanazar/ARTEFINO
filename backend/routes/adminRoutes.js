@@ -10,7 +10,6 @@ import {
     getAdminProfile,
     updateAdminProfile,
     getAllUsers,
-    deleteUserData,
     blockUserData,
     unblockUserData,
     showReportedPosts,
@@ -31,7 +30,6 @@ router.post('/auth', authAdmin)
 router.post('/logout', logoutAdmin)
 router.route('/profile').get( authenticateAdmin, getAdminProfile ).put( authenticateAdmin, updateAdminProfile ); // The route is same, above line will use the specified controller according to the type of the request
 router.post('/getUsers', authenticateAdmin, getAllUsers);
-router.post('/deleteUser', authenticateAdmin, deleteUserData);
 router.put('/blockUser', authenticateAdmin, blockUserData);
 router.put('/unblockUser', authenticateAdmin, unblockUserData);
 router.post('/getCategories', authenticateAdmin, getAllCategories);

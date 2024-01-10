@@ -3,7 +3,7 @@ import { Button, Table } from "react-bootstrap";
 import ConfirmReportModal from "./ConfirmReport";
 import { useRemoveReportedPostMutation } from "../../slices/adminApiSlice";
 import { toast } from "react-toastify";
-
+import moment from 'moment'
 
 const ReportedPostsTable = ({ reportedPosts, setReportedPosts }) => {
     const [showModal, setShowModal] = useState(false);
@@ -31,7 +31,7 @@ const ReportedPostsTable = ({ reportedPosts, setReportedPosts }) => {
             // Update the reportedPosts array locally
             const updatedPosts = reportedPosts.map(post => {
                 if (post.reportId === reportId) {
-                    return { ...post, isReviewed: true }; // Assuming isReviewed is the property indicating post removal
+                    return { ...post, isReviewed: true }; 
                 }
                 return post;
             });
@@ -40,10 +40,7 @@ const ReportedPostsTable = ({ reportedPosts, setReportedPosts }) => {
         } catch (err) {
             toast.error(err?.data?.message || err?.error);
         }
-        // Update the state or fetch updated data as needed
-        // removePost(selectedPost.id).then(() => {
-        //   // Update state or fetch updated data
-        // });
+       
 
         setShowModal(false);
     };
@@ -73,7 +70,7 @@ const ReportedPostsTable = ({ reportedPosts, setReportedPosts }) => {
                             <td>{post.title}</td>
                             <td>{post.postedUserName}</td>
                             <td>{post.reportedUserName}</td>
-                            <td>{post.reportedDate}</td>
+                            <td>{moment(post.reportedDate).format('MMMM DD, YYYY hh:mm A')}</td>
                             <td>{post.reportedReason}</td>
                             <td>
                                 <Button

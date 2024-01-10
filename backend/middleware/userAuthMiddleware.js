@@ -23,6 +23,13 @@ const authenticateUser = asyncHandler(async (req, res, next) => {
                 }
                 req.user = requestUser; // Set the req.user with the user data fetched from the Db
                 next(); // Proceed to next process
+                // if (decodedTokenData.role === 'user') {
+                //     // User is authorized
+                //     next();
+                // } else {
+                //     res.status(403);
+                //     throw new Error('Role-based authorization failed. User is not authorized.');
+                // }
             }
         } catch (error) {
             res.status(401)

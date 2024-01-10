@@ -43,6 +43,7 @@ import {
     updatePost,
     likePost,
     unlikePost,
+    fetchLikedUsers,
     commentPost,
     commentDelete,
     reportPost
@@ -89,6 +90,7 @@ router.delete('/removePost/:postId', authenticateUser, removePost)
 router.post('/updatePost/:postId', authenticateUser, updatePost)
 router.post('/likePost/:postId', authenticateUser, likePost)
 router.delete('/unlikePost/:postId', authenticateUser, unlikePost)
+router.get('/likedUsers/:postId', authenticateUser, fetchLikedUsers)
 router.post('/commentPost/:postId', authenticateUser, commentPost)
 router.delete('/commentDelete/:postId', authenticateUser, commentDelete)
 router.post('/reportPost', authenticateUser, reportPost);
@@ -103,7 +105,7 @@ router.post('/sendMessage', authenticateUser, sendMessage)
 router.get('/allMessages/:chatId', authenticateUser, allMessages)
 router.put('/checkBlock', checkBlock)
 router.get('/allNotifications', authenticateUser, fetchNotifications)
-router.put('/deleteNotification/:notificationId', authenticateUser, deleteNotification)
+router.delete('/deleteNotification/:notificationId', authenticateUser, deleteNotification)
 router.get('/userNotifications', authenticateUser, fetchUserNotifications)
 router.put('/acceptRequest/:artistId', authenticateUser, acceptFollowRequest)
 router.put('/rejectRequest/:artistId', authenticateUser, rejectFollowRequest)

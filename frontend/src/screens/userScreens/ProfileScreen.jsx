@@ -1,5 +1,4 @@
 import { Link, useParams } from 'react-router-dom';
-import CategoriesTab from '../../components/userComponents/CategoriesTab';
 import UserProfile from '../../components/userComponents/UserProfile';
 import UserPosts from '../../components/userComponents/UserPosts';
 import { useEffect, useState } from 'react';
@@ -10,8 +9,6 @@ import { useSelector } from 'react-redux';
 
 const ProfileScreen = () => {
   const { id } = useParams();
-  const [isFollowed, setIsFollowed] = useState(false);
-  const [isFollowRequested, setIsFollowRequested] = useState(false);
   const [getUserProfile] = useGetUserProfileMutation()
   const [userDetails, setUserDetails] = useState({})
   const { userInfo } = useSelector((state) => state.userAuth);
@@ -48,7 +45,6 @@ const ProfileScreen = () => {
 
   return (
     <div>
-      <CategoriesTab />
       <div style={{ display: 'flex' }}>
         <div>
           <UserProfile UserDetails={userDetails} fetchUserDetails={fetchUserDetails} updateFollowersCountOnRemove={updateFollowersCountOnRemove} />
