@@ -72,7 +72,7 @@ import("socket.io").then((socketIO) => {
             origin: "https://www.nahalasm.shop"
         }
     });
-    
+     
     // Your socket.io configuration and event handling can go here
     io.on("connection", (socket) => {
         console.log("connected to socket.io")
