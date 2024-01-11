@@ -2,36 +2,41 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useCheckBlockMutation } from '../../slices/userApiSlice';
 import { useEffect, useState } from "react";
-import {toast} from 'react-toastify'
+import { toast } from 'react-toastify';
 
 const PrivateRoutes = () => {
-    const [blocked, setBlocked] = useState(false)
     const { userInfo } = useSelector((state) => state.userAuth);
-    const [blockCheck] = useCheckBlockMutation()
+    const [blocked, setBlocked] = useState(false);
+    const [blockCheck] = useCheckBlockMutation();
 
     useEffect(() => {
-        const checkBlocked = async() => {
+        const checkBlocked = async () => {
             try {
-                const response = await blockCheck({ id: userInfo.id })
-                if (response.data.is_blocked) {
-                    setBlocked(true)
-                    // Show a toast notification when the user is blocked
-                    toast.error("Your account is blocked");
+                if (userInfo) {
+                    const response = await blockCheck({ id: userInfo.id });
+                    if (response.data.is_blocked) {
+                        setBlocked(true);
+                        // Show a toast notification when the user is blocked
+                        toast.error("Your account is blocked");
+                    }
+                } else {
+                    // If userInfo is not available, navigate to the login page
+                    <Navigate to='/login' replace />;
                 }
             } catch (error) {
-                console.log(error)
+                console.error(error);
             }
-        } 
-        checkBlocked()
-    }, [blockCheck, userInfo.id])
+        };
 
-    return !blocked && userInfo ? (
-    <Outlet />
-    ) : (!blocked ? 
-    <Navigate to="/login" replace />
-     : 
-    "you are blocked"
-    );
+        checkBlocked();
+    }, []);
+
+    if (userInfo && !blocked) {
+        return <Outlet />;
+    }
+
+    // If userInfo is not available or the user is blocked, navigate to the login page
+    return <Navigate to="/login" replace />;
 }
 
 export default PrivateRoutes;

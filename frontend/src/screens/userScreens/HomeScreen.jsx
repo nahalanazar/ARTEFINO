@@ -1,27 +1,65 @@
-import Hero from '../../components/userComponents/Hero'
 import CategoriesTab from '../../components/userComponents/CategoriesTab'
 import Posts from '../../components/userComponents/Posts'
 import UserProfile from '../../components/userComponents/UserProfile'
-import ArtistsList from '../../components/userComponents/ArtistsList'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import { useGetUserProfileMutation } from '../../slices/userApiSlice'
+import { useSelector } from 'react-redux'
+const ArtistsList = lazy(() => import('../../components/userComponents/ArtistsList'))
 
-
+  
 const HomeScreen = () => {
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [userDetails, setUserDetails] = useState({})
+  const [getUserProfile] = useGetUserProfileMutation()
+  const { userInfo } = useSelector((state) => state.userAuth);
+
+  useEffect(() => {
+    
+    if (userInfo) {
+      fetchUserDetails();
+    }
+  }, [getUserProfile, userInfo]);
+
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+  };
+
+  const fetchUserDetails = async () => {
+      try {
+        const userIdToFetch = String(userInfo.id); 
+        const response = await getUserProfile(userIdToFetch).unwrap();
+        setUserDetails(response.user)
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+  };
+
+  const updateFollowersCountOnRemove = (removedUserId) => {
+    setUserDetails((prevUserDetails) => ({
+      ...prevUserDetails,
+      followers: prevUserDetails.followers.filter(
+        (follower) => follower._id !== removedUserId
+      ),
+    }));
+  };
+  
   return (
     <>
-      <CategoriesTab />
-      {/* <Hero /> */}
+      <CategoriesTab selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} />
        <div className="container-fluid mt-3">
         <div className="row">
           <div className="col-md-3 d-none d-md-block">
-            <UserProfile />
+            <UserProfile UserDetails={userDetails} fetchUserDetails={fetchUserDetails} updateFollowersCountOnRemove={updateFollowersCountOnRemove} />
           </div>
 
           <div className="col-md-6 col-12">
-            <Posts  />
+            <Posts selectedCategory={selectedCategory._id} />
           </div>
  
           <div className="col-md-3 d-none d-md-block">
-            <ArtistsList />
+            <Suspense fallback={<div>Loading...</div>}>
+              <ArtistsList fetchUserDetails={fetchUserDetails} />
+            </Suspense>
           </div>
         </div>
       </div>

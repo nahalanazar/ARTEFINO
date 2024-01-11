@@ -58,6 +58,12 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 method: 'POST'
             })
         }),
+        getUsersData: builder.mutation({
+            query: () => ({
+                url: `${USERS_URL}/getUsers`,
+                method: 'POST'
+            })
+        }),
         getUserProfile: builder.mutation({
             query: (userId) => ({
                 url: `${USERS_URL}/profile/${userId}`,
@@ -73,7 +79,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         updateUser: builder.mutation({
             query: (data) => ({
                 url: `${USERS_URL}/profile`,
-                method: 'PUT',
+                method: 'POST',
                 body: data
             })
         }),
@@ -91,9 +97,17 @@ export const userApiSlice = apiSlice.injectEndpoints({
             })
         }),
         showPosts: builder.mutation({
-            query: () => ({
+            query: ({category, offset}) => ({
                 url: `${USERS_URL}/showPosts`,
-                method: 'GET'
+                method: 'GET',
+                params: { category, offset }
+            }) 
+        }),
+        showLandingPosts: builder.mutation({
+            query: ({category, offset}) => ({
+                url: `${USERS_URL}/showLandingPosts`,
+                method: 'GET',
+                params: { category, offset }
             })
         }),
         getPostById: builder.mutation({
@@ -102,12 +116,74 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 method: 'GET'
             })
         }),
+        removePost: builder.mutation({          
+            query: (data) => ({
+                url: `${USERS_URL}/removePost/${data}`,
+                method: 'DELETE',
+                body: data
+            })
+        }),
+        updatePost: builder.mutation({
+            query: ({ postId, postData }) => ({
+                url: `${USERS_URL}/updatePost/${postId}`,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Set the content type to JSON
+                },
+                body: JSON.stringify(postData), // Convert postData to a JSON string
+            }),
+        }),
+        reportPost: builder.mutation({
+            query: ({ postId, data }) => ({
+                url: `${USERS_URL}/reportPost`,
+                method: 'POST',
+                body: {
+                    postId: postId,
+                    data: data
+                }
+            })
+        }),
+        likePost: builder.mutation({          
+            query: (postId) => ({
+                url: `${USERS_URL}/likePost/${postId}`,
+                method: 'POST'
+            })
+        }),
+        unlikePost: builder.mutation({          
+            query: (postId) => ({
+                url: `${USERS_URL}/unlikePost/${postId}`,
+                method: 'DELETE'
+            })
+        }),
+        likedUsers: builder.mutation({          
+            query: (postId) => ({
+                url: `${USERS_URL}/likedUsers/${postId}`,
+                method: 'GET'
+            })
+        }),
+        commentPost: builder.mutation({          
+            query: ({ postId, text }) => ({
+                url: `${USERS_URL}/commentPost/${postId}`,
+                method: 'POST',
+                body: JSON.stringify({ text }), // Stringify the body
+                headers: {
+                'Content-Type': 'application/json', // Set the content type
+                },
+            }),
+        }),
+        commentDelete: builder.mutation({          
+            query: ({ postId, commentId }) => ({
+                url: `${USERS_URL}/commentDelete/${postId}`,
+                method: 'DELETE',
+                body: { commentId }, // Send commentId directly in the body
+                
+            })
+        }),
         followedUsers: builder.mutation({          
             query: () => ({
                 url: `${USERS_URL}/followedUsers`,
                 method: 'GET'
             })
-
         }),
         followArtist: builder.mutation({          
             query: (data) => ({
@@ -120,6 +196,14 @@ export const userApiSlice = apiSlice.injectEndpoints({
         unFollowArtist: builder.mutation({          
             query: (data) => ({
                 url: `${USERS_URL}/unFollowArtist/${data}`,
+                method: 'PUT',
+                body: data
+            })
+
+        }),
+        removeArtist: builder.mutation({          
+            query: (data) => ({
+                url: `${USERS_URL}/removeArtist/${data}`,
                 method: 'PUT',
                 body: data
             })
@@ -164,6 +248,40 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 body: data
             })
         }),
+        fetchNotifications: builder.mutation({
+            query: () => ({
+                url: `${USERS_URL}/allNotifications`,
+                method: 'GET'
+            })
+        }),
+        deleteNotification: builder.mutation({
+            query: (notificationId) => ({
+                url: `${USERS_URL}/deleteNotification/${notificationId}`,
+                method: 'DELETE'
+            })
+        }),
+        fetchUserNotifications: builder.mutation({
+            query: () => ({
+                url: `${USERS_URL}/userNotifications`,
+                method: 'GET'
+            })
+        }),
+        acceptRequest: builder.mutation({          
+            query: (data) => ({
+                url: `${USERS_URL}/acceptRequest/${data}`,
+                method: 'PUT',
+                body: data
+            })
+
+        }),
+        rejectRequest: builder.mutation({          
+            query: (data) => ({
+                url: `${USERS_URL}/rejectRequest/${data}`,
+                method: 'PUT',
+                body: data
+            })
+
+        }),
     })
 })
 
@@ -176,6 +294,7 @@ export const {
     useForgotPasswordMutation,
     useResetPasswordMutation,
     useGoogleRegisterMutation,
+    useGetUsersDataMutation,
     useGetUserProfileMutation,
     useGetUserPostsMutation,
     useUpdateUserMutation,
@@ -183,13 +302,28 @@ export const {
     useAddProductMutation,
     useShowPostsMutation,
     useGetPostByIdMutation,
+    useRemovePostMutation,
+    useUpdatePostMutation,
+    useReportPostMutation,
+    useLikePostMutation,
+    useUnlikePostMutation,
+    useLikedUsersMutation,
+    useCommentPostMutation,
+    useCommentDeleteMutation,
     useFollowedUsersMutation,
     useFollowArtistMutation,
     useUnFollowArtistMutation,
+    useRemoveArtistMutation,
     useGetArtistsMutation,
     useAccessChatMutation,
     useFetchChatMutation,
     useSendMessageMutation,
     useFetchMessagesMutation,
-    useCheckBlockMutation
+    useCheckBlockMutation,
+    useFetchNotificationsMutation,
+    useDeleteNotificationMutation,
+    useFetchUserNotificationsMutation,
+    useAcceptRequestMutation,
+    useRejectRequestMutation,
+    useShowLandingPostsMutation
 } = userApiSlice

@@ -1,7 +1,6 @@
 import express from 'express'
 import { authenticateUser } from '../middleware/userAuthMiddleware.js'
 import nocache from 'nocache'
-
 const router = express.Router()
 
 router.use(nocache())
@@ -15,14 +14,19 @@ import {
     forgotPassword,
     resetPassword,
     logoutUser,
+    getAllUsers,
     getUserProfile,
     updateUserProfile,
     getFollowedUsers,
     followArtist,
     unFollowArtist,
+    removeArtist,
     showArtists,
     allUsers,
-    checkBlock
+    checkBlock,
+    fetchUserNotifications,
+    acceptFollowRequest,
+    rejectFollowRequest
 } from '../controllers/userController.js'
 
 import {
@@ -32,9 +36,23 @@ import {
 import {
     createProduct,
     showPosts,
+    showLandingPosts,
     postDetails,
-    getUserPosts
+    getUserPosts,
+    removePost,
+    updatePost,
+    likePost,
+    unlikePost,
+    fetchLikedUsers,
+    commentPost,
+    commentDelete,
+    reportPost
 } from '../controllers/productController.js'
+
+import {
+    fetchNotifications,
+    deleteNotification
+} from '../controllers/notificationController.js'
 
 import {
     multerUploadUserProfile,
@@ -58,22 +76,39 @@ router.post('/googleRegister', googleRegisterUser)
 router.post('/forgotPassword', forgotPassword)
 router.post('/resetPassword', authenticateUser, resetPassword)
 router.post('/logout', logoutUser)
+router.post('/getUsers', authenticateUser, getAllUsers);
 router.get('/profile/:userId', authenticateUser, getUserProfile)
 router.get('/userPosts/:userId', authenticateUser, getUserPosts)
-router.put('/profile', authenticateUser, multerUploadUserProfile.single('profileImage'), updateUserProfile);
-router.get('/getCategories', getAllCategories);
-router.post('/addProduct', authenticateUser, multerUploadProductImages, createProduct);
-router.get('/showPosts', showPosts);
+// router.put('/profile', authenticateUser, multerUploadUserProfile.single('profileImage'), updateUserProfile)
+router.post('/profile', authenticateUser, updateUserProfile)
+router.get('/getCategories', getAllCategories)
+router.post('/addProduct', authenticateUser, createProduct)
+router.get('/showLandingPosts', showLandingPosts)
+router.get('/showPosts', authenticateUser, showPosts)
 router.get('/postDetails/:postId', authenticateUser, postDetails)
+router.delete('/removePost/:postId', authenticateUser, removePost)
+router.post('/updatePost/:postId', authenticateUser, updatePost)
+router.post('/likePost/:postId', authenticateUser, likePost)
+router.delete('/unlikePost/:postId', authenticateUser, unlikePost)
+router.get('/likedUsers/:postId', authenticateUser, fetchLikedUsers)
+router.post('/commentPost/:postId', authenticateUser, commentPost)
+router.delete('/commentDelete/:postId', authenticateUser, commentDelete)
+router.post('/reportPost', authenticateUser, reportPost);
 router.get('/followedUsers', authenticateUser, getFollowedUsers)
 router.put('/followArtist/:artistId', authenticateUser, followArtist)
 router.put('/unFollowArtist/:artistId', authenticateUser, unFollowArtist)
-router.get('/getArtists', authenticateUser, showArtists);
+router.put('/removeArtist/:artistId', authenticateUser, removeArtist)
+router.get('/getArtists', authenticateUser, showArtists)
 router.post('/accessChat', authenticateUser, accessChat)
 router.get('/fetchChats', authenticateUser, fetchChats)
 router.post('/sendMessage', authenticateUser, sendMessage)
 router.get('/allMessages/:chatId', authenticateUser, allMessages)
 router.put('/checkBlock', checkBlock)
+router.get('/allNotifications', authenticateUser, fetchNotifications)
+router.delete('/deleteNotification/:notificationId', authenticateUser, deleteNotification)
+router.get('/userNotifications', authenticateUser, fetchUserNotifications)
+router.put('/acceptRequest/:artistId', authenticateUser, acceptFollowRequest)
+router.put('/rejectRequest/:artistId', authenticateUser, rejectFollowRequest)
 
 
 export default router;

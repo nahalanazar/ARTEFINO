@@ -5,6 +5,7 @@ import destroyUserToken from '../utils/jwtConfig/userJwtConfig/destroyUserToken.
 import OTPVerification from '../models/otpVerificationModel.js'
 import nodemailer from 'nodemailer'
 import bcrypt from 'bcryptjs';
+import cloudinary from '../utils/cloudinary.js'
 
 // desc   Auth user/set token
 // route  POST /api/users/login
@@ -49,7 +50,10 @@ const authUser = asyncHandler(async (req, res) => {
         let registeredUserData = {
             name: user.name,
             email: user.email,
-            id: user._id
+            id: user._id,
+            followers: user.followers,
+            following: user.following,
+            isPrivate: user.isPrivate
         }
         if (user.profileImageName) {
             registeredUserData.profileImageName = user.profileImageName
@@ -130,7 +134,10 @@ const registerUser = asyncHandler(async (req, res) => {
         let registeredUserData = {
             name: user.name,
             email: user.email,
-            id: user._id
+            id: user._id,
+            followers: user.followers,
+            following: user.following,
+            isPrivate: user.isPrivate
         }
         res.status(200).json({"message":registeredUserData})
     } else {
@@ -138,8 +145,6 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new Error('Invalid user data, User registration failed')
     }
 })
-
-// const { EMAIL } = process.env
 
 
 let transporter = nodemailer.createTransport({
@@ -232,7 +237,10 @@ const verifyOtp = asyncHandler(async (req, res) => {
                     let registeredUserData = {
                         name: req.user.name,
                         email: req.user.email,
-                        id: req.user._id
+                        id: req.user._id,
+                        followers: req.user.followers,
+                        following: req.user.following,
+                        isPrivate: req.user.isPrivate
                     }
                     res.status(201).json(registeredUserData)
                 }
@@ -277,7 +285,10 @@ const googleRegisterUser = asyncHandler(async (req, res) => {
         let registeredUserData = {
             name: existingUser.name,
             email: existingUser.email,
-            id: existingUser._id
+            id: existingUser._id,
+            followers: existingUser.followers,
+            following: existingUser.following,
+            isPrivate: existingUser.isPrivate
         }
         if (existingUser.profileImageName) {
             registeredUserData.profileImageName = existingUser.profileImageName
@@ -298,7 +309,10 @@ const googleRegisterUser = asyncHandler(async (req, res) => {
             let registeredUserData = {
                 name: user.name,
                 email: user.email,
-                id: user._id
+                id: user._id,
+                followers: user.followers,
+                following: user.following,
+                isPrivate: user.isPrivate
             }
             res.status(201).json(registeredUserData)
         } else {
@@ -361,6 +375,8 @@ const logoutUser = asyncHandler(async (req, res) => {
 const getUserProfile = asyncHandler(async (req, res) => {
     const id = req.params.userId
     const user = await User.findById(id)
+        .populate('followers', 'name profileImageName')
+        .populate('following', 'name profileImageName')
 
     if (!user) {
       res.status(404).json({ error: 'User not found' });
@@ -374,52 +390,57 @@ const getUserProfile = asyncHandler(async (req, res) => {
 // route  PUT /api/users/profile
 // access Private
 const updateUserProfile = asyncHandler(async (req, res) => {
-
     const user = await User.findById(req.user._id);
-
     if (user) {
-        // Update the user with new data if found or keep the old data itself.
-        user.name = req.body.name || user.name;
-        user.email = req.body.email || user.email;
+        user.name = req.body.name !== undefined ? req.body.name : user.name;
+        user.email = req.body.email !== undefined ? req.body.email : user.email;
 
-        // If request has new password, update the user with the new password
         if (req.body.password) {
-            user.password = req.body.password
+            user.password = req.body.password;
         }
 
-        if(req.file){
-            user.profileImageName = req.file.filename || user.profileImageName;
+        if (req.body.profileImage) {
+            // user.profileImageName = req.file.filename || user.profileImageName;
+            // user.profileImageName = req.file.filename || null;
+            const result = await cloudinary.uploader.upload(req.body.profileImage, {
+                folder: "profileImage",
+                // width: 300,
+                // crop: "scale"
+            });
+            user.profileImageName = result.secure_url             
         }
+
+        user.isPrivate = req.body.isPrivate !== undefined ? req.body.isPrivate : false;
 
         const updatedUserData = await user.save();
-
-        // Send the response with updated user data
         res.status(200).json({
             id: updatedUserData._id,
             name: updatedUserData.name,
             email: updatedUserData.email,
-            profileImageName: updatedUserData.profileImageName
+            profileImageName: updatedUserData.profileImageName,
+            isPrivate: updatedUserData.isPrivate,
         });
 
     } else {
         res.status(404);
         throw new Error("Requested User not found.");
-    };
-
+    }
 });
+
 
 // desc   Get  FollowedUsers
 // route  GET /api/users/followedUsers
 // access Private
 const getFollowedUsers = asyncHandler(async (req, res) => {
-    const id = req.user._id //thasni
+    const id = req.user._id
     const user = await User.findById(id)
 
     if (!user) {
       res.status(404).json({ error: 'User not found' });
     }
-    const followers = await User.find({ _id: { $in: user.following } }) //this id is nahala's id , ie , follower
-    res.status(200).json({followers});
+    const followers = await User.find({ _id: { $in: user.following } }) 
+    const followRequestsSend = await User.find({ followRequests: id });
+    res.status(200).json({followers, followRequestsSend});
 });
 
 // desc    Follow an artist
@@ -428,11 +449,102 @@ const getFollowedUsers = asyncHandler(async (req, res) => {
 const followArtist = asyncHandler(async (req, res) => {
     const userId = req.user._id;
     const artistId = req.params.artistId;
-    await User.findByIdAndUpdate(userId, { $addToSet: { following: artistId } });
-    await User.findByIdAndUpdate(artistId, { $addToSet: { followers: userId } });
-    res.status(200).json({ status: 'success', message: 'Followed artist successfully' });
+
+    const artist = await User.findById(artistId);
+    if (!artist) {
+        res.status(404).json({ status: 'error', message: 'Artist not found' });
+        return;
+    }
+
+    if (artist.isPrivate) {
+        // Check if the user has already sent a follow request
+        if (artist.followRequests.includes(userId)) {
+            res.status(200).json({ status: 'requested', message: 'Follow request already sent' });
+            return;
+        }
+
+        // If the artist's account is private, initiate a follow request
+        await User.findByIdAndUpdate(artistId, { $addToSet: { followRequests: userId } });
+        const updatedArtist = await User.findById(artistId);
+
+        // Add a notification to the artist
+        await User.findByIdAndUpdate(artistId, {
+            $addToSet: {
+            notifications: {
+                type: 'follow_request',
+                sender: userId,
+                createdAt: new Date(),
+            },
+            },
+        });
+
+        res.status(200).json({ status: 'requested', message: 'Follow request sent successfully', artist: updatedArtist });
+    } else {
+        // If the artist's account is not private, update following and followers lists
+        await User.findByIdAndUpdate(userId, { $addToSet: { following: artistId } });
+        await User.findByIdAndUpdate(artistId, { $addToSet: { followers: userId } });
+        const updatedArtist = await User.findById(artistId);
+        res.status(200).json({ status: 'success', message: 'Followed artist successfully', artist: updatedArtist });
+    }
 })
- 
+
+// desc    Accept Follow Request
+// route   PUT /api/users/acceptRequest/:artistId
+// access  Private
+const acceptFollowRequest = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const artistId = req.params.artistId;
+
+    const artist = await User.findById(artistId);
+    if (!artist) {
+        res.status(404).json({ status: 'error', message: 'Artist not found' });
+        return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user || !user.followRequests.includes(artistId)) {
+        res.status(404).json({ status: 'error', message: 'Follow request not found' });
+        return;
+    }
+    
+    // Update the artist's and user's following and followers lists
+    await User.findByIdAndUpdate(userId, { $addToSet: { followers: artistId } });
+    await User.findByIdAndUpdate(artistId, { $addToSet: { following: userId } });
+    
+    // Remove the follow request from the user's document
+    await User.findByIdAndUpdate(userId, { $pull: { followRequests: artistId } });
+
+    await User.findByIdAndUpdate(userId, { $pull: { notifications: { sender: artistId, type: 'follow_request' } } });
+
+    res.status(200).json({ status: 'success', message: 'Follow request accepted successfully' });
+});
+
+// desc    Accept Follow Request
+// route   PUT /api/users/acceptRequest/:artistId
+// access  Private
+const rejectFollowRequest = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const artistId = req.params.artistId;
+
+    const artist = await User.findById(artistId);
+    if (!artist) {
+        res.status(404).json({ status: 'error', message: 'Artist not found' });
+        return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user || !user.followRequests.includes(artistId)) {
+        res.status(404).json({ status: 'error', message: 'Follow request not found' });
+        return;
+    }
+
+    await User.findByIdAndUpdate(userId, { $pull: { followRequests: artistId } });
+
+    await User.findByIdAndUpdate(userId, { $pull: { notifications: { sender: artistId, type: 'follow_request' } } });
+    
+    res.status(200).json({ status: 'success', message: 'Follow request rejected successfully' });
+});
+
 // desc    UnFollow an artist
 // route   PUT /api/users/unFollowArtist/:artistId
 // access  Private
@@ -442,6 +554,17 @@ const unFollowArtist = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(userId, { $pull: { following: artistId } });
     await User.findByIdAndUpdate(artistId, { $pull: { followers: userId } });
     res.status(200).json({ status: 'success', message: 'UnFollowed artist successfully' });
+})
+
+// desc    Remove an artist from Followers list
+// route   PUT /api/users/removeArtist/:artistId
+// access  Private
+const removeArtist = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const artistId = req.params.artistId;
+    await User.findByIdAndUpdate(userId, { $pull: { followers: artistId } });
+    await User.findByIdAndUpdate(artistId, { $pull: { following: userId } });
+    res.status(200).json({ status: 'success', message: 'Removed artist successfully' });
 })
 
 // desc   Show some artists in home
@@ -456,17 +579,30 @@ const showArtists = asyncHandler(async (req, res) => {
 
   // Find artists who are not in the current user's following list
   const artists = await User.find({
-    _id: { $ne: userId, $nin: followingList }
+      _id: { $ne: userId, $nin: followingList },
+      verified: true
   }).limit(5);
 
   res.status(200).json(artists);
+});
+
+// desc    GET all users
+// route   GET /api/users/getUsers
+// access  PRIVATE
+const getAllUsers = asyncHandler(async (req, res) => {
+    const usersData = await User.find({}, { name: 1, email: 1, mobile: 1, is_blocked: 1, profileImageName: 1 });
+    if(usersData){
+        res.status(200).json({ usersData });
+    }else{
+        res.status(404);
+        throw new Error("Users data fetch failed.");
+    }
 });
 
 // desc   Show all artists except the current user in search
 // route  GET /api/users?search=name/email
 // access Private
 const allUsers = asyncHandler(async (req, res) => {
-    console.log("hi");
     const keyword = req.query.search
         ? {
             $or: [
@@ -487,6 +623,20 @@ const checkBlock = asyncHandler(async (req, res) => {
     
 })
 
+// desc    Fetch user Notifications
+// route   PUT /api/users/fetchUserNotifications
+// access  Private
+const fetchUserNotifications = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const user = await User.findById(userId).populate('notifications.sender');
+    if (!user) {
+        return res.status(404).json({ status: 'error', message: 'User not found' });
+    }
+
+    const notifications = user.notifications || [];
+    return res.status(200).json({ status: 'success', notifications });
+})
+
 export {
     authUser,
     registerUser,
@@ -496,12 +646,17 @@ export {
     forgotPassword,
     resetPassword,
     logoutUser,
+    getAllUsers,
     getUserProfile,
     updateUserProfile,
     getFollowedUsers,
     followArtist,
     unFollowArtist,
+    removeArtist,
     showArtists,
     allUsers,
-    checkBlock
+    checkBlock,
+    acceptFollowRequest,
+    rejectFollowRequest,
+    fetchUserNotifications
 } 

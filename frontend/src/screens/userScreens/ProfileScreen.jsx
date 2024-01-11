@@ -1,92 +1,53 @@
 import { Link, useParams } from 'react-router-dom';
-import CategoriesTab from '../../components/userComponents/CategoriesTab';
 import UserProfile from '../../components/userComponents/UserProfile';
 import UserPosts from '../../components/userComponents/UserPosts';
-import { useSelector } from 'react-redux';
-import { useState, useEffect } from 'react';
-import { useFollowedUsersMutation, useFollowArtistMutation, useUnFollowArtistMutation } from '../../slices/userApiSlice';
-import { toast } from "react-toastify";
+import { useEffect, useState } from 'react';
 import ChatButton from "../../components/userComponents/ChatButton";
-
+import FollowButton from '../../components/userComponents/FollowButton';
+import { useGetUserProfileMutation } from '../../slices/userApiSlice'
+import { useSelector } from 'react-redux';
 
 const ProfileScreen = () => {
-  const { userInfo } = useSelector((state) => state.userAuth);
-  const [followedUsers, setFollowedUsers] = useState([]);
   const { id } = useParams();
-  const [isFollowed, setIsFollowed] = useState(false);
-  
+  const [getUserProfile] = useGetUserProfileMutation()
+  const [userDetails, setUserDetails] = useState({})
+  const { userInfo } = useSelector((state) => state.userAuth);
 
   // If there's no ID in the params, it's the current user's profile
   const isCurrentUserProfile = !id;
-  const [fetchingFollowedUsers] = useFollowedUsersMutation()
-  const [followArtist] = useFollowArtistMutation()
-  const [unFollowArtist] = useUnFollowArtistMutation()
 
   useEffect(() => {
-  const fetchFollowedUsers = async () => {
-    try {
-      const response = await fetchingFollowedUsers();
-      const followerIds = response.data.followers.map((follower) => follower._id);
-      setFollowedUsers(followerIds);
-      setIsFollowed(followerIds.includes(id));
-    } catch (error) {
-      toast.error(error?.data?.message || error?.error);
-      console.error('Error fetching followed users:', error);
+    
+    if (userInfo) {
+      fetchUserDetails();
     }
+  }, [getUserProfile, id, userInfo]);
+
+  const fetchUserDetails = async () => {
+      try {
+        const userIdToFetch = String(id || userInfo.id); // Use id from params if available, otherwise use current user's id
+        const response = await getUserProfile(userIdToFetch).unwrap();
+        setUserDetails(response.user)
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
   };
 
-  fetchFollowedUsers();
-}, [id, fetchingFollowedUsers]);
-
-
-
-const handleFollow = async (userIdToFollow) => {
-  try {
-    const artistId = String(userIdToFollow);
-    const response = await followArtist(artistId);
-    
-    if (response.data.status === 'success') {
-      toast.success("Started Following New Artist");
-      setFollowedUsers([...followedUsers, userIdToFollow]);
-      setIsFollowed(true);
-    } else {
-      console.error('Error following user:', response);
-      toast.error("Failed to follow artist");
-    }
-  } catch (err) {
-    console.error('Error following user:', err);
-    toast.error(err?.data?.message || err?.error);
-  }
-};
-
-const handleUnFollow = async (userIdToUnFollow) => {
-  try {
-    const artistId = String(userIdToUnFollow);
-    const response = await unFollowArtist(artistId);
-
-    if (response.data.status === 'success') {
-      toast.success("UnFollowed Artist");
-      setFollowedUsers(followedUsers.filter((id) => id !== userIdToUnFollow));
-      setIsFollowed(false);
-    } else {
-      console.error('Error unFollowing user:', response);
-      toast.error("Failed to unFollow artist");
-    }
-  } catch (err) {
-    console.error('Error unFollowing user:', err);
-    toast.error(err?.data?.message || err?.error);
-  }
-};
-
-
+  const updateFollowersCountOnRemove = (removedUserId) => {
+    setUserDetails((prevUserDetails) => ({
+      ...prevUserDetails,
+      followers: prevUserDetails.followers.filter(
+        (follower) => follower._id !== removedUserId
+      ),
+    }));
+  };
 
 
   return (
     <div>
-      <CategoriesTab />
       <div style={{ display: 'flex' }}>
         <div>
-          <UserProfile />
+          <UserProfile UserDetails={userDetails} fetchUserDetails={fetchUserDetails} updateFollowersCountOnRemove={updateFollowersCountOnRemove} />
           {isCurrentUserProfile ? (
             <Link to="/updateProfile">
               <div
@@ -131,24 +92,8 @@ const handleUnFollow = async (userIdToUnFollow) => {
                 cursor: 'pointer'
               }}
             >
-              <button
-                className="followButton"
-                style={{
-                  color: 'white',  
-                  backgroundColor: '#007BFF',  
-                  fontSize: 16,
-                  fontFamily: 'Roboto',
-                  fontWeight: '700',
-                  padding: '8px 16px',  
-                  marginRight: '10px',
-                  border: 'none',  
-                  borderRadius: '4px',  
-                  cursor: 'pointer',
-                  }}
-                  onClick={() => (isFollowed ? handleUnFollow(id) : handleFollow(id))}
-              >
-                {isFollowed ? 'UnFollow' : 'Follow'}
-              </button>
+              {/* <FollowButton artistId={id} onFollowChange={(isFollowed) => handleFollowChange(isFollowed)} /> */}
+              <FollowButton artistId={id} fetchUserDetails={fetchUserDetails} />
               <ChatButton userId={id} />
             </div>
           )}

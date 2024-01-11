@@ -43,9 +43,9 @@ const Header = () => {
                        Category Management
                     </Nav.Link>
                   </LinkContainer>
-                  <LinkContainer to="/admin/manage-banners">
+                  <LinkContainer to="/admin/reported-posts">
                     <Nav.Link>
-                       Banner Management
+                       Reported Posts
                     </Nav.Link>
                   </LinkContainer>
                   <NavDropdown title={adminInfo.name} id="userName">

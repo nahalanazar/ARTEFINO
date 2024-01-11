@@ -29,7 +29,6 @@ const ResetPasswordScreen = () => {
         } else {
             try {
                 const res = await resetPassword({ password }).unwrap()
-                console.log("res", res)
                 if (res.message) {
                     navigate('/login')
                 } else {

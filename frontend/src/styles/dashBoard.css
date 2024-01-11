@@ -1,0 +1,11 @@
+/* Dashboard.css */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chart-container {
+    margin-top: 50px;
+    width: 70%;
+}

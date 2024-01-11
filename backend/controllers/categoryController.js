@@ -25,7 +25,6 @@ const getAllCategories = asyncHandler(async (req, res) => {
 // route   POST /api/admin/addCategory
 // access  PRIVATE
 const addCategoryData = asyncHandler( async (req, res) => {
-   
     try {
         const name = req.body.name.toLowerCase()
         const existingCategory = await categoryModel.findOne({ name: name })
@@ -37,18 +36,19 @@ const addCategoryData = asyncHandler( async (req, res) => {
         const { description = '' } = req.body;
 
         if(!name || !description || name.trim().length === 0) {
-            // res.status(400);
             throw new Error("Name and description are required for category creation.");
         }
 
         const categoryData = { name, description };
         const result = await addCategory(categoryData);
-        res.status(201).json({"success" : result.success, "message" : result.message});
+        if (result) {
+            res.status(201).json({result});
+        } else {
+            res.status(400).json({ success: false, message: result.message });
+        }
     } catch (error) {
         res.status(400).json({"success" :false, "message" : error.message});
-        // throw new Error(error.message);
     }
-
 });
 
 // desc    update category
@@ -77,11 +77,11 @@ const updateCategoryData = asyncHandler( async (req, res) => {
         }
     
     const categoryData = {categoryId: categoryId, name: name, description: description};
-    const categoryUpdateStatus = await updateCategory(categoryData);
+    const result = await updateCategory(categoryData);
 
-    if(categoryUpdateStatus.success){
-        const response = categoryUpdateStatus.message;
-        res.status(200).json({ message:response });
+    if(result){
+        const response = result;
+        res.status(200).json({ response });
     }else{
         res.status(404);;
         throw new Error("User update failed.");

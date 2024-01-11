@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { useBlockUserByAdminMutation, useUnblockUserByAdminMutation } from "../../slices/adminApiSlice";
 import PropTypes from 'prop-types';
 
-const UsersDataTable = ({ users }) => {
+const UsersDataTable = ({ users, setUsersData }) => {
   UsersDataTable.propTypes = {
     users: PropTypes.array.isRequired
   };
@@ -12,7 +12,6 @@ const UsersDataTable = ({ users }) => {
   const [showConfirmation, setShowConfirmation] = useState(false); // State for the confirmation dialog
   const [userIdToBlock, setUserIdToBlock] = useState(null); // Track the user ID to block
   const [userIdToUnblock, setUserIdToUnblock] = useState(null); // Track the user ID to unblock
-
   
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
@@ -33,27 +32,37 @@ const UsersDataTable = ({ users }) => {
     try {      
       await blockUserByAdmin({ userId: userIdToBlock });
       toast.success("User Blocked Successfully.");
-      setUserIdToBlock(null); // Clear the user ID to block
-      setShowConfirmation(false); // Close the confirmation dialog
+      setUserIdToBlock(null);
+      setShowConfirmation(false); 
 
-      window.location.reload();
+      // Update the local state to reflect the blocked status
+      setUsersData(prevUsers => {
+        return prevUsers.map(user =>
+          user._id === userIdToBlock ? { ...user, is_blocked: true } : user
+        );
+      });
     } catch (err) {
       toast.error(err?.data?.message || err?.error);
     }
   };
   
   const handleUnblock = async () => {
-      try {      
-        await unblockUserByAdmin({ userId: userIdToUnblock });
-        toast.success("User Blocked Successfully.");
-        setUserIdToUnblock(null); // Clear the user ID to block
-        setShowConfirmation(false); // Close the confirmation dialog
+    try {      
+      await unblockUserByAdmin({ userId: userIdToUnblock });
+      toast.success("User Un Blocked Successfully.");
+      setUserIdToUnblock(null); 
+      setShowConfirmation(false); 
 
-        window.location.reload();
-      } catch (err) {
-        toast.error(err?.data?.message || err?.error);
-      }
-    };
+      // Update the local state to reflect the unblocked status
+      setUsersData(prevUsers => {
+        return prevUsers.map(user =>
+          user._id === userIdToUnblock ? { ...user, is_blocked: false } : user
+        );
+      });
+    } catch (err) {
+      toast.error(err?.data?.message || err?.error);
+    }
+  };
 
 
   return (
@@ -71,7 +80,7 @@ const UsersDataTable = ({ users }) => {
         </BootstrapForm.Group>
       </BootstrapForm>
 
-      <Table striped bordered hover responsive>
+      <Table className="mt-3 mb-3" striped bordered hover responsive>
         <thead>
           <tr>
             <th>SI No.</th>
@@ -101,10 +110,9 @@ const UsersDataTable = ({ users }) => {
                     <Button
                       type="button"
                       variant="danger"
-                      className="mt-3"
                       onClick={() => {
-                        setUserIdToBlock(user._id); // Set the user ID to block
-                        setShowConfirmation(true); // Open the confirmation dialog
+                        setUserIdToBlock(user._id);
+                        setShowConfirmation(true); 
                       }}
                     >
                       Block
@@ -113,10 +121,9 @@ const UsersDataTable = ({ users }) => {
                     <Button
                       type="button"
                       variant="success"
-                      className="mt-3"
                       onClick={() => {
-                        setUserIdToUnblock(user._id); // Set the user ID to unblock
-                        setShowConfirmation(true); // Open the confirmation dialog
+                        setUserIdToUnblock(user._id);
+                        setShowConfirmation(true);
                       }}
                     >
                       Unblock

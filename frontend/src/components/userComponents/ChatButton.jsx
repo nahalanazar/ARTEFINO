@@ -19,8 +19,11 @@ const ChatButton = ({ userId }) => {
 
     const accessChat = async (userId) => {
       try {
-          setLoadingChat(true)
-          const { data } = await getChat(userId)
+        setLoadingChat(true)
+        const response = await getChat(userId)
+        console.log("response from access chat: ", response);
+         if (response.data) {
+          const {data} = response
           if (!chats.find((c) => c._id === data._id)) {
             setChats([data, ...chats])
             setSelectedChat(data)
@@ -28,17 +31,29 @@ const ChatButton = ({ userId }) => {
           setSelectedChat(data)
           setLoadingChat(false)
           navigate('/chat')
-          
-      } catch (error) {
+        } else if (response.error.data) {
           toast({
-              title: "Error fetching the Chat",
-              description: error.message,
-              status: "error",
-              duration: 5000,
-              isClosable: true,
-              position: "bottom-left"
-            })
-            console.log("hi",error.message)
+            title: "Follow each other to access the chat",
+            description: response?.error.data.error|| "An error occurred",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "top-right"
+          })
+          setLoadingChat(false)
+        }
+      } catch (error) {
+        console.log("error:", error);
+        toast({
+          title: "Follow each other to access the chat",
+          description: error.response?.data?.message || "An error occurred",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "top-right"
+        })
+        console.log("hi", error.message)
+        setLoadingChat(false)
       }
     }
     //  toast.error(error?.message || error?.error);
@@ -46,23 +61,23 @@ const ChatButton = ({ userId }) => {
     return (
       <>
         <button
-        className="followButton"
-        style={{
-            color: 'white',  
-            backgroundColor: '#007BFF',  
-            fontSize: 16,
-            fontFamily: 'Roboto',
-            fontWeight: '700',
-            padding: '8px 16px',  
-            border: 'none',  
-            borderRadius: '4px',  
-            cursor: 'pointer',
-        }}
-        onClick={() => accessChat(userId)}
-        > 
-            Message
+          className="followButton"
+          style={{
+              color: 'white',  
+              backgroundColor: '#007BFF',  
+              fontSize: 16,
+              fontFamily: 'Roboto',
+              fontWeight: '700',
+              padding: '8px 16px',  
+              border: 'none',  
+              borderRadius: '4px',  
+              cursor: 'pointer',
+          }}
+          onClick={() => accessChat(userId)}
+        >
+          {loadingChat ? <Spinner size="sm" borderWidth="6px" ml="auto" display="flex" />:  <>Message</> }       
         </button>
-        {loadingChat && <Spinner size="lg" borderWidth= "6px" ml="auto" display="flex" />}
+        
       </>
 
     )

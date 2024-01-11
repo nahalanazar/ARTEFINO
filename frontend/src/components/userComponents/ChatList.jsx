@@ -3,24 +3,24 @@ import { ChatState } from "../context/ChatProvider"
 import { useEffect } from "react"
 import { useSelector } from 'react-redux';
 import { Menu, MenuButton, MenuItem, MenuList, useToast } from "@chakra-ui/react"
-import { useFetchChatMutation } from '../../slices/userApiSlice'
+import { useFetchChatMutation, useDeleteNotificationMutation } from '../../slices/userApiSlice'
 import { getSender } from "../config/ChatLogics"
 import { BellIcon } from "@chakra-ui/icons";
 import NotificationBadge from 'react-notification-badge'
 import { Effect } from "react-notification-badge"
 
 
-const ChatList = () => {
+const ChatList = ({ fetchAgain }) => {
   const { userInfo } = useSelector((state) => state.userAuth);
   const { selectedChat, setSelectedChat, chats, setChats, notification, setNotification } = ChatState()
   const [fetchChat] = useFetchChatMutation()
+  const [markAsRead] = useDeleteNotificationMutation()
   const userId = userInfo.id
   const toast = useToast()
 
   const fetchChats = async () => {
     try {
       const { data } = await fetchChat()
-      console.log("data", data);
       setChats(data)
     } catch (error) {
       console.log(error.message);
@@ -37,7 +37,25 @@ const ChatList = () => {
 
   useEffect(() => {
     fetchChats()
-  }, [])
+  }, [fetchAgain])
+
+
+  const handleNotificationClick = async (notification) => {
+    try {
+        setSelectedChat(notification.chat);
+        setNotification((prevNotifications) => [
+          ...prevNotifications.filter((n) => n._id !== notification._id),
+        ]);
+
+        if (notification._id) {
+            // Execute only for notifications from the database
+            await markAsRead(notification._id);
+        }
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+    }
+};
+
 
   return (
     <Box
@@ -64,20 +82,17 @@ const ChatList = () => {
       <Menu>
         <MenuButton p={1}>
           <NotificationBadge
-            count={notification.length}
+            count={notification?.length}
             effect={Effect.SCALE}
           />
           <BellIcon fontSize="2xl" m={1} />
         </MenuButton>
         <MenuList pl={2}>
-          {!notification.length && "No New Messages"}
-            {notification.map((notif) => (
-            <MenuItem 
+          {!notification?.length && "No New Messages"}
+            {notification?.map((notif) => (
+            <MenuItem
               key={notif._id}
-              onClick={()=>{
-                setSelectedChat(notif.chat)
-                setNotification(notification.filter((n) => n !== notif))
-              }}
+              onClick={() => handleNotificationClick(notif)}
             >
               {`New Message from ${getSender(userId, notif.chat.users)}`}
             </MenuItem>
@@ -103,25 +118,24 @@ const ChatList = () => {
                   <Box
                     onClick={() => setSelectedChat(chat)}
                     cursor="pointer"
-                    bg={selectedChat === chat ? "#38B2AC" : "#E8E8E8"}
-                    color={selectedChat === chat ? "white" : "black"}
+                    bg={selectedChat?._id === chat?._id ? "#38B2AC" : "#E8E8E8"}
+                    color={selectedChat?._id === chat?._id ? "white" : "black"}
                     px={3}
                     py={2}
                     borderRadius="lg"
                     key={chat._id}
                   >
                     <Text>
-                      {getSender(userId, chat.users)}
+                      {chat.users && chat.users.length > 0
+                        ? getSender(userId, chat.users)
+                        : "Unknown Sender"}
                     </Text>
                   </Box>
                 ))}
               </Stack>
             ) : (
-              <Text>
-                No Chats to Display
-              </Text>
+              <Text>No Chats to Display</Text>
             )}
-
           </Stack>
         ): (
           <Text>

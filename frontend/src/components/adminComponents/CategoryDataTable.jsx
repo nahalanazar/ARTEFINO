@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { useAddCategoryMutation, useUpdateCategoryByAdminMutation, useUnListCategoryByAdminMutation, useReListCategoryByAdminMutation } from "../../slices/adminApiSlice";
 import PropTypes from 'prop-types';
 
-const CategoriesDataTable = ({ categories }) => {
+const CategoriesDataTable = ({ categories, setCategoriesData }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false); // State for the confirmation dialog
   const [categoryIdToUnList, setCategoryIdToUnList] = useState(null); // Track the category ID to block
@@ -32,14 +32,14 @@ const CategoriesDataTable = ({ categories }) => {
       )
     : [];
 
-  const [addCategory] = useAddCategoryMutation();
+    const [addCategory] = useAddCategoryMutation();
     const [updateCategoryByAdmin, { isLoading: isUpdating }] = useUpdateCategoryByAdminMutation();
     const [UnListCategoryByAdmin, { isLoading: isUnListing }] = useUnListCategoryByAdminMutation();
     const [ReListCategoryByAdmin, { isLoading: isReListing }] = useReListCategoryByAdminMutation();
 
   const handleOpenAddCategoryModal = () => {
-    setNewCategoryName(""); // Reset form fields
-    setNewCategoryDescription(""); // Reset form fields
+    setNewCategoryName(""); 
+    setNewCategoryDescription(""); 
     setShowAddModal(true);
   };
 
@@ -54,9 +54,11 @@ const CategoriesDataTable = ({ categories }) => {
         description: newCategoryDescription,
       };
       const response = await addCategory(categoryData);
-      if (response.data) {
+      if (response.data.result) {
         toast.success("Category Added Successfully.");
-        window.location.reload();
+        setCategoriesData(prevCategories => [...prevCategories, response.data.result]);
+
+        setShowAddModal(false);
       } else {
         toast.error(response.error.data.message);
       }
@@ -69,29 +71,36 @@ const CategoriesDataTable = ({ categories }) => {
     try {
       await UnListCategoryByAdmin({ categoryId: categoryIdToUnList });
       toast.success("Category Blocked Successfully.");
-      setCategoryIdToUnList(null); // Clear the category ID to block
-      setShowConfirmation(false); // Close the confirmation dialog
+      setCategoryIdToUnList(null); 
+      setShowConfirmation(false); 
 
-      // Reload the page to reflect the updated data
-      window.location.reload();
+      setCategoriesData(prevCategories => {
+        return prevCategories.map(category =>
+          category._id === categoryIdToUnList ? { ...category, isListed: false } : category
+        );
+      });
+
     } catch (err) {
       toast.error(err?.data?.message || err?.error);
     }
   };
 
   const handleReList = async () => {
-      try {
-        await ReListCategoryByAdmin({ categoryId: categoryIdToReList });
-        toast.success("Category Blocked Successfully.");
-        setCategoryIdToReList(null); // Clear the category ID to block
-        setShowConfirmation(false); // Close the confirmation dialog
+    try {
+      await ReListCategoryByAdmin({ categoryId: categoryIdToReList });
+      toast.success("Category Un Blocked Successfully.");
+      setCategoryIdToReList(null); 
+      setShowConfirmation(false); 
 
-        // Reload the page to reflect the updated data
-        window.location.reload();
-      } catch (err) {
-        toast.error(err?.data?.message || err?.error);
-      }
-    };
+      setCategoriesData(prevCategories => {
+        return prevCategories.map(category =>
+          category._id === categoryIdToReList ? { ...category, isListed: true } : category
+        );
+      });
+    } catch (err) {
+      toast.error(err?.data?.message || err?.error);
+    }
+  };
 
   const handleOpenUpdateModal = (category) => {
     setCategoryIdToUpdate(category._id)
@@ -109,7 +118,14 @@ const CategoriesDataTable = ({ categories }) => {
       });
       if (responseFromApiCall.data) {
         toast.success("Category Updated Successfully.");
-        window.location.reload();
+        setCategoriesData(prevCategories => {
+          return prevCategories.map(category =>
+            category._id === categoryIdToUpdate ? { ...category, name: categoryNameToUpdate, description: categoryDescriptionToUpdate } : category
+          );
+        });
+
+        setShowUpdateModal(false);
+
       } else {
         toast.error(responseFromApiCall.error.data.message); // Show the error message from the backend
       }
@@ -142,7 +158,7 @@ const CategoriesDataTable = ({ categories }) => {
       <Button
         type="button"
         variant="primary"
-        className="mt-3"
+        className="mt-3 mb-3"
         onClick={() => handleOpenAddCategoryModal()}
       >
         Add Category
@@ -169,7 +185,6 @@ const CategoriesDataTable = ({ categories }) => {
                 <Button
                   type="button"
                   variant="primary"
-                  className="mt-3"
                   onClick={() => handleOpenUpdateModal(category)}
                 >
                   Update
@@ -187,7 +202,6 @@ const CategoriesDataTable = ({ categories }) => {
                     <Button
                       type="button"
                       variant="danger"
-                      className="mt-3"
                       onClick={() => {
                         setCategoryIdToUnList(category._id); // Set the category ID to block
                         setShowConfirmation(true); // Open the confirmation dialog
@@ -199,7 +213,6 @@ const CategoriesDataTable = ({ categories }) => {
                     <Button
                       type="button"
                       variant="success"
-                      className="mt-3"
                       onClick={() => {
                         setCategoryIdToReList(category._id); // Set the category ID to unblock
                         setShowConfirmation(true); // Open the confirmation dialog

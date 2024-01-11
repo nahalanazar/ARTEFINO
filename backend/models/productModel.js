@@ -9,7 +9,19 @@ const productSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    images: [String],
+    // images: [String],
+    images: [
+        {
+            public_id: {
+                type: String,
+                required: true
+            },
+            url: {
+                type: String,
+                required: true
+            }
+        }
+    ],
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category'
@@ -52,15 +64,17 @@ const productSchema = mongoose.Schema({
                 default: Date.now
             }
         }
-    ]
-    // isSold: {
-    //     type: Boolean,
-    //     default: false,
-    // },
-    // buyer: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'User',
-    // },
+    ],
+    reports: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Report'
+        }
+    ],
+    isRemoved: {
+        type: Boolean,
+        default: false,
+    }
 });
 
 const Product = mongoose.model('Product', productSchema);
