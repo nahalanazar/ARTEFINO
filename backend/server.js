@@ -9,7 +9,7 @@ import cookieParser from 'cookie-parser';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js'
 import userRoutes from './routes/userRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
-
+import path from 'path'
 // Server port configuration
 const port = process.env.PORT || 5000
 
@@ -36,13 +36,23 @@ app.use(express.static("./public"));
 
 
 //? ===================== Application Home Route =====================
-app.get('/', (req, res) => res.send('Server is ready'))
 
 
 //? ===================== Routes Configuration =====================
 app.use('/api/users', userRoutes)
 app.use('/api/admin', adminRoutes)
 
+if(process.env.NODE_ENV==='production'){
+    const __dirname= path.resolve() 
+    app.use(express.static(path.join(__dirname,'../frontend/dist')))
+    
+    app.get('*',(req,res)=>res.sendFile(path.resolve(__dirname,'..','frontend','dist','index.html')))
+}else{
+    
+    //? ===================== Application Home Route =====================
+    app.get('/', (req, res) => res.send('Server is ready'))
+
+}
 
 //? ===================== Error handler middleware configuration =====================
 app.use(notFound)
