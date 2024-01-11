@@ -117,7 +117,6 @@ const CategoriesDataTable = ({ categories, setCategoriesData }) => {
         description: categoryDescriptionToUpdate,
       });
       if (responseFromApiCall.data) {
-        console.log("updateCategory: ", responseFromApiCall.data.response);
         toast.success("Category Updated Successfully.");
         setCategoriesData(prevCategories => {
           return prevCategories.map(category =>

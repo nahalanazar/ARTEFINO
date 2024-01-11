@@ -35,7 +35,6 @@ const SearchDrawer = () => {
             setIsLoading(true);
             const responseFromApiCall = await usersDataFromAPI();
             const usersArray = responseFromApiCall.data.usersData;
-            console.log('usersArray', usersArray);
             setUsersData(usersArray);
         } catch (error) {
             toast.error(error);

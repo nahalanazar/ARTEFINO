@@ -18,9 +18,7 @@ const { ObjectId } = mongoose.Types;
 const createProduct = asyncHandler(async (req, res) => {
     const { title, description, categoryId, accessLatitude, accessLongitude, address } = req.body;
     // const images = req.files.map((file) => file.filename);
-    console.log("images:", req.body)
     let images = [...req.body.images]
-    console.log("body create", images)
     let imagesBuffer = []
 
     for (let i = 0; i < images.length; i++){
@@ -34,16 +32,6 @@ const createProduct = asyncHandler(async (req, res) => {
             url: result.url
         })
     }
-
-    // req.body.images = imagesBuffer
-
-    // let categoryId;
-    // try {
-    //     categoryId = new ObjectId(category);
-    // } catch (error) {
-    //     console.error('Invalid category ObjectId:', error);
-    //     return res.status(400).json({ success: false, message: 'Invalid category ObjectId' });
-    // }
 
     // Create a new product
     const newProduct = new Product({

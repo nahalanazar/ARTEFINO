@@ -82,7 +82,6 @@ const CommentsModal = ({ post, isOpen, onClose, onCommentPost, formatTimeDiffere
     }
     try {
       const response = await commentDelete({ postId: post._id, commentId: comments[commentToDeleteIndex]._id }).unwrap()
-      console.log("response:", response);
       // Update local state (remove the deleted comment)
       const updatedComments = [...comments];
       updatedComments.splice(commentToDeleteIndex, 1);

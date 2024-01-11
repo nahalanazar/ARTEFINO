@@ -12,7 +12,6 @@ const ReportedPostsScreen = () => {
         const fetchReportedPosts = async () => {
             try {
                 const response = await getReportedPosts();
-                console.log("response reported posts: ", response);
                 setReportedPosts(response.data);
             } catch (error) {
                 console.error("Error fetching reported posts:", error);

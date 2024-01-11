@@ -16,7 +16,6 @@ const UserPosts = () => {
         try {
           const userIdToFetch = String(id || userInfo.id);
           const res = await getUserPosts(userIdToFetch);
-          console.log("res:", res)
         } catch (error) {
           console.error('Error fetching user posts:', error);
         }

@@ -16,7 +16,6 @@ const ForgotPasswordScreen = () => {
         e.preventDefault();
         try {
             const res = await forgotPassword({ email }).unwrap()
-            console.log("res", res)
             navigate('/passwordOtpVerify')
         } catch (err) {
             toast.error(err?.data?.message || err.error)

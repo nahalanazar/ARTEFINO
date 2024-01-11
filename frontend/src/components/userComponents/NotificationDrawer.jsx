@@ -40,7 +40,6 @@ const NotificationDrawer = (userInfo) => {
   const handleAccept = async (artistId, notificationId) => {
     try {
       const response = await acceptRequestMutation(artistId);
-      console.log("response accept", response);
       setUserNotification((prevNotifications) =>
         prevNotifications.filter((notification) => notification._id !== notificationId)
       );
@@ -52,7 +51,6 @@ const NotificationDrawer = (userInfo) => {
   const handleReject = async (artistId, notificationId) => {
     try {
       const response = await rejectRequestMutation(artistId);
-      console.log("response reject", response);
       setUserNotification((prevNotifications) =>
         prevNotifications.filter((notification) => notification._id !== notificationId)
       );

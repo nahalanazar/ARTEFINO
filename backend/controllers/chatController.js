@@ -4,6 +4,7 @@ import User from '../models/userModel.js'
 import Message from '../models/messageModel.js'
 import { createNotification } from './notificationController.js'
 import Notification from '../models/notificationModel.js'
+import cloudinary from '../utils/cloudinary.js'
 
 
 // desc   Access particular chatRoom or create a new chatRoom
@@ -82,17 +83,26 @@ const fetchChats = asyncHandler(async (req, res) => {
 // route  POST /api/users/sendMessage
 // access Private
 const sendMessage = asyncHandler(async (req, res) => {
-    const { content, chatId } = req.body
-    
-    if (!content || !chatId) {
-        console.log("Invalid data passed into request")
-        return res.sendStatus(400)
+    const { content, chatId, imageUrl } = req.body
+    let imagesBuffer = [];
+
+    if (imageUrl) {
+        const result = await cloudinary.uploader.upload(imageUrl, {
+            folder: "ChatImages",
+            // width: 300,
+            // crop: "scale"
+        });
+        imagesBuffer.push({
+            public_id: result.public_id,
+            url: result.url
+        })
     }
 
     let newMessage = {
         sender: req.user._id,
         content: content,
-        chat: chatId
+        chat: chatId,
+        images: imagesBuffer
     }
 
     try {
@@ -107,19 +117,6 @@ const sendMessage = asyncHandler(async (req, res) => {
         await ChatRoom.findByIdAndUpdate(req.body.chatId, {
             latestMessage: message
         })
-
-        // Notify users about the new message
-        // const senderId = req.user._id;
-        // const receiverId = message.chat.users.find((user) => user._id.toString() !== senderId.toString())._id;
-
-        // const existingNotification = await Notification.findOne({
-        //     sender: senderId,
-        //     receiver: receiverId
-        // });
-
-        // if (!existingNotification) {
-        //     await createNotification(senderId, receiverId, chatId, `New message from ${req.user.name}`);
-        // }
 
         res.status(200).json(message)
     } catch (error) {

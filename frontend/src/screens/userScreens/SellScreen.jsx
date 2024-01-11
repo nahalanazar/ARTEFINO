@@ -92,8 +92,6 @@ const SellScreen = () => {
   const handleCategoryChange = (e) => {
     const selectedCategoryId = e.target.value;
     setCategoryId(selectedCategoryId);
-    // const selectedCategory = categories.find((cat) => cat._id === selectedCategoryId);
-    // console.log("selectedCategory: ", selectedCategory);
   };
 
   const handleSubmit = async (e) => {
@@ -126,7 +124,6 @@ const SellScreen = () => {
       if (response) {
         setLoading(false)
         setImages([])
-        console.log("response: ", response);
         toast.success('Product added successfully');
         navigate(`/postDetails/${response.postId}`)
       }

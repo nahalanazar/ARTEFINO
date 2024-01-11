@@ -52,7 +52,6 @@ const fetchNotifications = asyncHandler(async (req, res) => {
         select: "name profileImageName email",
     });
 
-    console.log("notifications", finalNotifications);
     res.json(finalNotifications);
 })
 

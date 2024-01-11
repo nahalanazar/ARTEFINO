@@ -22,16 +22,15 @@ const ChatButton = ({ userId }) => {
         setLoadingChat(true)
         const response = await getChat(userId)
         console.log("response from access chat: ", response);
-        if (response.data.error) {
-          toast({
-            title: "Follow each other to access the chat",
-            description: response?.data?.error || "An error occurred",
-            status: "error",
-            duration: 5000,
-            isClosable: true,
-            position: "top-right"
-          })
+         if (response.data) {
+          const {data} = response
+          if (!chats.find((c) => c._id === data._id)) {
+            setChats([data, ...chats])
+            setSelectedChat(data)
+          }
+          setSelectedChat(data)
           setLoadingChat(false)
+          navigate('/chat')
         } else if (response.error.data) {
           toast({
             title: "Follow each other to access the chat",
@@ -42,15 +41,6 @@ const ChatButton = ({ userId }) => {
             position: "top-right"
           })
           setLoadingChat(false)
-        } else {
-          const {data} = response
-          if (!chats.find((c) => c._id === data._id)) {
-            setChats([data, ...chats])
-            setSelectedChat(data)
-          }
-          setSelectedChat(data)
-          setLoadingChat(false)
-          navigate('/chat')
         }
       } catch (error) {
         console.log("error:", error);

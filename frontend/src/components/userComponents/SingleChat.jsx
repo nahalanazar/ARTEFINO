@@ -1,8 +1,8 @@
 import { Box, Text } from '@chakra-ui/layout'
 import { FormControl} from '@chakra-ui/form-control'
-import { Spinner, IconButton, useToast } from '@chakra-ui/react'
-import { ArrowBackIcon } from '@chakra-ui/icons'
-import { Input } from "@chakra-ui/input";
+import { Spinner, IconButton, useToast, Input, InputGroup, InputRightElement, Button } from '@chakra-ui/react';
+import { ArrowBackIcon, AttachmentIcon } from '@chakra-ui/icons'
+// import { Input, InputGroup, InputRightElement } from "@chakra-ui/input";
 import { ChatState } from '../context/ChatProvider'
 import { getSender } from '../config/ChatLogics'
 import { useSelector } from 'react-redux';
@@ -14,6 +14,7 @@ import io from 'socket.io-client'
 import Lottie from 'react-lottie'
 import animationData from '../../animations/typing.json'
 import moment from 'moment'
+
 const ENDPOINT = "http://localhost:5000";
 let socket, selectedChatCompare;
 
@@ -24,6 +25,9 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     const [typing, setTyping] = useState(false)
     const [isTyping, setIsTyping] = useState(false)
     const [socketConnected, setSocketConnected] = useState(false)
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imageLoading, setImageLoading] = useState(true);
+
     const [sendNewMessage] = useSendMessageMutation()
     const [fetchAllMessages] = useFetchMessagesMutation()
     const [fetchNotifications] = useFetchNotificationsMutation()
@@ -95,28 +99,66 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     }, []);
 
 
-    const sendMessage = async (event) => {
-        if (event.key === "Enter" && newMessage) {
-            socket.emit("stop typing", selectedChat._id)
+    // const sendMessage = async (event) => {
+    //     if (event.key === "Enter" && newMessage) {
+    //         socket.emit("stop typing", selectedChat._id)
+    //         try {
+    //             setNewMessage(""); 
+    //             const { data } = await sendNewMessage({ content: newMessage, chatId: selectedChat._id });
+    //             // Update the updatedAt property of the selectedChat to the current time
+    //             setChats((prevChats) => {
+    //                 const updatedChats = prevChats.map((chat) => {
+    //                     if (chat._id === selectedChat._id) {
+    //                         return { ...chat, updatedAt: new Date() };
+    //                     }
+    //                     return chat;
+    //                 });
+
+    //                 // Sort chats based on updatedAt (newest first)
+    //                 const sortedChats = updatedChats.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+    //                 return sortedChats;
+    //             });
+    //             socket.emit('new Message', data)
+    //             setMessages([...messages, data]);
+    //         } catch (error) {
+    //             toast({
+    //                 title: "Error occurred",
+    //                 description: "Failed to send message",
+    //                 status: "error",
+    //                 duration: 5000,
+    //                 isClosable: true,
+    //                 position: "bottom"
+    //             });
+    //         }
+    //     }
+    // };
+
+   
+    const handleSend = async () => {
+        if (newMessage || selectedImage) {
+            socket.emit("stop typing", selectedChat._id);
             try {
-                setNewMessage(""); 
-                const { data } = await sendNewMessage({ content: newMessage, chatId: selectedChat._id });
-                // Update the updatedAt property of the selectedChat to the current time
-                setChats((prevChats) => {
-                    const updatedChats = prevChats.map((chat) => {
-                        if (chat._id === selectedChat._id) {
-                            return { ...chat, updatedAt: new Date() };
-                        }
-                        return chat;
+                setNewMessage("");
+                setImageLoading(true);
+                const { data } = await sendNewMessage({ content: newMessage, imageUrl: selectedImage, chatId: selectedChat._id });
+                if (data) {
+                    setChats((prevChats) => {
+                        const updatedChats = prevChats.map((chat) => {
+                            if (chat._id === selectedChat._id) {
+                                return { ...chat, updatedAt: new Date() };
+                            }
+                            return chat;
+                        });
+
+                        const sortedChats = updatedChats.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                        return sortedChats;
                     });
-
-                    // Sort chats based on updatedAt (newest first)
-                    const sortedChats = updatedChats.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-
-                    return sortedChats;
-                });
-                socket.emit('new Message', data)
-                setMessages([...messages, data]);
+                    socket.emit('new Message', data);
+                    setMessages([...messages, data]);
+                }
+                setSelectedImage(null);
+                setImageLoading(false);
             } catch (error) {
                 toast({
                     title: "Error occurred",
@@ -127,6 +169,12 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                     position: "bottom"
                 });
             }
+        }
+    };
+
+    const sendMessage = (event) => {
+        if (event.key === "Enter") {
+            handleSend();
         }
     };
 
@@ -156,8 +204,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         fetchMessages();
         selectedChatCompare = selectedChat;
     }, [selectedChat]);
-
-
+  
+ 
     useEffect(() => {
         const handleNewMessage = (newMessageReceived) => {
             if (!selectedChatCompare || selectedChatCompare._id !== newMessageReceived.chat._id) {
@@ -191,53 +239,11 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         };
     }, [notification, selectedChat]);
 
-    
-    // useEffect(() => {
-    //     socket.on("message received", (newMessageReceived) => {
-    //         if (!selectedChatCompare || selectedChatCompare._id !== newMessageReceived.chat._id) {
-    //             const existingNotification = notification.find((n) => n.chat._id === newMessageReceived.chat._id);
-
-    //             if (!existingNotification) {
-    //                 // Notify users about the new message
-    //                 // const senderId = newMessageReceived.sender._id;
-    //                 // const receiverId = userId; // Assume the current user is the receiver
-    //                 // createNotification(senderId, receiverId, `New message from ${getSender(userId, newMessageReceived.chat.users)}`);
-                    
-    //                 setNotification([newMessageReceived, ...notification]);
-    //                 setFetchAgain(!fetchAgain)
-    //             } else {
-    //                 // Update the existing notification
-    //                 setNotification([
-    //                 ...notification.filter((n) => n.chat._id !== newMessageReceived.chat._id),
-    //                 newMessageReceived,
-    //                 ]);
-    //                 setFetchAgain(!fetchAgain);
-    //             }
-    //         } else {
-    //             // setMessages([...messages, newMessageReceived]);
-    //             // setMessages(prevMessages => [...prevMessages, newMessageReceived]);
-    //             setMessages(prevMessages => {
-    //                 if (prevMessages) {
-    //                     return [...prevMessages, newMessageReceived];
-    //                 } else {
-    //                     return [newMessageReceived];
-    //                 }
-    //             });
-    //         }
-    //     });
-    //     return () => {
-    //         // Cleanup event listeners when the component unmounts
-    //         socket.off("connected");
-    //         socket.off("userStatus");
-    //     };
-
-    // },[notification, selectedChat]);
 
     useEffect(() => {
         const fetchNotificationsData = async () => {
             try {
                 const { data } = await fetchNotifications();
-                console.log("notifications: ", data);
                 setNotification(data);
             } catch (error) {
                 console.error('Error fetching notifications:', error.message);
@@ -270,6 +276,29 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             }
         }, timerLength);
     }
+
+    const handleImageSelect = (event) => {
+        const file = event.target.files[0];
+        // const fileType = file[0].type.split('/')[0];
+        // if (fileType !== 'image') {
+        //     toast.error('Please upload only images (JPEG, PNG, etc.).');
+        //     setSelectedImage(null)
+        //     event.target.value = null;
+        //     return;
+        // }
+        if (file.length > 1) {
+            toast.error('You can upload up to 3 images.');
+            event.target.value = null;
+            setSelectedImage(null)
+            return;
+        }
+        const reader = new FileReader()
+        reader.onload = () => {
+            setSelectedImage(reader.result); // Make sure to set the correct property name
+        };
+        reader.readAsDataURL(file)
+        // setSelectedImage(reader.result);
+    };
 
   return (
     <>
@@ -327,22 +356,67 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                       )}
 
                       <FormControl onKeyDown={sendMessage} isRequired mt={3}>
-                          {isTyping ? <div>
+                          {isTyping ? (
+                            <div>
                               <Lottie
                                   options={defaultOptions}
                                   width={70}
                                   style={{marginBottom: 15, marginLeft: 0}}
                               />
-                          </div> : <></>}
-                          <Input
-                              value={newMessage}
-                              variant="filled"
-                              bg="#E0E0E0"
-                              placeholder='Enter New Message'
-                              onChange={typingHandler}
-                          />
+                            </div> 
+                          ) : (
+                              <></>
+                          )}
+                          {/* Image preview */}
+                            {selectedImage && (
+                                <div style={{
+                                        backgroundColor: 'white'
+                                    }}>
+                                    {imageLoading && (
+                                        <Spinner size="xl" alignSelf="center" margin="auto" />
+                                    )}
+                                    {!imageLoading && (
+                                        <img
+                                        src={selectedImage}
+                                        alt="Selected Image Preview"
+                                        style={{
+                                            maxWidth: "50%",
+                                            maxHeight: "100px",
+                                            objectFit: "cover",
+                                            borderRadius: "8px",
+                                            marginRight: "8px",
+                                        }}
+                                    />
+                                    )}
+                                </div>
+                            )}
+                          
+                            <InputGroup mt={2}>
+                                <Input
+                                    value={newMessage}
+                                    variant="filled"
+                                    bg="#E0E0E0"
+                                    placeholder='Enter New Message'
+                                    onChange={typingHandler}
+                                />
+                                <InputRightElement width="4.5rem">
+                                    <label htmlFor="image-upload">
+                                        <AttachmentIcon cursor="pointer" />
+                                    </label>
+                                    <input
+                                        id="image-upload"
+                                        type="file"
+                                        accept="image/*"
+                                        style={{ display: "none" }}
+                                        onChange={handleImageSelect}
+                                    />
+                                    <Button style={{padding: "6px", marginLeft: "8px"}} size="sm" onClick={handleSend}>
+                                        Send
+                                    </Button>
+                                </InputRightElement>
+                            </InputGroup>
                       </FormControl>
-                </Box>
+                </Box> 
             </>
         ) : (
             <Box display="flex" alignItems="center" justifyContent="center" h="100%">

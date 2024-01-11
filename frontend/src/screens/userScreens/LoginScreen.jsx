@@ -55,7 +55,6 @@ const LoginScreen = () => {
             try {
                 // making login POST request (/auth), pass email & password to backend, and assign its response to 'res'
                 const responseFromApiCall = await login({ email, password }).unwrap() // 'unwrap' to unwrap the returned promise 
-                console.log("responseFromApiCall", responseFromApiCall)
                 if (responseFromApiCall) {
                     // then to store it in the local storage & state, setCredential is called and res is passed to it
                     dispatch(setCredentials({ ...responseFromApiCall }))
@@ -115,7 +114,6 @@ const LoginScreen = () => {
                             <GoogleLogin
                                 onSuccess={credentialResponse => {
                                 const decoded = jwtDecode(credentialResponse.credential);
-                                console.log(decoded);
                                 {googleSubmit(decoded)}
                             }}
                             onError={() => {

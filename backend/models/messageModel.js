@@ -13,7 +13,17 @@ const chatMessageSchema = new mongoose.Schema({
   content: {
     type: String,
     trim:true
-  }
+  },
+  images: [
+    {
+      public_id: {
+        type: String
+      },
+      url: {
+        type: String
+      }
+    }
+  ],
 },
   {
     timestamps: true

@@ -92,7 +92,6 @@ const RegisterScreen = () => {
     ) {
         try {
             const res = await register({ name, mobile, email, password }).unwrap();
-            console.log("res", res);
             if (res.message) {
             navigate('/otpVerify');
             } else {

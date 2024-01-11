@@ -39,7 +39,6 @@ const PostDetailScreen = () => {
         const fetchPostDetails = async () => {
             try {
                 const response = await getPostById(postId);
-                console.log("response post details:", response);
                 setPost(response.data);
                 const userReported = response.data.reports.some(report => report.reporter === userInfo.id);
                 setIsReported(userReported);
@@ -132,7 +131,6 @@ const PostDetailScreen = () => {
     const handleReportModal = async (postId) => {
         setShowReportModal(true);
         setPostToReport(postId);
-        console.log("setPostToReport", setPostToReport);
     }
 
     const handleReport = async (postId, reportDetails) => {
@@ -143,7 +141,6 @@ const PostDetailScreen = () => {
             }
           
             const response = await reportPost({ postId, data: reportDetails });
-console.log("response", response);
             if (response.data.message === "Report submitted successfully") {
                 toast.success("Post reported successfully!");
                 setShowReportModal(false);

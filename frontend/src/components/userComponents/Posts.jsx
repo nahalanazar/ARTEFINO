@@ -97,7 +97,6 @@ const Posts = ({ selectedCategory }) => {
             const response = posts.find((post) => post._id === postId).isLiked
                 ? await unlikePostApi(postId).unwrap()
                 : await likePost(postId).unwrap();
-            console.log("response on like: ", response);
 
             // Update the likes count in the post
             const updatedPosts = posts.map((post) =>
