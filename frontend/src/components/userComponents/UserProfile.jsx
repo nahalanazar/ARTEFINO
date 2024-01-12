@@ -8,7 +8,7 @@ const UserProfile = ({UserDetails, fetchUserDetails, updateFollowersCountOnRemov
   const VITE_PROFILE_IMAGE_DIR_PATH = import.meta.env.VITE_PROFILE_IMAGE_DIR_PATH;
   const { userInfo } = useSelector((state) => state.userAuth);
   const [memberSince, setMemberSince] = useState('');
-const imageUrl = UserDetails.profileImageName ? UserDetails.profileImageName : 'https://www.nahalasm.shop/userProfileImages/defaultImage.jpeg';
+  const imageUrl = UserDetails.profileImageName? UserDetails.profileImageName: VITE_PROFILE_IMAGE_DIR_PATH
   // Determine if it's the user's own profile
   const isOwnProfile = userInfo && UserDetails && UserDetails._id === userInfo.id;
 
