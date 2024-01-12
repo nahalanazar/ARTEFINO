@@ -124,7 +124,7 @@ const RegisterScreen = () => {
                     </div>
                     <div className='w-full lg:w-1/2 py-10 px-12'>
                         <h2 className='text-3xl mb-3'>Register</h2>
-                        <p className='mb-3'>Create your account. It's free and take a minute</p>
+                        <p className='mb-3'>Create your account. It is free and take a minute</p>
                         <form onSubmit={submitHandler}>
                             <div>
                                 <input type='text' placeholder='Name' className='border border-grey-400 py-1 px-2 w-full' value={name} onChange={(e) => { setName(e.target.value); setNameError(validateName(e.target.value))}} />
@@ -170,91 +170,7 @@ const RegisterScreen = () => {
                 </div>
             </div>
         </div>
-
-        
-    // <FormContainer>
-    //     <h1>Sign Up</h1>
-
-    //     <Form onSubmit={submitHandler}>
-    //         <Form.Group className='my-2' controlId='name'>
-    //             <Form.Label>Name</Form.Label>
-    //             <Form.Control
-    //             type='text'
-    //             placeholder='Enter Name'
-    //             value={name}
-    //             onChange={(e) => setName(e.target.value)}
-    //             ></Form.Control>
-    //         </Form.Group>
-              
-    //         <Form.Group className='my-2' controlId='mobile'>
-    //             <Form.Label>Mobile</Form.Label>
-    //             <Form.Control
-    //             type='text'
-    //             placeholder='Enter Mobile'
-    //             value={mobile}
-    //             onChange={(e) => setMobile(e.target.value)}
-    //             ></Form.Control>
-    //         </Form.Group>
-
-    //         <Form.Group className='my-2' controlId='email'>
-    //             <Form.Label>Email Address</Form.Label>
-    //             <Form.Control
-    //             type='email'
-    //             placeholder='Enter Email'
-    //             value={email}
-    //             onChange={(e) => setEmail(e.target.value)}
-    //             ></Form.Control>
-    //         </Form.Group>
-
-    //         <Form.Group className='my-2' controlId='password'>
-    //             <Form.Label>Password</Form.Label>
-    //             <Form.Control
-    //             type='password'
-    //             placeholder='Enter Password'
-    //             value={password}
-    //             onChange={(e) => setPassword(e.target.value)}
-    //             ></Form.Control>
-    //         </Form.Group>  
-              
-    //         <Form.Group className='my-2' controlId='confirmPassword'>
-    //             <Form.Label>Confirm Password</Form.Label>
-    //             <Form.Control
-    //             type='password'
-    //             placeholder='Confirm Password'
-    //             value={confirmPassword}
-    //             onChange={(e) => setConfirmPassword(e.target.value)}
-    //             ></Form.Control>
-    //         </Form.Group>
-              
-    //         {isLoading && <Loader />}
-
-    //         <Button type='submit' variant='primary' className='mt-3'>
-    //               Send OTP
-    //         </Button>
-
-    //         <Row className='py-3'>
-    //             <Col>
-    //                 Already have an account? <Link to='/login'>Login</Link>
-    //             </Col> 
-    //         </Row>  
-            // <GoogleOAuthProvider clientId="915783098784-vqrg4q9jh52kbfrh7u085shb3u4tqk45.apps.googleusercontent.com">
-            //     <GoogleLogin
-            //         onSuccess={credentialResponse => {
-            //         const decoded = jwtDecode(credentialResponse.credential);
-            //         console.log(decoded);
-            //         {googleSubmit(decoded)}
-            //     }}
-            //     onError={() => {
-            //         console.log('Login Failed');
-            //     }}
-            //     />
-            // </GoogleOAuthProvider>
-    //     </Form>  
-    // </FormContainer>
-    // <svg className='w-5 inline-block' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-    //     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
-    // </svg>
-  )
+    )
 }
 
 export default RegisterScreen
