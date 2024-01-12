@@ -68,7 +68,7 @@ const UpdateProfileScreen = () => {
         <h1>Update Profile</h1>
 
             <img
-            src={userInfo.profileImageName ? userInfo.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg'}
+            src={userInfo.profileImageName ? userInfo.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH}
             alt={userInfo.name}
             style={{
                 width: "150px",

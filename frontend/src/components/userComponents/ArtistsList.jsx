@@ -45,7 +45,7 @@ const ArtistsList = ({fetchUserDetails}) => {
         <Card key={artist._id} style={{ width: '17rem', marginBottom: '20px' }}>
           <Card.Body style={{ display: 'flex', alignItems: 'center' }}>
             <img
-              src={artist.profileImageName ? artist.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg'}
+              src={artist.profileImageName ? artist.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH}
               alt="Profile"
               style={{
                 width: '40px',

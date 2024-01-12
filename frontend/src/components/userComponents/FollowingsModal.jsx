@@ -41,7 +41,7 @@ function FollowingModal({ userDetails, fetchUserDetails }) {
                                 userDetails.following.map((follower) => (
                                     <Box key={follower._id} display="flex" alignItems="center" justifyContent="space-between" w="100%">
                                         <Box display="flex" alignItems="center">
-                                            <Avatar name={follower.name} src={follower.profileImageName ? follower.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg'} />
+                                            <Avatar name={follower.name} src={follower.profileImageName ? follower.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH} />
                                             <Text ml={4}>{follower.name}</Text>
                                         </Box>
                                         {follower._id !== userInfo.id && (

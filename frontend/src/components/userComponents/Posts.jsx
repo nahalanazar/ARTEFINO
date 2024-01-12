@@ -181,7 +181,7 @@ const Posts = ({ selectedCategory }) => {
                                     {post.stores && post.stores.name && (
                                         <>
                                             <img
-                                                src={post?.stores?.profileImageName ? post.stores.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH + 'defaultImage.jpeg'}
+                                                src={post?.stores?.profileImageName ? post.stores.profileImageName : VITE_PROFILE_IMAGE_DIR_PATH}
                                                 alt="Profile"
                                                 style={{
                                                     width: '30px',

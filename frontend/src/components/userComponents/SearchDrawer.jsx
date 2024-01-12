@@ -112,7 +112,7 @@ const SearchDrawer = () => {
                           src={
                             user.profileImageName
                               ? user.profileImageName
-                              : `${VITE_PROFILE_IMAGE_DIR_PATH}defaultImage.jpeg`
+                              : `${VITE_PROFILE_IMAGE_DIR_PATH}`
                           }
                           alt={user.name}
                           style={{
