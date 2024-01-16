@@ -35,7 +35,7 @@ const ArtistsList = ({fetchUserDetails}) => {
   }, [getArtists, userInfo]);
 
   if (!userInfo) {
-    return <div>Login To Get Artists Suggestion</div>;
+    return <div></div>;
   }
 
   return (

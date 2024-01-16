@@ -25,7 +25,7 @@ const UserProfile = ({UserDetails, fetchUserDetails, updateFollowersCountOnRemov
   }, [UserDetails]);
 
   if (!userInfo) {
-    return <div>Login To see Profile</div>;
+    return <div></div>;
   }
 
 
