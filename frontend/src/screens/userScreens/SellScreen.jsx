@@ -119,7 +119,6 @@ const SellScreen = () => {
       formData.append('latitude', accessLatitude);
       formData.append('longitude', accessLongitude);
       formData.append('address', address)
-      // const response = await addProduct(formData).unwrap();
       const response = await addProduct({title, description, categoryId, images, accessLatitude, accessLongitude, address}).unwrap();
       if (response) {
         setLoading(false)

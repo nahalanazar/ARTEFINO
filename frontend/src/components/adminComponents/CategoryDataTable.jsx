@@ -127,10 +127,10 @@ const CategoriesDataTable = ({ categories, setCategoriesData }) => {
         setShowUpdateModal(false);
 
       } else {
-        toast.error(responseFromApiCall.error.data.message); // Show the error message from the backend
+        toast.error(responseFromApiCall.error.data.message); 
       }
-      setCategoryIdToUpdate(null); // Clear the category ID to update
-      setShowUpdateModal(false); // Close the update modal
+      setCategoryIdToUpdate(null);
+      setShowUpdateModal(false); 
 
     } catch (err) {
       toast.error(err?.data?.message || err?.error);
@@ -203,8 +203,8 @@ const CategoriesDataTable = ({ categories, setCategoriesData }) => {
                       type="button"
                       variant="danger"
                       onClick={() => {
-                        setCategoryIdToUnList(category._id); // Set the category ID to block
-                        setShowConfirmation(true); // Open the confirmation dialog
+                        setCategoryIdToUnList(category._id); 
+                        setShowConfirmation(true); 
                       }}
                     >
                       UnList
@@ -214,8 +214,8 @@ const CategoriesDataTable = ({ categories, setCategoriesData }) => {
                       type="button"
                       variant="success"
                       onClick={() => {
-                        setCategoryIdToReList(category._id); // Set the category ID to unblock
-                        setShowConfirmation(true); // Open the confirmation dialog
+                        setCategoryIdToReList(category._id); 
+                        setShowConfirmation(true); 
                       }}
                     >
                       ReList

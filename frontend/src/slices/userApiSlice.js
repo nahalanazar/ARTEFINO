@@ -128,9 +128,9 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 url: `${USERS_URL}/updatePost/${postId}`,
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json', // Set the content type to JSON
+                    'Content-Type': 'application/json', 
                 },
-                body: JSON.stringify(postData), // Convert postData to a JSON string
+                body: JSON.stringify(postData), 
             }),
         }),
         reportPost: builder.mutation({
@@ -165,9 +165,9 @@ export const userApiSlice = apiSlice.injectEndpoints({
             query: ({ postId, text }) => ({
                 url: `${USERS_URL}/commentPost/${postId}`,
                 method: 'POST',
-                body: JSON.stringify({ text }), // Stringify the body
+                body: JSON.stringify({ text }), 
                 headers: {
-                'Content-Type': 'application/json', // Set the content type
+                'Content-Type': 'application/json'
                 },
             }),
         }),
@@ -175,8 +175,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
             query: ({ postId, commentId }) => ({
                 url: `${USERS_URL}/commentDelete/${postId}`,
                 method: 'DELETE',
-                body: { commentId }, // Send commentId directly in the body
-                
+                body: { commentId }
             })
         }),
         followedUsers: builder.mutation({          
@@ -199,7 +198,6 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 method: 'PUT',
                 body: data
             })
-
         }),
         removeArtist: builder.mutation({          
             query: (data) => ({
@@ -207,7 +205,6 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 method: 'PUT',
                 body: data
             })
-
         }),
         getArtists: builder.mutation({
             query: () => ({

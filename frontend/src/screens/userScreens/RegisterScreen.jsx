@@ -40,25 +40,6 @@ const RegisterScreen = () => {
         }
     }, [navigate, userInfo])
 
-    // const submitHandler = async (e) => {
-    //     e.preventDefault();
-    //     if (password !== confirmPassword) {
-    //         toast.error('Passwords do not match')
-    //     } else {
-    //         try {
-    //             const res = await register({ name, mobile, email, password }).unwrap()
-    //             console.log("res", res)
-    //             if (res.message) {
-    //                 navigate('/otpVerify')
-    //             } else {
-    //                 toast.error(res.error.data.message);
-    //             }
-    //         } catch (err) {
-    //             toast.error(err?.data?.message || err.error)
-    //         }
-    //     }
-    // }
-
     const submitHandler = async (e) => {
     e.preventDefault();
 

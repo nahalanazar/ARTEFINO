@@ -279,13 +279,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
     const handleImageSelect = (event) => {
         const file = event.target.files[0];
-        // const fileType = file[0].type.split('/')[0];
-        // if (fileType !== 'image') {
-        //     toast.error('Please upload only images (JPEG, PNG, etc.).');
-        //     setSelectedImage(null)
-        //     event.target.value = null;
-        //     return;
-        // }
+        
         if (file.length > 1) {
             toast.error('You can upload up to 3 images.');
             event.target.value = null;
@@ -294,10 +288,9 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         }
         const reader = new FileReader()
         reader.onload = () => {
-            setSelectedImage(reader.result); // Make sure to set the correct property name
+            setSelectedImage(reader.result); 
         };
         reader.readAsDataURL(file)
-        // setSelectedImage(reader.result);
     };
 
   return (

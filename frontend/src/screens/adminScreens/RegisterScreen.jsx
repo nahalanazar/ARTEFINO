@@ -2,23 +2,13 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import FormContainer from "../../components/FormContainer";
-
 import { useDispatch, useSelector } from "react-redux";
-
 import { useAdminRegisterMutation } from "../../slices/adminApiSlice";
 import { setCredentials } from "../../slices/adminAuthSlice";
-
 import { toast } from "react-toastify";
-
 import Loader from "../../components/Loader";
 
-
-
-
-
-
 const AdminRegisterScreen = () => {
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

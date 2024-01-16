@@ -13,14 +13,12 @@
     width: 100%;
     height: 200px;
     object-fit: cover;
-    /* This property ensures the image covers the entire space, maintaining aspect ratio */
 }
 
 /* Media query for small screens */
 @media (max-width: 767px) {
     .user-post-card {
         width: 100%;
-        /* Show one card per row for small screens */
     }
 }
 

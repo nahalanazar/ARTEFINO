@@ -2,8 +2,6 @@ import asyncHandler from 'express-async-handler'
 import ChatRoom from '../models/chatModel.js'
 import User from '../models/userModel.js'
 import Message from '../models/messageModel.js'
-import { createNotification } from './notificationController.js'
-import Notification from '../models/notificationModel.js'
 import cloudinary from '../utils/cloudinary.js'
 
 
@@ -13,7 +11,6 @@ import cloudinary from '../utils/cloudinary.js'
 const accessChat = asyncHandler(async (req, res) => {
     const { userId } = req.body
     if (!userId) {
-        console.log("UserId param not send with request")
         return res.status(400).json({ error: "UserId parameter is required" });
     }
 
@@ -63,16 +60,16 @@ const accessChat = asyncHandler(async (req, res) => {
 const fetchChats = asyncHandler(async (req, res) => {
     try {
         ChatRoom.find({ users: { $elemMatch: { $eq: req.user._id } } })
-        .populate("users", "-password")
-        .populate("latestMessage")
-        .sort({ updatedAt: -1 })
-        .then(async (results) => {
-            results = await User.populate(results, {
-                path: "latestMessage.sender",
-                select: "name profilePictureName email"
+            .populate("users", "-password")
+            .populate("latestMessage")
+            .sort({ updatedAt: -1 })
+            .then(async (results) => {
+                results = await User.populate(results, {
+                    path: "latestMessage.sender",
+                    select: "name profilePictureName email"
+                })
+                res.status(200).send(results)
             })
-            res.status(200).send(results)
-    })
     } catch (error) {
         res.status(400)
         throw new Error(error.message)

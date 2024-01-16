@@ -67,6 +67,7 @@ const authUser = asyncHandler(async (req, res) => {
     }
 })
 
+
 // desc   Register new user
 // route  POST /api/users/register
 // access Public
@@ -157,6 +158,7 @@ let transporter = nodemailer.createTransport({
     }
 })
 
+
 const sendOtpVerification = asyncHandler(async ({_id, email}, res) => {
     try {
         const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
@@ -178,7 +180,6 @@ const sendOtpVerification = asyncHandler(async ({_id, email}, res) => {
             expiresAt: Date.now() + 60000
         });
 
-        // save otp record
         await newOtpVerification.save();
 
         transporter.sendMail(mailOptions, (err) => {
@@ -189,14 +190,6 @@ const sendOtpVerification = asyncHandler(async ({_id, email}, res) => {
             }
         });
 
-        // res.json({
-        //     status: "Pending",
-        //     message: "Otp send to email",
-        //     data: {
-        //         userId: _id,
-        //         email
-        //     }
-        // });
     } catch (error) {
         res.json({
             status: "Failed",
@@ -233,7 +226,6 @@ const verifyOtp = asyncHandler(async (req, res) => {
                 } else {
                     await User.updateOne({ _id: userId }, { verified: true })
                     await OTPVerification.deleteMany({ userId })
-                    // res.status(201).json('user email verified successfully')
                     let registeredUserData = {
                         name: req.user.name,
                         email: req.user.email,
@@ -249,11 +241,11 @@ const verifyOtp = asyncHandler(async (req, res) => {
     }
 })
 
+
 // desc   Resend OTP
 // route  POST /api/users/resendOtp
 // access Public
 const resendOtp = asyncHandler(async (req, res) => {
-    console.log("user:", req.user._id)
     let userId = req.user._id
     let email = req.user.email
 
@@ -266,6 +258,7 @@ const resendOtp = asyncHandler(async (req, res) => {
     }
 })
 
+
 // desc   Register new user through Google
 // route  POST /api/users/register
 // access Public
@@ -274,9 +267,8 @@ const googleRegisterUser = asyncHandler(async (req, res) => {
 
     if (!name || !email) {
         res.status(400)
-            throw new Error('Please provide all required fields');
+        throw new Error('Please provide all required fields');
     }
-
 
     const existingUser = await User.findOne({email:email})
 
@@ -322,12 +314,12 @@ const googleRegisterUser = asyncHandler(async (req, res) => {
     }
 })
 
+
 // desc   Forgot Password
 // route  POST /api/users/forgotPassword
 // access Public
 const forgotPassword = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email: req.body.email, verified: true })
-    console.log
     if (!user) {
         res.status(401);
         throw new Error('User not found, User authentication failed, Please SignUp again');
@@ -337,6 +329,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
         res.status(200).json({message: "email verified"})
     }
 })
+
 
 // desc   Reset Password
 // route  POST /api/users/resetPassword
@@ -355,7 +348,6 @@ const resetPassword = asyncHandler(async (req, res) => {
     }
 
     const updatedUserData = await user.save();
-    console.log("updatedUserData", updatedUserData)
     res.status(200).json({message: "password updated"})
 })
 
@@ -381,7 +373,6 @@ const getUserProfile = asyncHandler(async (req, res) => {
     if (!user) {
       res.status(404).json({ error: 'User not found' });
     }
-
     res.status(200).json({user});
 });
 
@@ -400,8 +391,6 @@ const updateUserProfile = asyncHandler(async (req, res) => {
         }
 
         if (req.body.profileImage) {
-            // user.profileImageName = req.file.filename || user.profileImageName;
-            // user.profileImageName = req.file.filename || null;
             const result = await cloudinary.uploader.upload(req.body.profileImage, {
                 folder: "profileImage",
                 // width: 300,
@@ -442,6 +431,7 @@ const getFollowedUsers = asyncHandler(async (req, res) => {
     const followRequestsSend = await User.find({ followRequests: id });
     res.status(200).json({followers, followRequestsSend});
 });
+
 
 // desc    Follow an artist
 // route   PUT /api/users/followArtist/:artistId
@@ -488,6 +478,7 @@ const followArtist = asyncHandler(async (req, res) => {
     }
 })
 
+
 // desc    Accept Follow Request
 // route   PUT /api/users/acceptRequest/:artistId
 // access  Private
@@ -519,6 +510,7 @@ const acceptFollowRequest = asyncHandler(async (req, res) => {
     res.status(200).json({ status: 'success', message: 'Follow request accepted successfully' });
 });
 
+
 // desc    Accept Follow Request
 // route   PUT /api/users/acceptRequest/:artistId
 // access  Private
@@ -545,6 +537,7 @@ const rejectFollowRequest = asyncHandler(async (req, res) => {
     res.status(200).json({ status: 'success', message: 'Follow request rejected successfully' });
 });
 
+
 // desc    UnFollow an artist
 // route   PUT /api/users/unFollowArtist/:artistId
 // access  Private
@@ -556,6 +549,7 @@ const unFollowArtist = asyncHandler(async (req, res) => {
     res.status(200).json({ status: 'success', message: 'UnFollowed artist successfully' });
 })
 
+
 // desc    Remove an artist from Followers list
 // route   PUT /api/users/removeArtist/:artistId
 // access  Private
@@ -566,6 +560,7 @@ const removeArtist = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(artistId, { $pull: { following: userId } });
     res.status(200).json({ status: 'success', message: 'Removed artist successfully' });
 })
+
 
 // desc   Show some artists in home
 // route  GET /api/users/getArtists
@@ -586,6 +581,7 @@ const showArtists = asyncHandler(async (req, res) => {
   res.status(200).json(artists);
 });
 
+
 // desc    GET all users
 // route   GET /api/users/getUsers
 // access  PRIVATE
@@ -598,6 +594,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
         throw new Error("Users data fetch failed.");
     }
 });
+
 
 // desc   Show all artists except the current user in search
 // route  GET /api/users?search=name/email
@@ -615,13 +612,14 @@ const allUsers = asyncHandler(async (req, res) => {
     res.send(users)
 })
 
+
 const checkBlock = asyncHandler(async (req, res) => {
     const users = await User.findById(req.body.id)
     if (users) {
-    res.status(200).json(users)
-}
-    
+        res.status(200).json(users)
+    } 
 })
+
 
 // desc    Fetch user Notifications
 // route   PUT /api/users/fetchUserNotifications

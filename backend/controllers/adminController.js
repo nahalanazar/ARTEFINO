@@ -112,18 +112,14 @@ const getAdminProfile = asyncHandler ( async (req, res) => {
 const updateAdminProfile = asyncHandler ( async (req, res) => {
     const admin = await adminModel.findById(req.user._id);
     if (admin) {
-    
-        // Update the user with new data if found or keep the old data itself.
         admin.name = req.body.name || admin.name;
         admin.email = req.body.email || admin.email;
 
-        // If request has new password, update the user with the new password
         if (req.body.password) {
             admin.password = req.body.password      
         }
         const updatedAdminData = await admin.save();
 
-        // Send the response with updated user data
         res.status(200).json({
             name: updatedAdminData.name,
             email: updatedAdminData.email
@@ -147,32 +143,6 @@ const getAllUsers = asyncHandler(async (req, res) => {
     }
 });
 
-// desc    DELETE user
-// route   POST /api/admin/deleteUsers
-// access  PRIVATE
-const deleteUserData = asyncHandler( async (req, res) => {
-
-    const userId = req.body.userId;
-
-    const usersDeleteStatus = await deleteUser(userId);
-
-    if(usersDeleteStatus.success){
-
-        const response = usersDeleteStatus.message;
-
-        res.status(200).json({ message:response });
-
-    }else{
-
-        res.status(404);
-
-        const response = usersDeleteStatus.message;
-
-        throw new Error(response);
-
-    }
-
-});
 
 // desc    BLOCK user
 // route   PUT /api/admin/blockUser
@@ -243,7 +213,6 @@ const removeReportedPost = asyncHandler(async (req, res) => {
     const report = await Report.findById(reportId);
     report.isReviewed = true;
     await report.save();
-    // Update the post status as removed
     const post = await Product.findById(report.reportedPost);
     post.isRemoved = true;
     await post.save();
@@ -316,7 +285,6 @@ export {
     getAdminProfile,
     updateAdminProfile,
     getAllUsers,
-    deleteUserData,
     blockUserData,
     unblockUserData,
     showReportedPosts,

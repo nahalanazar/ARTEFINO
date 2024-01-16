@@ -57,9 +57,7 @@ const OtpScreen = () => {
         } catch (err) {
             setOtp('')
             if (err?.data?.message) {
-                // toast.error('Invalid OTP. Click "Resend OTP" to get a new one.');
                 toast.error(err?.data?.message)
-                // setShowResendButton(true);
             } else {
                 toast.error(err?.data?.message || err.error);
             }
@@ -74,8 +72,8 @@ const OtpScreen = () => {
             toast.info('Resending OTP...');
             await resendOtpMutation().unwrap();
             toast.success('New OTP sent successfully!');
-            setShowResendButton(false); // Hide the button after successfully resending OTP
-            setCountdown(60); // Reset the countdown
+            setShowResendButton(false); 
+            setCountdown(60); 
         } catch (error) {
             toast.error(error?.data?.message || error.error);
         } finally {

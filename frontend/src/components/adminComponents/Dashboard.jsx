@@ -29,56 +29,16 @@ const Dashboard = () => {
     }
   }, [dashBoardData]);
 
-//   const userData = {
-//     labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
-//     datasets: [
-//       {
-//         label: 'New Users',
-//         data: details.newUsers, // Replace with actual data
-//         borderColor: 'rgba(75,192,192,1)',
-//         borderWidth: 2,
-//         fill: false,
-//       },
-//     ],
-//   };
-
-//   const userOptions = {
-//     title: {
-//       display: true,
-//       text: 'Daily Joined Users',
-//     },
-//   };
-
-//   const postsData = {
-//     labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
-//     datasets: [
-//       {
-//         label: 'New Posts',
-//         data: details.newPosts, // Replace with actual data
-//         borderColor: 'rgba(75,192,192,1)',
-//         borderWidth: 2,
-//         fill: false,
-//       },
-//     ],
-//   };
-
-//   const postsOptions = {
-//     title: {
-//       display: true,
-//       text: 'Daily Joined Users',
-//     },
-//   };
-
-    const currentDate = new Date();
+  const currentDate = new Date();
   const lastSevenDays = Array.from({ length: 7 }, (_, index) => {
     const day = new Date(currentDate);
     day.setDate(currentDate.getDate() - index);
-    return day.toLocaleDateString(); // You can format the date as needed
+    return day.toLocaleDateString(); 
   });
 
     const formatDate = (dateString) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString(); // Adjust the formatting as needed
+  return date.toLocaleDateString(); 
 };
 
     const userData = {

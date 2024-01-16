@@ -129,7 +129,6 @@ const UpdateProfileScreen = () => {
               <Form.Control
                 type="file"
                 onChange={handleImage}
-                // onChange={(e) => setProfileImage(e.target.files[0])}
               ></Form.Control>
             </Form.Group>
             

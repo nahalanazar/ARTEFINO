@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-// import { Form, Button, Row, Col } from 'react-bootstrap'
-// import FormContainer from '../../components/FormContainer'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLoginMutation, useGoogleRegisterMutation } from '../../slices/userApiSlice'
 import { setCredentials } from '../../slices/userAuthSlice'
@@ -53,7 +51,6 @@ const LoginScreen = () => {
             !passwordValidationResult
         ) {
             try {
-                // making login POST request (/auth), pass email & password to backend, and assign its response to 'res'
                 const responseFromApiCall = await login({ email, password }).unwrap() // 'unwrap' to unwrap the returned promise 
                 if (responseFromApiCall) {
                     // then to store it in the local storage & state, setCredential is called and res is passed to it

@@ -28,7 +28,6 @@ const UpdatePostScreen = () => {
     const [getPostById] = useGetPostByIdMutation();
     const [updatePost] = useUpdatePostMutation();
     const [getCategories] = useGetCategoriesMutation();
-    // const VITE_PRODUCT_IMAGE_DIR_PATH = import.meta.env.VITE_PRODUCT_IMAGE_DIR_PATH;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -41,7 +40,7 @@ const UpdatePostScreen = () => {
                 const postDetails = postResponse.data;
                 setTitle(postDetails.title);
                 setDescription(postDetails.description);
-                setCategoryId(postDetails.category._id); // Assuming category field in postDetails
+                setCategoryId(postDetails.category._id); 
                 setImages(postDetails.images);
                 setAccessLatitude(postDetails.latitude);
                 setAccessLongitude(postDetails.longitude);

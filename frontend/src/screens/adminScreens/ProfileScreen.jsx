@@ -7,8 +7,6 @@ import { useUpdateAdminMutation } from "../../slices/adminApiSlice";
 import { toast } from "react-toastify";
 import Loader from "../../components/Loader";
 
-
-
 const AdminProfileScreen = () => {
 
   const [name, setName] = useState("");
@@ -41,7 +39,6 @@ const AdminProfileScreen = () => {
     }
     
   };
-
 
 
   return (

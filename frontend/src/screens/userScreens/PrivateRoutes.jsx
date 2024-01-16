@@ -16,11 +16,9 @@ const PrivateRoutes = () => {
                     const response = await blockCheck({ id: userInfo.id });
                     if (response.data.is_blocked) {
                         setBlocked(true);
-                        // Show a toast notification when the user is blocked
                         toast.error("Your account is blocked");
                     }
                 } else {
-                    // If userInfo is not available, navigate to the login page
                     <Navigate to='/login' replace />;
                 }
             } catch (error) {
@@ -35,7 +33,6 @@ const PrivateRoutes = () => {
         return <Outlet />;
     }
 
-    // If userInfo is not available or the user is blocked, navigate to the login page
     return <Navigate to="/login" replace />;
 }
 

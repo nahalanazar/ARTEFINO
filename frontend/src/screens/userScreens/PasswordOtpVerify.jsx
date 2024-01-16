@@ -28,7 +28,6 @@ const PasswordOtpVerify = () => {
     }, [countdown]);
 
     useEffect(() => {
-        // Show the resend button after one minute
         if (countdown === 0) {
             setShowResendButton(true);
         }
@@ -43,7 +42,6 @@ const PasswordOtpVerify = () => {
             setOtp('')
             if (err?.data?.message) {
                 toast.error(err?.data?.message);
-                // setShowResendButton(true)
             } else {
                 toast.error(err?.data?.message || err.error)
             }
@@ -55,7 +53,7 @@ const PasswordOtpVerify = () => {
             toast.info('Resending OTP...');
             await resendOtpMutation().unwrap();
             toast.success('New OTP sent successfully!');
-            setShowResendButton(false); // Hide the button after successfully resending OTP
+            setShowResendButton(false);
             setCountdown(60);
         } catch (error) {
             toast.error(error?.data?.message || error.error);

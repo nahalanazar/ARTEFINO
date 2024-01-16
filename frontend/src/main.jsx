@@ -26,19 +26,6 @@ const PostDetailScreen = lazy(() => import('./screens/userScreens/PostDetailScre
 const ChatScreen = lazy(() => import('./screens/userScreens/ChatScreen.jsx'));
 const UpdatePostScreen = lazy(() => import('./screens/userScreens/UpdatePostScreen.jsx'));
 
-// import UserLoginScreen from './screens/userScreens/LoginScreen.jsx';
-// import UserRegisterScreen from './screens/userScreens/RegisterScreen.jsx';
-// import UserProfileScreen from './screens/userScreens/ProfileScreen.jsx'
-// import UserUpdateProfileScreen from './screens/userScreens/UpdateProfileScreen.jsx';
-// import UserOtpVerifyScreen from './screens/userScreens/OtpScreen.jsx';
-// import ForgotPasswordScreen from './screens/userScreens/ForgotPasswordScreen.jsx'
-// import PasswordOtpVerify from './screens/userScreens/PasswordOtpVerify.jsx'
-// import ResetPassword from './screens/userScreens/ResetPasswordScreen.jsx'
-// import UserSellScreen from './screens/userScreens/SellScreen.jsx'
-// import PostDetailScreen from './screens/userScreens/PostDetailScreen.jsx'
-// import ChatScreen from './screens/userScreens/ChatScreen.jsx'
-// import UpdatePostScreen from './screens/userScreens/UpdatePostScreen.jsx'
-
 //? ==================================== Admin Screens Import ====================================
 import AdminHomeScreen from './screens/adminScreens/HomeScreen.jsx'
 import AdminPrivateRoutes from './screens/adminScreens/PrivateRoutes.jsx';
@@ -49,12 +36,6 @@ const UsersManagementScreen = lazy(() => import('./screens/adminScreens/UserMana
 const CategoriesManagementScreen = lazy(() => import('./screens/adminScreens/CategoryManagementScreen.jsx'));
 const ReportedPostsScreen = lazy(() => import('./screens/adminScreens/ReportedPostsScreen.jsx'));
 
-// import AdminLoginScreen from './screens/adminScreens/LoginScreen.jsx'
-// import AdminRegisterScreen from './screens/adminScreens/RegisterScreen.jsx'
-// import AdminProfileScreen from './screens/adminScreens/ProfileScreen.jsx';
-// import UsersManagementScreen from './screens/adminScreens/UserManagementScreen.jsx';
-// import CategoriesManagementScreen from './screens/adminScreens/CategoryManagementScreen.jsx';
-// import ReportedPostsScreen from './screens/adminScreens/ReportedPostsScreen.jsx'
 
 export { UserLoginScreen };
   
@@ -109,12 +90,3 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     {/* </React.StrictMode> */}
   </Provider>,
 );
-
-
-// ReactDOM.createRoot(document.getElementById('root')).render(
-//   <Provider store={store}>
-//     {/* <React.StrictMode> */}
-//       <RouterProvider router={router} />
-//     {/* </React.StrictMode> */}
-//   </Provider>
-// )

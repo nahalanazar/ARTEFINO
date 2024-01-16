@@ -1,6 +1,5 @@
 import { ChakraProvider } from "@chakra-ui/react"
 import { Box } from "@chakra-ui/layout"
-// import ChatSideDrawer from "../../components/userComponents/ChatSideDrawer"
 import ChatList from "../../components/userComponents/ChatList"
 import ChatBox from "../../components/userComponents/ChatBox"
 import { useState } from "react"
@@ -10,7 +9,6 @@ const ChatScreen = () => {
     return (
         <ChakraProvider>
             <div style={{width: "100%"}}>
-                {/* <ChatSideDrawer /> */}
                 <Box
                     display="flex"
                     justifyContent="space-between"

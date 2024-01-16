@@ -9,9 +9,9 @@ const UsersDataTable = ({ users, setUsersData }) => {
     users: PropTypes.array.isRequired
   };
   const [searchQuery, setSearchQuery] = useState("");
-  const [showConfirmation, setShowConfirmation] = useState(false); // State for the confirmation dialog
-  const [userIdToBlock, setUserIdToBlock] = useState(null); // Track the user ID to block
-  const [userIdToUnblock, setUserIdToUnblock] = useState(null); // Track the user ID to unblock
+  const [showConfirmation, setShowConfirmation] = useState(false); 
+  const [userIdToBlock, setUserIdToBlock] = useState(null); 
+  const [userIdToUnblock, setUserIdToUnblock] = useState(null); 
   
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
@@ -34,8 +34,6 @@ const UsersDataTable = ({ users, setUsersData }) => {
       toast.success("User Blocked Successfully.");
       setUserIdToBlock(null);
       setShowConfirmation(false); 
-
-      // Update the local state to reflect the blocked status
       setUsersData(prevUsers => {
         return prevUsers.map(user =>
           user._id === userIdToBlock ? { ...user, is_blocked: true } : user
@@ -53,7 +51,6 @@ const UsersDataTable = ({ users, setUsersData }) => {
       setUserIdToUnblock(null); 
       setShowConfirmation(false); 
 
-      // Update the local state to reflect the unblocked status
       setUsersData(prevUsers => {
         return prevUsers.map(user =>
           user._id === userIdToUnblock ? { ...user, is_blocked: false } : user

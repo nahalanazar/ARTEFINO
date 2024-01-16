@@ -22,19 +22,7 @@ async function storeNotification(userId, newMessageReceived) {
         console.error('Error storing notification:', error);
     }
 }
-const createNotification = async (senderId, receiverId, chatId, content, link) => {
-    try {
-        await Notification.create({
-            sender: senderId,
-            receiver: receiverId,
-            chat: chatId,
-            content,
-            link
-        })
-    } catch (error) {
-        console.error('Error creating notification: ', error.message)
-    }
-}
+
 
 const fetchNotifications = asyncHandler(async (req, res) => {
 
@@ -62,14 +50,12 @@ const deleteNotification = asyncHandler(async (req, res) => {
         return res.status(404).json({ error: 'Notification not found' });
     }
 
-    // notification.isRead = true;
     await notification.deleteOne();
 
     res.status(200).json({ message: 'Notification Deleted' });
 })
 
 export {
-    createNotification,
     fetchNotifications,
     deleteNotification,
     storeNotification

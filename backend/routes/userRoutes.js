@@ -22,7 +22,6 @@ import {
     unFollowArtist,
     removeArtist,
     showArtists,
-    allUsers,
     checkBlock,
     fetchUserNotifications,
     acceptFollowRequest,
@@ -55,19 +54,12 @@ import {
 } from '../controllers/notificationController.js'
 
 import {
-    multerUploadUserProfile,
-    multerUploadProductImages
-} from '../config/multerConfig.js';
-
-import {
     accessChat,
     fetchChats,
     sendMessage,
     allMessages
 } from '../controllers/chatController.js'
 
-// router.all('*', checkUser)
-// router.get('/', authenticateUser, allUsers)
 router.post('/login', authUser)
 router.post('/register', registerUser)
 router.post('/otpVerify', authenticateUser, verifyOtp)
@@ -79,7 +71,6 @@ router.post('/logout', logoutUser)
 router.post('/getUsers', authenticateUser, getAllUsers);
 router.get('/profile/:userId', authenticateUser, getUserProfile)
 router.get('/userPosts/:userId', authenticateUser, getUserPosts)
-// router.put('/profile', authenticateUser, multerUploadUserProfile.single('profileImage'), updateUserProfile)
 router.post('/profile', authenticateUser, updateUserProfile)
 router.get('/getCategories', getAllCategories)
 router.post('/addProduct', authenticateUser, createProduct)
