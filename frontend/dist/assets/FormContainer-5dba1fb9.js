@@ -1,1 +1,0 @@
-import{j as s,A as t,v as o}from"./index-908e2f29.js";import{R as a}from"./Row-cc9ed775.js";const m=({children:r})=>s.jsx(t,{children:s.jsx(a,{className:"justify-content-md-center mt-5",children:s.jsx(o,{xs:12,md:6,className:"card p-5",children:r})})});export{m as F};

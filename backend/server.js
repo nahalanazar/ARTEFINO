@@ -69,7 +69,7 @@ import("socket.io").then((socketIO) => {
     const io = new socketIO.Server(server, {
         pingTimeout: 60000,  // amount of time it will wait while being inactive. So after one minute of inactivity(not send any message), it will close the connection to save the bandwidth
         cors: {
-            origin: "https://www.nahalasm.shop"
+            origin: "https://www.paznwise.dgnxt.in"
         }
     });
      

@@ -15,7 +15,7 @@ import Lottie from 'react-lottie'
 import animationData from '../../animations/typing.json'
 import moment from 'moment'
 
-const ENDPOINT = "https://nahalasm.shop";
+const ENDPOINT = "https://paznwise.dgnxt.in";
 let socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
